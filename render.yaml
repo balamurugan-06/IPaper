@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: login-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: "postgresql://admin:D13wcvKvUe943UNKu93Wup4ymA0b34eX@dpg-d1p2hoer433s73ctjudg-a.oregon-postgres.render.com/fyp_login_db"
+        fromDatabase:
+          name: fyp_login_db
+          property: connectionString
