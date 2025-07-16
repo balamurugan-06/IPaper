@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>User Records</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <table>
+      <tr>
+        <th>Name</th><th>Email</th><th>Gender</th><th>Age</th><th>Profession</th><th>Action</th>
+      </tr>
+      {% for user in users %}
+        <tr>
+          <td>{{ user[1] }}</td>
+          <td>{{ user[2] }}</td>
+          <td>{{ user[3] }}</td>
+          <td>{{ user[4] }}</td>
+          <td>{{ user[5] }}</td>
+          <td><a href="/admin/delete/{{ user[0] }}" onclick="return confirm('Delete this user?')">🗑</a></td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</body>
+</html>

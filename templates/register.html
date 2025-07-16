@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Register</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form action="/register" method="POST">
+      <label>Name</label>
+      <input type="text" name="name" required>
+
+      <label>Email</label>
+      <input type="email" name="email" required>
+
+      <label>Password</label>
+      <div class="password-wrapper">
+        <input type="password" name="password" id="registerPassword" required>
+        <span class="toggle-password" onclick="toggleVisibility('registerPassword', this)">👁️</span>
+      </div>
+
+      <label>Confirm Password</label>
+      <div class="password-wrapper">
+        <input type="password" name="confirmPassword" id="confirmPassword" required>
+        <span class="toggle-password" onclick="toggleVisibility('confirmPassword', this)">👁️</span>
+      </div>
+
+      <label>Gender</label>
+      <select name="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+
+      <label>Age</label>
+      <input type="number" name="age" min="1" max="120" required>
+
+      <label>Profession</label>
+      <input type="text" name="profession" required>
+
+      <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="/login">Login</a></p>
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
