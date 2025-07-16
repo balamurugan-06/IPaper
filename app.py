@@ -23,7 +23,7 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return redirect('index.html')
+    return redirect('/index')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
