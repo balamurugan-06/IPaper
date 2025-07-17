@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <title>AI</title>
     <style>
         * {
@@ -237,15 +235,13 @@
     <header>
         <div class="container">
             <div class="header-content">
-  <div class="logo">IPaper</div>
-  <div class="top-buttons">
-  <a href="/login" class="btn">Login</a>
-  <a href="/register" class="btn">Register</a>
-  <a href="/admin-login" class="btn admin-btn" title="Admin Login">👤</a>
-</div>
-
-</div>
-
+                <div class="logo">IPaper</div>
+                <div class="auth-buttons">
+                    <a href="/login" class="login1">login</a>
+                    <a href="/register" class="signup">Register</a>
+                    <a href="/admin-login" class="signup" style="color: white;">Admin 👤</a>
+                </div>
+            </div>
         </div>
     </header>
     
@@ -260,15 +256,15 @@
         <div class="slider-container">
             <div class="slider">
                 <div class="slide">
-                    <img src="Images/1.png">
+                    <img src="1.png" alt="樱花主题">
                     <div class="slide-caption">An exclusive AI summarization tool for college students</div>
                 </div>
                 <div class="slide">
-                    <img src="Images/2.png">
+                    <img src="2.png" alt="樱花主题">
                     <div class="slide-caption">An exclusive AI summarization tool for college students</div>
                 </div>
                 <div class="slide">
-                    <img src="Images/3.png">
+                    <img src="3.png" alt="樱花主题">
                     <div class="slide-caption">An exclusive AI summarization tool for college students</div>
                 </div>
             </div>
@@ -321,12 +317,12 @@
     
     <footer>
         <div class="container">
-            <p>© 2023 Copyright AI learning Assistant</p>
+            <p>© 2025 Copyright AI learning Assistant</p>
         </div>
     </footer>
     
     <script>
-  
+        // 简单的图片轮播功能
         const slider = document.querySelector('.slider');
         const slides = document.querySelectorAll('.slide');
         const dots = document.querySelectorAll('.slider-dot');
@@ -341,7 +337,7 @@
             updateDots();
         }
         
-       
+        // 更新导航点状态
         function updateDots() {
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === currentSlide);
@@ -358,7 +354,7 @@
             slideInterval = setInterval(nextSlide, 3000);
         }
         
-       
+        // 初始化导航点点击事件
         dots.forEach(dot => {
             dot.addEventListener('click', function() {
                 const targetIndex = parseInt(this.getAttribute('data-index'));
@@ -369,16 +365,18 @@
             });
         });
         
+        // 鼠标悬停控制
         sliderContainer.addEventListener('mouseenter', () => {
             clearInterval(slideInterval);
             clearTimeout(hoverTimer);
         });
         
         sliderContainer.addEventListener('mouseleave', startSlider);
-     
+        
+        // 初始化轮播
         startSlider();
         
-      
+        // 视频自动循环播放
         document.querySelector('video').addEventListener('play', function() {
             this.loop = true;
         });
