@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <title>AI</title>
     <style>
         * {
@@ -237,11 +238,12 @@
         <div class="container">
             <div class="header-content">
   <div class="logo">IPaper</div>
-  <div style="display: flex; align-items: center;">
-    <a href="/admin-login" title="Admin Panel" style="margin-left: 20px; font-size: 20px;">👤 Admin</a>
-    <a href="/login" class="login">Login</a>
-    <a href="/register" class="register">Register</a>
-  </div>
+  <div class="top-buttons">
+  <a href="/login" class="btn">Login</a>
+  <a href="/register" class="btn">Register</a>
+  <a href="/admin-login" class="btn admin-btn" title="Admin Login">👤</a>
+</div>
+
 </div>
 
         </div>
