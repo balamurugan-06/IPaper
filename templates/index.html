@@ -74,20 +74,22 @@
   </header>
 
   <!-- Image Slider -->
-  {% if images %}
   <div class="slider-container">
-    <div class="slider">
-      {% for image in images %}
+  <div class="slider">
+    {% for img in images %}
       <div class="slide">
-        <img src="{{ url_for('static', filename=image.path) }}" alt="Slide Image">
-        <div class="slide-caption">{{ image.caption }}</div>
+        <img src="{{ img[1] }}" alt="Image">
+        <div class="slide-caption">{{ img[2] }}</div>
       </div>
-      {% endfor %}
-    </div>
+    {% endfor %}
   </div>
-  {% else %}
-  <p style="text-align:center;">No images to display.</p>
-  {% endif %}
+  <div class="slider-nav">
+    {% for img in images %}
+      <span class="slider-dot {% if loop.index0 == 0 %}active{% endif %}" data-index="{{ loop.index0 }}"></span>
+    {% endfor %}
+  </div>
+</div>
+
 
   <!-- Videos Section -->
   {% if videos %}
