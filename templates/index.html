@@ -4,230 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        header {
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px 0;
-        }
-        
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4a6baf;
-        }
-        
-        .auth-buttons a {
-            margin-left: 15px;
-            padding: 8px 20px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .signup {
-            background-color: #4a6baf;
-            color: white;
-        }
-        
-        .login {
-            border: 1px solid #4a6baf;
-            color: #4a6baf;
-        }
-        
-        .hero {
-            text-align: center;
-            padding: 60px 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 800px;
-            margin: 0 auto 30px;
-            color: #4a5568;
-        }
-        
-        .slider-container {
-            width: 100%;
-            max-width: 900px;
-            margin: 40px auto;
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .slider-nav {
-            text-align: center;
-            margin-top: 15px;
-        }
-        
-        .slider-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin: 0 5px;
-            background-color: #ccc;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .slider-dot:hover {
-            background-color: #7a92c4;
-        }
-        .slider-dot.active {
-            background-color: #4a6baf;
-        }
-        
-        .slider {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-        
-        .slide {
-            min-width: 100%;
-            position: relative;
-        }
-        
-        .slide img {
-            width: 100%;
-            display: block;
-        }
-        
-        .slide-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .info-section {
-            background-color: white;
-            padding: 60px 0;
-            text-align: center;
-        }
-        
-        .info-section h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        
-        .info-section p {
-            max-width: 800px;
-            margin: 0 auto;
-            font-size: 1.1rem;
-            color: #4a5568;
-        }
-        
-        .video-section {
-            padding: 60px 0;
-            background-color: #f5f7fa;
-            text-align: center;
-        }
-        
-        .video-container {
-            max-width: 800px;
-            margin: 30px auto;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        video {
-            width: 100%;
-            display: block;
-        }
-        
-        .testimonials {
-            padding: 60px 0;
-            background-color: white;
-        }
-        
-        .testimonials h2 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2rem;
-            color: #2c3e50;
-        }
-        
-        .testimonial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .testimonial {
-            background-color: #f8f9fa;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        }
-        
-        .testimonial-text {
-            font-style: italic;
-            margin-bottom: 15px;
-        }
-        
-        .stars {
-            color: #f39c12;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-        
-        footer {
-            background-color: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 30px 0;
-            margin-top: 60px;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f8f9fa; color: #333; line-height: 1.6; }
+        header { background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px 0; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; color: #4a6baf; }
+        .auth-buttons a { margin-left: 15px; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+        .signup { background-color: #4a6baf; color: white; }
+        .login { border: 1px solid #4a6baf; color: #4a6baf; }
+        .hero { text-align: center; padding: 60px 0; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 20px; color: #2c3e50; }
+        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 30px; color: #4a5568; }
+        .slider-container { width: 100%; max-width: 900px; margin: 40px auto; overflow: hidden; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .slider { display: flex; transition: transform 0.5s ease; }
+        .slide { min-width: 100%; position: relative; }
+        .slide img { width: 100%; display: block; }
+        .slide-caption { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 20px; text-align: center; }
+        .slider-nav { text-align: center; margin-top: 15px; }
+        .slider-dot { display: inline-block; width: 12px; height: 12px; margin: 0 5px; background-color: #ccc; border-radius: 50%; cursor: pointer; transition: background-color 0.3s; }
+        .slider-dot:hover { background-color: #7a92c4; }
+        .slider-dot.active { background-color: #4a6baf; }
+        .info-section, .testimonials, .video-section { padding: 60px 0; text-align: center; }
+        .info-section h2, .testimonials h2 { font-size: 2rem; margin-bottom: 20px; color: #2c3e50; }
+        .info-section p, .testimonial-text { font-size: 1.1rem; color: #4a5568; max-width: 800px; margin: auto; }
+        .video-container { max-width: 800px; margin: 30px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        video { width: 100%; display: block; }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .testimonial { background-color: #f8f9fa; padding: 30px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .stars { color: #f39c12; font-size: 1.2rem; margin-bottom: 10px; }
+        footer { background-color: #2c3e50; color: white; text-align: center; padding: 30px 0; margin-top: 60px; }
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-            }
-            
-            .auth-buttons {
-                margin-top: 15px;
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
+            .header-content { flex-direction: column; }
+            .auth-buttons { margin-top: 15px; }
+            .hero h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -237,23 +49,31 @@
             <div class="header-content">
                 <div class="logo">IPaper</div>
                 <div class="auth-buttons">
-                    <a href="/login" class="login1">login</a>
+                    <a href="/login" class="login">Login</a>
                     <a href="/register" class="signup">Register</a>
-                    <a href="/admin-login" class="signup" style="color: white;">Admin 👤</a>
+                    <a href="/admin-login" class="signup">Admin 👤</a>
                 </div>
             </div>
         </div>
     </header>
-    
+
     <section class="hero">
         <div class="container">
             <h1>An exclusive AI summarization tool for college students</h1>
-            <p>Assit you in conducting more efficient learning and research</p>
+            <p>Assist you in conducting more efficient learning and research</p>
         </div>
     </section>
-    
+
     <div class="container">
-        
+        <div class="slider-container">
+            <div class="slider">
+                {% for image in images %}
+                    <div class="slide">
+                        <img src="{{ image.path }}" alt="Slide image">
+                        <div class="slide-caption">{{ image.caption }}</div>
+                    </div>
+                {% endfor %}
+            </div>
             <div class="slider-nav">
                 <span class="slider-dot active" data-index="0"></span>
                 <span class="slider-dot" data-index="1"></span>
@@ -261,89 +81,82 @@
             </div>
         </div>
     </div>
-    
+
     <section class="info-section">
         <div class="container">
-            <h2>Our advantages </h2>
-            <p>Assit you in conducting more efficient learning and research</p>
+            <h2>Our Advantages</h2>
+            <p>Assist you in conducting more efficient learning and research</p>
         </div>
     </section>
-    
-    <section class="video-section">
-    <div class="container">
-        <h2>Product Demonstrations</h2>
-        <div class="video-container">
-            {% for vid in videos %}
-            <video controls>
-                <source src="{{ vid[1] }}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            {% endfor %}
-        </div>
-    </div>
-</section>
 
-    
+    <section class="video-section">
+        <div class="container">
+            <h2>Product Demonstrations</h2>
+            <div class="video-container">
+                <video controls>
+                    <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </section>
+
     <section class="testimonials">
         <div class="container">
-            <h2>User evaluation</h2>
+            <h2>User Evaluation</h2>
             <div class="testimonial-grid">
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
-                    <p class="testimonial-text">good</p>
+                    <p class="testimonial-text">Good</p>
                 </div>
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
-                    <p class="testimonial-text">good</p>
+                    <p class="testimonial-text">Excellent</p>
                 </div>
                 <div class="testimonial">
                     <div class="stars">★★★★★</div>
-                    <p class="testimonial-text">good</p>
+                    <p class="testimonial-text">Amazing</p>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <footer>
         <div class="container">
-            <p>© 2025 Copyright AI learning Assistant</p>
+            <p>&copy; 2025 Copyright AI Learning Assistant</p>
         </div>
     </footer>
-    
+
     <script>
-        // 简单的图片轮播功能
         const slider = document.querySelector('.slider');
         const slides = document.querySelectorAll('.slide');
         const dots = document.querySelectorAll('.slider-dot');
         const sliderContainer = document.querySelector('.slider-container');
         let currentSlide = 0;
         let slideInterval;
-        let hoverTimer;
 
         function goToSlide(index) {
             slider.style.transform = `translateX(-${index * 100}%)`;
             currentSlide = index;
             updateDots();
         }
-        
-        // 更新导航点状态
+
         function updateDots() {
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === currentSlide);
             });
         }
-        
+
         function nextSlide() {
             const newIndex = (currentSlide + 1) % slides.length;
             goToSlide(newIndex);
         }
-        
+
         function startSlider() {
             clearInterval(slideInterval);
             slideInterval = setInterval(nextSlide, 3000);
         }
-        
-        // 初始化导航点点击事件
+
         dots.forEach(dot => {
             dot.addEventListener('click', function() {
                 const targetIndex = parseInt(this.getAttribute('data-index'));
@@ -353,22 +166,12 @@
                 }
             });
         });
-        
-        // 鼠标悬停控制
-        sliderContainer.addEventListener('mouseenter', () => {
-            clearInterval(slideInterval);
-            clearTimeout(hoverTimer);
-        });
-        
+
+        sliderContainer.addEventListener('mouseenter', () => clearInterval(slideInterval));
         sliderContainer.addEventListener('mouseleave', startSlider);
-        
-        // 初始化轮播
+
         startSlider();
-        
-        // 视频自动循环播放
-        document.querySelector('video').addEventListener('play', function() {
-            this.loop = true;
-        });
+        document.querySelector('video').addEventListener('play', function() { this.loop = true; });
     </script>
 </body>
 </html>
