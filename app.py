@@ -23,7 +23,20 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT type, path, caption FROM media")
+        media_items = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        images = [item for item in media_items if item[0] == 'image']
+        videos = [item for item in media_items if item[0] == 'video']
+        
+        return render_template('index.html', images=images, videos=videos)
+    except Exception as e:
+        return f"Error loading media: {e}"
 
 
 @app.route('/register', methods=['GET', 'POST'])
