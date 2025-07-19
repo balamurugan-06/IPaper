@@ -82,13 +82,13 @@
   </header>
 
   <!-- Image Slider -->
-  <section class="slider">
-    {% for image in images %}
-    <div class="slide">
-      <img src="{{ image[1] }}" alt="Slide Image">
-    </div>
-    {% endfor %}
-  </section>
+  <section class="slider" id="slider">
+  {% for image in images %}
+  <div class="slide">
+    <img src="{{ image[1] }}" alt="Slide Image">
+  </div>
+  {% endfor %}
+</section>
 
   <!-- Our Advantages -->
   <section class="advantages">
