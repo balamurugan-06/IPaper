@@ -122,6 +122,20 @@
       <span>⭐ - Bad</span>
     </div>
   </section>
+<script>
+  const slider = document.getElementById('slider');
+  let currentIndex = 0;
 
+  function autoSlide() {
+    const slides = document.querySelectorAll('.slide');
+    currentIndex = (currentIndex + 1) % slides.length;
+    slider.scrollTo({
+      left: slides[currentIndex].offsetLeft,
+      behavior: 'smooth'
+    });
+  }
+
+  setInterval(autoSlide, 3000); // Change slide every 3 seconds
+</script>
 </body>
 </html>
