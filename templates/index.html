@@ -253,21 +253,7 @@
     </section>
     
     <div class="container">
-        <div class="slider-container">
-            <div class="slider">
-                <div class="slide">
-                    <img src="1.png" alt="樱花主题">
-                    <div class="slide-caption">An exclusive AI summarization tool for college students</div>
-                </div>
-                <div class="slide">
-                    <img src="2.png" alt="樱花主题">
-                    <div class="slide-caption">An exclusive AI summarization tool for college students</div>
-                </div>
-                <div class="slide">
-                    <img src="3.png" alt="樱花主题">
-                    <div class="slide-caption">An exclusive AI summarization tool for college students</div>
-                </div>
-            </div>
+        
             <div class="slider-nav">
                 <span class="slider-dot active" data-index="0"></span>
                 <span class="slider-dot" data-index="1"></span>
@@ -284,16 +270,19 @@
     </section>
     
     <section class="video-section">
-        <div class="container">
-            <h2>Producte demonstrations</h2>
-            <div class="video-container">
-                <video controls>
-                    <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
-                    您的浏览器不支持视频播放。
-                </video>
-            </div>
+    <div class="container">
+        <h2>Product Demonstrations</h2>
+        <div class="video-container">
+            {% for vid in videos %}
+            <video controls>
+                <source src="{{ vid[1] }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            {% endfor %}
         </div>
-    </section>
+    </div>
+</section>
+
     
     <section class="testimonials">
         <div class="container">
