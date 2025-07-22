@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Manage Users</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    table {
+      width: 90%;
+      margin: 30px auto;
+      border-collapse: collapse;
+      background-color: #222;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #555;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+    }
+
+    .flash {
+      color: lime;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    a {
+      color: red;
+      text-decoration: none;
+    }
+
+    .back-btn {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: white;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>User Records</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <table>
+    <tr>
+      <th>Name</th><th>Email</th><th>Gender</th><th>Age</th><th>Profession</th><th>Action</th>
+    </tr>
+    {% for user in users %}
+      <tr>
+        <td>{{ user[1] }}</td>
+        <td>{{ user[2] }}</td>
+        <td>{{ user[3] }}</td>
+        <td>{{ user[4] }}</td>
+        <td>{{ user[5] }}</td>
+        <td><a href="/admin/delete/{{ user[0] }}" onclick="return confirm('Delete this user?')">🗑</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <a class="back-btn" href="/admin">⬅ Back to Admin Dashboard</a>
+
+</body>
+</html>
