@@ -208,7 +208,6 @@ def admin():
 def admin_users():
     if not session.get('admin_logged_in'):
         return redirect('/admin-login')
-    
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -216,10 +215,10 @@ def admin_users():
         users = cur.fetchall()
         cur.close()
         conn.close()
-        return render_template('admin.html', users=users)
+        return render_template('admin_users.html', users=users)
     except Exception as e:
         flash(f"Error loading user data: {e}", "error")
-        return render_template('admin.html', users=[])
+        return render_template('admin_users.html', users=[])
 
 
 @app.route('/admin/delete/<int:user_id>')
