@@ -5,7 +5,7 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn app:app"
     envVars:
-      - key: "postgresql://admin:D13wcvKvUe943UNKu93Wup4ymA0b34eX@dpg-d1p2hoer433s73ctjudg-a.oregon-postgres.render.com/fyp_login_db"
+      - key: "postgresql://neondb_owner:npg_zL7hEuVMZ5iv@ep-tiny-mouse-a1uj4utg-pooler.ap-southeast-1.aws.neon.tech/FYP?sslmode=require&channel_binding=require"
         fromDatabase:
-          name: fyp_login_db
+          name: FYP
           property: connectionString
