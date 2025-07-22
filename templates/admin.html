@@ -1,12 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin: 50px 0;
+      gap: 30px;
+    }
+
+    .admin-button {
+      padding: 20px 30px;
+      border: 1px solid white;
+      background-color: transparent;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .admin-button:hover {
+      background-color: white;
+      color: black;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    table {
+      margin: 30px auto;
+      width: 90%;
+      border-collapse: collapse;
+      background: #222;
+      color: white;
+    }
+
+    th, td {
+      border: 1px solid white;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+    }
+
+    .flash {
+      color: green;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    a {
+      color: red;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>User Records</h2>
+
+  <h1 style="text-align: center;">Welcome Admin</h1>
+
+  <div class="button-container">
+    <button class="admin-button" onclick="showUserTable()">Manage User Account</button>
+    <button class="admin-button">Upload Summary Template</button>
+  </div>
+
+  <div id="userTable" class="hidden">
+    <h2 style="text-align:center;">User Records</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
         <div class="flash {{ category }}">{{ message }}</div>
@@ -29,5 +95,12 @@
       {% endfor %}
     </table>
   </div>
+
+  <script>
+    function showUserTable() {
+      document.getElementById('userTable').classList.remove('hidden');
+    }
+  </script>
+
 </body>
 </html>
