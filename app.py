@@ -169,25 +169,41 @@ def upload_document():
     if 'user_name' not in session:
         return redirect('/login')
 
-    file = request.files['file']
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(path)
+    try:
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
-        user = cur.fetchone()
-        user_id, email, profession = user
+            # Create uploads folder if it doesn't exist
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
 
-        cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
-                    (user_id, session['user_name'], email, profession, filename))
-        conn.commit()
-        cur.close()
-        conn.close()
+            file.save(path)
 
-    return redirect('/dashboard')
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+            user = cur.fetchone()
+
+            if not user:
+                raise Exception("User not found in database.")
+
+            user_id, email, profession = user
+
+            cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
+                        (user_id, session['user_name'], email, profession, filename))
+            conn.commit()
+            cur.close()
+            conn.close()
+
+        return redirect('/dashboard')
+
+    except Exception as e:
+        print(f"UPLOAD ERROR: {e}")  # ✅ Print actual error
+        flash(f"Upload failed: {e}", "error")
+        return redirect('/dashboard')
+
 
 @app.route('/delete-document/<int:doc_id>')
 def delete_document(doc_id):
