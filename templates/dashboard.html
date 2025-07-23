@@ -3,9 +3,227 @@
 <head>
   <meta charset="UTF-8" />
   <title>User Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  
   <style>
-    /* Use your existing styles and paste additional from previous HTML */
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .btn-generate {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-user {
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-user:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .btn-role {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        
+        .btn-role:hover {
+            background-color: #d0e4f7;
+        }
+        
+        .logout-btn {
+            color: #666;
+            text-decoration: none;
+            margin-top: auto;
+            padding: 10px 0;
+            display: block;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        
+        .todo-item {
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        
+        .important {
+            font-weight: bold;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+        }
+        
+        /* File list styles */
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            margin: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        
+        .file-item {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .file-actions {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .file-delete {
+            color: #ff4444;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #999;
+        }
+        
+        .selected-files {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .file-badge {
+            display: inline-block;
+            background-color: #f1f1f1;
+            padding: 3px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .btn-upload {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            padding: 10px 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-upload.active {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
   </style>
 </head>
 <body>
