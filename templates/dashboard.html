@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Use your existing styles and paste additional from previous HTML */
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Chatlists</h2>
+    <form action="/upload-document" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button type="submit" class="btn btn-add">Add</button>
+    </form>
+    <div class="file-list">
+      {% if documents %}
+        {% for doc in documents %}
+          <div class="file-item">
+            <a href="{{ url_for('uploaded_file', filename=doc[1]) }}" target="_blank">{{ doc[1] }}</a>
+            <span class="file-delete"><a href="/delete-document/{{ doc[0] }}" onclick="return confirm('Delete?')">×</a></span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No files uploaded yet.</p>
+      {% endif %}
+    </div>
+    <a href="/logout" class="logout-btn">Logout</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <h1>Welcome, {{ name }}</h1>
+    <div class="user-info">
+      <button class="btn btn-user">{{ name }}</button>
+      <button class="btn btn-role">{{ profession }}</button>
+    </div>
+  </div>
+
+</body>
+</html>
