@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, session
 import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_session import Session
 from dotenv import load_dotenv
 import os
@@ -12,12 +13,17 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['UPLOAD_FOLDER'] = 'uploads'
 Session(app)
 
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 # Admin credentials from environment (instead of hardcoded)
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    
 def get_db_connection():
     return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 
@@ -135,6 +141,81 @@ def logout():
     flash("You have been logged out successfully.", "success")
     return redirect('/login')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    name = session.get('user_name')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
+        user = cur.fetchone()
+        user_id, profession = user[0], user[1]
+
+        cur.execute("SELECT id, document FROM UserDocuments WHERE user_id = %s", (user_id,))
+        documents = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        return render_template('dashboard.html', name=name, profession=profession, documents=documents)
+    except Exception as e:
+        return f"Dashboard Error: {e}"
+
+@app.route('/upload-document', methods=['POST'])
+def upload_document():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(path)
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+        user = cur.fetchone()
+        user_id, email, profession = user
+
+        cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
+                    (user_id, session['user_name'], email, profession, filename))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    return redirect('/dashboard')
+
+@app.route('/delete-document/<int:doc_id>')
+def delete_document(doc_id):
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT document FROM UserDocuments WHERE id = %s", (doc_id,))
+        result = cur.fetchone()
+        if result:
+            filename = result[0]
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+
+        cur.execute("DELETE FROM UserDocuments WHERE id = %s", (doc_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        flash("Error deleting document: " + str(e), "error")
+
+    return redirect('/dashboard')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
