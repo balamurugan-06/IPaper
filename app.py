@@ -122,7 +122,8 @@ def login():
                 return render_template('login.html')
 
             session['user_name'] = user[1]
-            return redirect('/home')
+            return redirect('/dashboard')
+
 
         except Exception as e:
             flash("Login failed: " + str(e), 'error')
