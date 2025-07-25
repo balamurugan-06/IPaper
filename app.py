@@ -194,6 +194,8 @@ def upload_document():
 
     return redirect('/dashboard')
 
+
+
 @app.route('/view-document/<int:doc_id>')
 def view_document(doc_id):
     try:
@@ -206,7 +208,10 @@ def view_document(doc_id):
 
         if result:
             file_data, filename = result
-            response = make_response(file_data)
+            # Convert memoryview to bytes
+            pdf_bytes = bytes(file_data)
+
+            response = make_response(pdf_bytes)
             response.headers.set('Content-Type', 'application/pdf')
             response.headers.set('Content-Disposition', 'inline', filename=filename)
             return response
@@ -215,6 +220,7 @@ def view_document(doc_id):
 
     except Exception as e:
         return f"Error displaying document: {e}", 500
+
 
 
 
