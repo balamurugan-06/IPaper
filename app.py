@@ -184,7 +184,7 @@ def upload_document():
         user_id, email, profession = user
 
         cur.execute("""
-            INSERT INTO UserDocuments (user_id, name, email, profession, file_name, file_data)
+            INSERT INTO UserDocuments (user_id, name, email, document, file_name, file_data)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (user_id, session['user_name'], email, profession, filename, psycopg2.Binary(file_data)))
         conn.commit()
