@@ -224,6 +224,43 @@
             color: white;
             cursor: pointer;
         }
+.top-right-button {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .purchase-button {
+      margin: 20px auto;
+      display: block;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #1e7e34;
+    }
+
   </style>
 </head>
 <body>
@@ -249,9 +286,14 @@
         <p>No files uploaded yet.</p>
       {% endif %}
     </div>
+    
+    <button class="btn btn-primary purchase-button" onclick="location.href='/purchase'">Purchase</button>
+    
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
-
+  
+ <button class="btn btn-success top-right-button" onclick="location.href='/generate'">Generate</button>
+  
   <!-- Main -->
   <div class="main-content">
     <h1>Welcome, {{ name }}</h1>
