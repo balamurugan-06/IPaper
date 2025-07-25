@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from flask_session import Session
 from dotenv import load_dotenv
 from flask import send_from_directory
+from flask import Response
 import os
 import re
 
@@ -191,6 +192,29 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
+
+@app.route('/view-document/<int:doc_id>')
+def view_document(doc_id):
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT file_data, file_name FROM UserDocuments WHERE id = %s", (doc_id,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if result:
+            pdf_data, filename = result
+            return Response(pdf_data, mimetype='application/pdf',
+                            headers={"Content-Disposition": f"inline; filename={filename}"})
+        else:
+            return "Document not found", 404
+    except Exception as e:
+        return f"Error displaying document: {e}", 500
+
 
 
 @app.route('/delete-document/<int:doc_id>')
