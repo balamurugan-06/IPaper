@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_session import Session
 from dotenv import load_dotenv
+from flask import make_response
 from flask import send_from_directory
 from flask import Response
 import os
@@ -195,23 +196,23 @@ def upload_document():
 
 @app.route('/view-document/<int:doc_id>')
 def view_document(doc_id):
-    if 'user_name' not in session:
-        return redirect('/login')
-
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT file_data, file_name FROM UserDocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT file_data, document FROM UserDocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
         if result:
-            pdf_data, filename = result
-            return Response(pdf_data, mimetype='application/pdf',
-                            headers={"Content-Disposition": f"inline; filename={filename}"})
+            file_data, filename = result
+            response = make_response(file_data)
+            response.headers.set('Content-Type', 'application/pdf')
+            response.headers.set('Content-Disposition', 'inline', filename=filename)
+            return response
         else:
             return "Document not found", 404
+
     except Exception as e:
         return f"Error displaying document: {e}", 500
 
