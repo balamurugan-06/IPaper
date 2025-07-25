@@ -242,9 +242,7 @@ def delete_document(doc_id):
 
     return redirect('/dashboard')
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
