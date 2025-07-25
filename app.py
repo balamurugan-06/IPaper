@@ -4,8 +4,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_session import Session
 from dotenv import load_dotenv
+from flask import send_from_directory
 import os
 import re
+
 
 load_dotenv()
 
