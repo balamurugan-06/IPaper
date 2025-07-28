@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask import Flask, render_template, request, redirect, flash, session
 import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -157,31 +157,16 @@ def dashboard():
         cur = conn.cursor()
         cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
         user = cur.fetchone()
-        if not user:
-            flash("User not found.", "error")
-            return redirect('/login')
         user_id, profession = user[0], user[1]
 
-        cur.execute("""
-        SELECT membership FROM userdocuments 
-        WHERE user_id = %s 
-        ORDER BY id DESC LIMIT 1
-    """, (session['user_id'],))
-        row = cur.fetchone()
-        latest_membership = row[0] if row else 'Free'
-
-    
-        cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (session['user_id'],))
+        cur.execute("SELECT id, document FROM UserDocuments WHERE user_id = %s", (user_id,))
         documents = cur.fetchall()
-
-    except Exception as e:
-        print("Error fetching data:", e)
-    finally:
         cur.close()
         conn.close()
 
-    return render_template('dashboard.html', name=session['user_name'], documents=documents, latest_membership=latest_membership)
-
+        return render_template('dashboard.html', name=name, profession=profession, documents=documents)
+    except Exception as e:
+        return f"Dashboard Error: {e}"
 
 @app.route('/upload-document', methods=['POST'])
 def upload_document():
@@ -366,55 +351,6 @@ def delete_user(user_id):
     except Exception as e:
         flash(f"Failed to delete user: {e}", "error")
     return redirect('/admin')
-
-@app.route('/membership')
-def membership():
-    return render_template('membership.html')
-
-
-
-@app.route('/pay-membership', methods=['POST'])
-def pay_membership():
-    if 'user_id' not in session:
-        return 'Unauthorized', 401
-
-    selected_plan = request.form.get('plan')  # free, pro, ultimate
-
-    if not selected_plan:
-        return 'No plan selected', 400
-
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT profession FROM userdocuments 
-        WHERE user_id = %s ORDER BY id DESC LIMIT 1
-    """, (session['user_id'],))
-    prof_row = cur.fetchone()
-    profession = prof_row[0] if prof_row else ''
-
-   
-    if selected_plan == 'pro' and profession.lower() == 'professor':
-        return 'Professors cannot choose student plan', 403
-
-    
-    cur.execute("""
-        INSERT INTO userdocuments (user_id, name, email, profession, document, summary, membership)
-        VALUES (%s, %s, %s, %s, '', '', %s)
-    """, (
-        session['user_id'],
-        session['user_name'],
-        session['email'],
-        profession,
-        'Student' if selected_plan == 'pro' else 'Professor' if selected_plan == 'ultimate' else 'Free'
-    ))
-
-    conn.commit()
-    cur.close()
-    conn.close()
-    return 'success', 200
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
