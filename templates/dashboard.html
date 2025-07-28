@@ -304,18 +304,19 @@
       {% endif %}
     </div>
     
-    <a href="/membership" class="btn" style="margin-top: 20px;">Purchase</a>
+    <a href="/membership">
+    <button id="purchaseBtn">Purchase</button>
+</a>
     
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
   
- <div style="text-align: right;">
-  {% if latest_membership != 'Free' %}
-    <a href="/generate" class="btn">Generate</a>
-  {% else %}
-    <button class="btn" onclick="showPopup()" disabled>Generate</button>
-  {% endif %}
-</div>
+ <button 
+    id="generateBtn"
+    {% if membership == 'Free' %} disabled onclick="alert('Upgrade to Student or Professor to generate')" {% endif %}
+>
+    Generate
+</button>
   
   <!-- Main -->
   <div class="main-content">
