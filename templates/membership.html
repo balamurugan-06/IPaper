@@ -251,92 +251,26 @@
                 <h1>Choose Your Plan</h1>
             </header>
             
-            <div class="membership-options">
-                <div class="option">
-                    <div class="option-header">
-                        <div class="option-title">Free User</div>
-                        <div class="option-price">$0/month</div>
-                    </div>
-                    <ul class="option-features">
-                        <li>Basic features</li>
-                        <li>Limited access</li>
-                        <li>Community support</li>
-                    </ul>
-                    <form action="/process-payment" method="POST">
-                        <input type="hidden" name="plan" value="student">
-                        <button class="btn select-plan" data-plan="Student">Select Plan</button>
+            <form method="POST" action="/select_plan">
+  <div class="card">
+    <h3>Free Plan</h3>
+    <p>$0</p>
+    <button type="submit" name="plan" value="Free">Select</button>
+  </div>
 
-                      </form>
-                      
-                </div>
-                
-                <div class="option">
-                    <div class="option-header">
-                        <div class="option-title">Student User</div>
-                        <div class="option-price">$9.99/month</div>
-                    </div>
-                    </ul>
-                    <form action="/process-payment" method="POST">
-                        <input type="hidden" name="plan" value="student">
-                        <button class="btn select-plan" data-plan="Student">Select Plan</button>
+  <div class="card">
+    <h3>Student Plan</h3>
+    <p>$9.99</p>
+    <button type="submit" name="plan" value="Student">Select</button>
+  </div>
 
-                      </form>
-                      
-                </div>
-                
-                <div class="option">
-                    <div class="option-header">
-                        <div class="option-title">Professor User</div>
-                        <div class="option-price">$19.99/month</div>
-                    </div>
-                    </ul>
-                    <form action="/process-payment" method="POST">
-                        <input type="hidden" name="plan" value="student">
-                        <button class="btn select-plan" data-plan="Student">Select Plan</button>
+  <div class="card">
+    <h3>Professor Plan</h3>
+    <p>$19.99</p>
+    <button type="submit" name="plan" value="Professor">Select</button>
+  </div>
+</form>
 
-                      </form>
-                      
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Payment Page -->
-    <div id="paymentPage" class="hidden">
-        <div class="payment-container">
-            <div class="payment-header">
-                <h2 class="payment-title">Payment Gateway</h2>
-                <div class="payment-method-title">PAYMENT METHOD</div>
-            </div>
-            
-            <div class="payment-method">
-                <div class="payment-card">
-                    <div class="card-images">
-                        <span>CREDIT / DEBIT CARD</span>
-                        <span>VISA</span>
-                    </div>
-                    
-                    <form id="paymentForm">
-                        <div class="form-group">
-                            <label for="cardNumber">Card Number</label>
-                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="16">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expiryDate">Expiry Date</label>
-                                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
-                            </div>
-                            <div class="form-group">
-                                <label for="cvv">CVV</label>
-                                <input type="text" id="cvv" placeholder="123" maxlength="3">
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn">Pay Now</button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
     
