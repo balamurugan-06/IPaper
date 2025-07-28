@@ -287,12 +287,18 @@
       {% endif %}
     </div>
     
-    <button class="btn btn-primary purchase-button" onclick="location.href='/purchase'">Purchase</button>
+    <a href="/membership" class="btn" style="margin-top: 20px;">Purchase</a>
     
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
   
- <button class="btn btn-success top-right-button" onclick="location.href='/generate'">Generate</button>
+ <div style="text-align: right;">
+  {% if latest_membership != 'Free' %}
+    <a href="/generate" class="btn">Generate</a>
+  {% else %}
+    <button onclick="alert('Only paid users can generate!')" class="btn" disabled>Generate</button>
+  {% endif %}
+</div>
   
   <!-- Main -->
   <div class="main-content">
