@@ -372,14 +372,39 @@ def membership():
 @app.route('/select_plan', methods=['POST'])
 def select_plan():
     plan = request.form.get('plan')
-    profession = session.get('profession', '')
     
+    # Make sure user is logged in
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
+    
+    # Get profession from session or DB
+    profession = session.get('profession')
+
+    if not profession:
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT profession FROM UserDocuments WHERE user_id = %s", (user_id,))
+            result = cur.fetchone()
+            if result:
+                profession = result[0]
+                session['profession'] = profession
+            cur.close()
+            conn.close()
+        except Exception as e:
+            return f"Database error fetching profession: {e}"
+    
+    # Condition: only professors can choose Professor plan
     if plan == 'Professor' and profession != 'Professor':
         flash("Only Professors can choose the Professor plan.", "error")
         return redirect('/membership')
     
     session['selected_plan'] = plan
     return redirect('/payment')
+
+
 
 @app.route('/payment')
 def payment():
@@ -417,6 +442,8 @@ def process_payment():
 @app.context_processor
 def inject_membership():
     return {'membership': session.get('membership', 'Free')}
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
