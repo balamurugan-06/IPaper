@@ -157,16 +157,25 @@ def dashboard():
         cur = conn.cursor()
         cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
         user = cur.fetchone()
+        if not user:
+            flash("User not found.", "error")
+            return redirect('/login')
         user_id, profession = user[0], user[1]
 
-        cur.execute("SELECT id, document FROM UserDocuments WHERE user_id = %s", (user_id,))
+        cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
         documents = cur.fetchall()
+
+        cur.execute("SELECT membership FROM userdocuments WHERE user_id = %s ORDER BY id DESC LIMIT 1", (user_id,))
+        result = cur.fetchone()
+        latest_membership = result[0] if result else "Free"
+        
         cur.close()
         conn.close()
 
         return render_template('dashboard.html', name=name, profession=profession, documents=documents)
     except Exception as e:
         return f"Dashboard Error: {e}"
+
 
 @app.route('/upload-document', methods=['POST'])
 def upload_document():
@@ -351,6 +360,55 @@ def delete_user(user_id):
     except Exception as e:
         flash(f"Failed to delete user: {e}", "error")
     return redirect('/admin')
+
+@app.route('/membership')
+def membership():
+    if 'user_name' not in session:
+        return redirect('/login')
+    return render_template('membership.html') 
+
+
+@app.route('/process-payment', methods=['POST'])
+def process_payment():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    plan = request.form.get('plan')  
+    name = session['user_name']
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Get user info
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
+        user = cur.fetchone()
+        if not user:
+            return "User not found", 400
+
+        user_id, email, profession = user
+
+        
+        cur.execute("SELECT membership FROM userdocuments WHERE user_id = %s ORDER BY id DESC LIMIT 1", (user_id,))
+        current_membership = cur.fetchone()
+        if current_membership and current_membership[0] == "Professor" and plan == "Student":
+            return "Professors cannot downgrade to Student", 400
+
+        
+        cur.execute("""
+            INSERT INTO userdocuments (user_id, name, email, profession, membership)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, name, email, profession, "Student" if plan == "student" else "Professor"))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect('/dashboard')
+    except Exception as e:
+        return f"Payment processing error: {e}", 500
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
