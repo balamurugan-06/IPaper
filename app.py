@@ -167,12 +167,12 @@ def dashboard():
         WHERE user_id = %s 
         ORDER BY id DESC LIMIT 1
     """, (session['user_id'],))
-    row = cur.fetchone()
-    latest_membership = row[0] if row else 'Free'
+        row = cur.fetchone()
+        latest_membership = row[0] if row else 'Free'
 
-    # Fetch documents
-    cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (session['user_id'],))
-    documents = cur.fetchall()
+    
+        cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (session['user_id'],))
+        documents = cur.fetchall()
 
     cur.close()
     conn.close()
