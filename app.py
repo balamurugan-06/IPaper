@@ -128,6 +128,9 @@ def login():
                 return render_template('login.html')
 
             session['user_name'] = user[1]
+            session['user_id'] = user[0] 
+            session['profession'] = user[6]
+            
             return redirect('/dashboard')
 
 
