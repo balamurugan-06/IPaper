@@ -365,8 +365,10 @@ def delete_user(user_id):
 
 @app.route('/membership')
 def membership():
+    if 'user_id' not in session:
+        flash("Please login first", "error")
+        return redirect('/login')
     return render_template('membership.html')
-
 
 
 
