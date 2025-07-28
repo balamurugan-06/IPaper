@@ -174,9 +174,11 @@ def dashboard():
         cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (session['user_id'],))
         documents = cur.fetchall()
 
+    except Exception as e:
+        print("Error fetching data:", e)
     finally:
-    cur.close()
-    conn.close()
+        cur.close()
+        conn.close()
 
     return render_template('dashboard.html', name=session['user_name'], documents=documents, latest_membership=latest_membership)
 
