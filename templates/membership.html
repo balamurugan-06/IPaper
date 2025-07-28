@@ -264,7 +264,7 @@
                     </ul>
                     <form action="/process-payment" method="POST">
                         <input type="hidden" name="plan" value="student">
-                        <button class="btn">Select Plan</button>
+                        <button class="btn" data-plan="free">Select Plan</button>
                       </form>
                       
                 </div>
@@ -277,7 +277,7 @@
                     </ul>
                     <form action="/process-payment" method="POST">
                         <input type="hidden" name="plan" value="student">
-                        <button class="btn">Select Plan</button>
+                        <button class="btn" data-plan="student">Select Plan</button>
                       </form>
                       
                 </div>
@@ -290,7 +290,7 @@
                     </ul>
                     <form action="/process-payment" method="POST">
                         <input type="hidden" name="plan" value="student">
-                        <button class="btn">Select Plan</button>
+                        <button class="btn" data-plan="professor">Select Plan</button>
                       </form>
                       
                 </div>
@@ -352,86 +352,91 @@
     </div>
 
     <script>
+        let plan = "";  // store selected plan globally
+    
         // DOM Elements
         const membershipPage = document.getElementById('membershipPage');
         const paymentPage = document.getElementById('paymentPage');
         const successPage = document.getElementById('successPage');
-        const selectPlanButtons = document.querySelectorAll('.select-plan');
         const paymentForm = document.getElementById('paymentForm');
         const backButton = document.getElementById('backButton');
         const successAmount = document.getElementById('successAmount');
         const successPlanName = document.getElementById('successPlanName');
-        
+    
         // Plan prices and names
         const plans = {
             free: { price: '$0', name: 'Free Plan' },
-            pro: { price: '$9.99', name: 'Student Plan' },
-            ultimate: { price: '$19.99', name: 'Professor Plan' }
+            student: { price: '$9.99', name: 'Student Plan' },
+            professor: { price: '$19.99', name: 'Professor Plan' }
         };
-        
+    
         // Select Plan Button Click Handler
-        selectPlanButtons.forEach(button => {
+        document.querySelectorAll('.btn[data-plan]').forEach(button => {
             button.addEventListener('click', () => {
-                const plan = button.getAttribute('data-plan');
-                
-                // Update success page with selected plan
+                plan = button.getAttribute('data-plan');
                 successAmount.textContent = plans[plan].price;
                 successPlanName.textContent = plans[plan].name;
-                
+    
                 if (plan === 'free') {
-                    // For free plan, skip payment page
                     membershipPage.classList.add('hidden');
                     successPage.classList.remove('hidden');
-                    return;
+                } else {
+                    membershipPage.classList.add('hidden');
+                    paymentPage.classList.remove('hidden');
                 }
-                
-                // For paid plans, show payment page
-                membershipPage.classList.add('hidden');
-                paymentPage.classList.remove('hidden');
             });
         });
-        
+    
         // Payment Form Submission Handler
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            // Get form values
+    
             const cardNumber = document.getElementById('cardNumber').value;
             const expiryDate = document.getElementById('expiryDate').value;
             const cvv = document.getElementById('cvv').value;
-            
-            // Simple validation
+    
             if (!cardNumber || !expiryDate || !cvv) {
                 alert('Please fill in all payment details');
                 return;
             }
-            
+    
             if (cardNumber.length !== 16 || isNaN(cardNumber)) {
                 alert('Please enter a valid 16-digit card number');
                 return;
             }
-            
+    
             if (cvv.length !== 3 || isNaN(cvv)) {
                 alert('Please enter a valid 3-digit CVV');
                 return;
             }
-            
-            // Simulate payment processing
-            setTimeout(() => {
-                paymentPage.classList.add('hidden');
-                successPage.classList.remove('hidden');
-            }, 1000);
+    
+            fetch("/pay-membership", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `plan=${plan}`
+            })
+            .then(res => res.text())
+            .then(data => {
+                if (data === "success") {
+                    paymentPage.classList.add('hidden');
+                    successPage.classList.remove('hidden');
+                } else {
+                    alert(data); // e.g. "Professors cannot choose student plan"
+                }
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+            });
         });
-        
-        // Back Button Click Handler
+    
+        // Back Button
         backButton.addEventListener('click', () => {
             successPage.classList.add('hidden');
             paymentPage.classList.add('hidden');
             membershipPage.classList.remove('hidden');
-            
-            // Clear payment form
             paymentForm.reset();
         });
     </script>
+    
 </body>
 </html>
