@@ -296,7 +296,7 @@
   {% if latest_membership != 'Free' %}
     <a href="/generate" class="btn">Generate</a>
   {% else %}
-    <button onclick="alert('Only paid users can generate!')" class="btn" disabled>Generate</button>
+    <button class="btn" onclick="showPopup()" disabled>Generate</button>
   {% endif %}
 </div>
   
