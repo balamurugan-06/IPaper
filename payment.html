@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+</head>
+<body>
+    <h3>Payment for {{ plan }} Plan</h3>
+<form method="POST" action="/process_payment">
+  <input name="card_number" placeholder="Card Number" required><br>
+  <input name="expiry" placeholder="MM/YY" required><br>
+  <input name="cvv" placeholder="CVV" required><br>
+  <button type="submit">Pay</button>
+</form>
+
+    
+</body>
+</html>
