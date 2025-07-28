@@ -174,6 +174,7 @@ def dashboard():
         cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (session['user_id'],))
         documents = cur.fetchall()
 
+    finally:
     cur.close()
     conn.close()
 
