@@ -366,35 +366,7 @@ def delete_user(user_id):
 def membership():
     return render_template('membership.html')
 
-@app.route('/process-payment', methods=['POST'])
-def process_payment():
-    if 'user_name' not in session:
-        return jsonify({'error': 'Not logged in'}), 403
 
-    selected_plan = request.json.get('plan')
-    if selected_plan not in ['Student', 'Professor']:
-        return jsonify({'error': 'Invalid membership plan'}), 400
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
-    user = cur.fetchone()
-    user_id, email, profession = user
-
-    # Block professor from downgrading to student
-    if profession == "Professor" and selected_plan == "Student":
-        return jsonify({'error': "Professors cannot purchase Student plan."}), 400
-
-    # Insert membership into UserDocuments
-    cur.execute("""
-        INSERT INTO userdocuments (user_id, name, email, profession, document, membership)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (user_id, session['user_name'], email, profession, 'N/A', selected_plan))
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return jsonify({'success': True})
 
 
 @app.route('/select_plan', methods=['POST'])
