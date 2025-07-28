@@ -3,6 +3,7 @@ import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_session import Session
+from flask import jsonify
 from dotenv import load_dotenv
 from flask import make_response
 from flask import send_from_directory
@@ -157,14 +158,22 @@ def dashboard():
         cur = conn.cursor()
         cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
         user = cur.fetchone()
-        user_id, profession = user[0], user[1]
+        user_id, profession = user
 
-        cur.execute("SELECT id, document FROM UserDocuments WHERE user_id = %s", (user_id,))
+        cur.execute("""
+        SELECT membership FROM userdocuments 
+        WHERE user_id = %s 
+        ORDER BY id DESC LIMIT 1
+        """, (user_id,))
+        membership_record = cur.fetchone()
+        latest_membership = membership_record[0] if membership_record else "Free"
+
+        cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
         documents = cur.fetchall()
         cur.close()
         conn.close()
 
-        return render_template('dashboard.html', name=name, profession=profession, documents=documents)
+        return render_template('dashboard.html', name=name, profession=profession, documents=documents, latest_membership=latest_membership)
     except Exception as e:
         return f"Dashboard Error: {e}"
 
@@ -185,7 +194,7 @@ def upload_document():
         user_id, email, profession = user
 
         cur.execute("""
-            INSERT INTO UserDocuments (user_id, name, email, profession, document, file_data)
+            INSERT INTO userdocuments (user_id, name, email, profession, document, file_data)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (user_id, session['user_name'], email, profession, filename, psycopg2.Binary(file_data)))
         conn.commit()
@@ -201,14 +210,14 @@ def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT file_data, document FROM UserDocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT file_data, document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
         if result:
             file_data, filename = result
-            # Convert memoryview to bytes
+            
             pdf_bytes = bytes(file_data)
 
             response = make_response(pdf_bytes)
@@ -232,7 +241,7 @@ def delete_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT document FROM UserDocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         if result:
             filename = result[0]
@@ -240,7 +249,7 @@ def delete_document(doc_id):
             if os.path.exists(filepath):
                 os.remove(filepath)
 
-        cur.execute("DELETE FROM UserDocuments WHERE id = %s", (doc_id,))
+        cur.execute("DELETE FROM userdocuments WHERE id = %s", (doc_id,))
         conn.commit()
         cur.close()
         conn.close()
@@ -351,6 +360,44 @@ def delete_user(user_id):
     except Exception as e:
         flash(f"Failed to delete user: {e}", "error")
     return redirect('/admin')
+
+
+@app.route('/membership')
+def membership():
+    if 'user_name' not in session:
+        return redirect('/login')
+    return render_template('membership.html')
+
+@app.route('/process-payment', methods=['POST'])
+def process_payment():
+    if 'user_name' not in session:
+        return jsonify({'error': 'Not logged in'}), 403
+
+    selected_plan = request.json.get('plan')
+    if selected_plan not in ['Student', 'Professor']:
+        return jsonify({'error': 'Invalid membership plan'}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+    user = cur.fetchone()
+    user_id, email, profession = user
+
+    # Block professor from downgrading to student
+    if profession == "Professor" and selected_plan == "Student":
+        return jsonify({'error': "Professors cannot purchase Student plan."}), 400
+
+    # Insert membership into UserDocuments
+    cur.execute("""
+        INSERT INTO userdocuments (user_id, name, email, profession, document, membership)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (user_id, session['user_name'], email, profession, 'N/A', selected_plan))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return jsonify({'success': True})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
