@@ -364,8 +364,6 @@ def delete_user(user_id):
 
 @app.route('/membership')
 def membership():
-    if 'user_name' not in session:
-        return redirect('/login')
     return render_template('membership.html')
 
 @app.route('/process-payment', methods=['POST'])
@@ -399,6 +397,54 @@ def process_payment():
     return jsonify({'success': True})
 
 
+@app.route('/select_plan', methods=['POST'])
+def select_plan():
+    plan = request.form.get('plan')
+    profession = session.get('profession', '')
+    
+    if plan == 'Professor' and profession != 'Professor':
+        flash("Only Professors can choose the Professor plan.", "error")
+        return redirect('/membership')
+    
+    session['selected_plan'] = plan
+    return redirect('/payment')
+
+@app.route('/payment')
+def payment():
+    plan = session.get('selected_plan', 'Free')
+    return render_template('payment.html', plan=plan)
+
+@app.route('/process_payment', methods=['POST'])
+def process_payment():
+    user_id = session.get('user_id')
+    plan = session.get('selected_plan', 'Free')
+
+    # dummy card data just for simulation
+    card_number = request.form['card_number']
+    expiry = request.form['expiry']
+    cvv = request.form['cvv']
+
+    if not all([card_number, expiry, cvv]):
+        flash("Please enter all card details.", "error")
+        return redirect('/payment')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE userdocuments SET membership = %s WHERE user_id = %s
+        """, (plan, user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        session['membership'] = plan
+        return render_template('success.html', plan=plan)
+    except Exception as e:
+        return f"Database Error: {e}"
+
+@app.context_processor
+def inject_membership():
+    return {'membership': session.get('membership', 'Free')}
 if __name__ == '__main__':
     app.run(debug=True)
 
