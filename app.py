@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask import make_response
 from flask import send_from_directory
 from flask import Response
+from flask_session import Session
 import os
 import re
 
