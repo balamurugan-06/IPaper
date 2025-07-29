@@ -345,11 +345,13 @@
   </div>
   
  <button 
-    id="generateBtn"
-    {% if membership == 'Free' %} disabled onclick="alert('Upgrade to Student or Professor to generate')" {% endif %}
+  id="generateBtn"
+  title="{% if membership == 'Free' %}Upgrade required{% endif %}"
+  {% if membership == 'Free' %} disabled onclick="alert('Upgrade to Student or Professor to generate')" {% endif %}
 >
-    Generate
+  Generate
 </button>
+
   
   <!-- Main -->
   <div class="main-content">
