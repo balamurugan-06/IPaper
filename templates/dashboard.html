@@ -344,13 +344,11 @@
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
   
- <button 
-  id="generateBtn"
-  title="{% if membership == 'Free' %}Upgrade required{% endif %}"
-  {% if membership == 'Free' %} disabled onclick="alert('Upgrade to Student or Professor to generate')" {% endif %}
->
-  Generate
-</button>
+ {% if latest_membership != 'Free' %}
+  <button class="btn btn-success" id="generate-btn">Generate</button>
+{% else %}
+  <button class="btn btn-secondary" id="generate-btn" disabled onclick="alert('Upgrade your plan to access this feature.')">Generate</button>
+{% endif %}
 
   
   <!-- Main -->
