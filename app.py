@@ -176,7 +176,7 @@ def dashboard():
         documents = cur.fetchall()
         cur.close()
         conn.close()
-
+        session['membership'] = latest_membership
         return render_template('dashboard.html', name=name, profession=profession, documents=documents, latest_membership=latest_membership)
     except Exception as e:
         return f"Dashboard Error: {e}"
