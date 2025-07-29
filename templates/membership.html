@@ -412,14 +412,27 @@
         });
         
         // Back Button Click Handler
-        backButton.addEventListener('click', () => {
-            successPage.classList.add('hidden');
-            paymentPage.classList.add('hidden');
-            membershipPage.classList.remove('hidden');
-            
-            // Clear payment form
-            paymentForm.reset();
-        });
+        button.addEventListener('click', () => {
+    const plan = button.getAttribute('data-plan');
+
+    fetch('/select_plan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'  
+        },
+        body: JSON.stringify({ plan })         
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'redirect') {
+            window.location.href = data.redirect_url; // Go to payment page
+        } else if (data.status === 'success') {
+            membershipPage.classList.add('hidden');
+            successPage.classList.remove('hidden');
+        }
+    });
+});
+
     </script>
 </body>
 </html>
