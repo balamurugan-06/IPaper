@@ -362,6 +362,17 @@
       <button class="btn btn-role">{{ profession }}</button>
     </div>
   </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const generateBtn = document.getElementById("generateBtn");
+    if (generateBtn.disabled) {
+        generateBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert("Upgrade your membership to access the Generate feature.");
+        });
+    }
+});
+</script>
 
 </body>
 </html>
