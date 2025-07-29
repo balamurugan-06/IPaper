@@ -377,73 +377,60 @@ def membership():
 
 @app.route('/select_plan', methods=['POST'])
 def select_plan():
-    plan = request.form.get('plan')
-    
-    # Make sure user is logged in
-    user_id = session.get('user_id')
-    if not user_id:
-        flash("Please log in first.", "error")
-        return redirect('/login')
-    
-    # Get profession from session or DB
-    profession = session.get('profession')
+    if 'user_id' not in session:
+        return redirect('/login')  
 
-    if not profession:
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT profession FROM UserDocuments WHERE user_id = %s", (user_id,))
-            result = cur.fetchone()
-            if result:
-                profession = result[0]
-                session['profession'] = profession
-            cur.close()
-            conn.close()
-        except Exception as e:
-            return f"Database error fetching profession: {e}"
-    
-    # Condition: only professors can choose Professor plan
-    if plan == 'Professor' and profession != 'Professor':
-        flash("Only Professors can choose the Professor plan.", "error")
-        return redirect('/membership')
-    
+    data = request.get_json()     
+    plan = data.get('plan')
     session['selected_plan'] = plan
-    return redirect('/payment')
+
+    if plan == 'free':
+        update_user_membership(session['user_id'], 'Free')
+        return jsonify({'status': 'success', 'message': 'Free plan activated'})
+
+    return jsonify({'status': 'redirect', 'redirect_url': '/payment'})  
 
 
 
 @app.route('/payment')
 def payment():
-    plan = session.get('selected_plan', 'Free')
+    if 'user_id' not in session:
+        return redirect('/login')
+    if 'selected_plan' not in session:
+        return redirect('/membership')  
+
+    plan = session['selected_plan']
     return render_template('payment.html', plan=plan)
+
 
 @app.route('/process_payment', methods=['POST'])
 def process_payment():
-    user_id = session.get('user_id')
-    plan = session.get('selected_plan', 'Free')
+    if 'user_id' not in session:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
 
-    # dummy card data just for simulation
-    card_number = request.form['card_number']
-    expiry = request.form['expiry']
+    card_number = request.form['cardNumber']
+    expiry = request.form['expiryDate']
     cvv = request.form['cvv']
 
-    if not all([card_number, expiry, cvv]):
-        flash("Please enter all card details.", "error")
-        return redirect('/payment')
+    
+    if len(card_number) != 16 or len(cvv) != 3:
+        return jsonify({'status': 'error', 'message': 'Invalid card details'}), 400
 
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            UPDATE userdocuments SET membership = %s WHERE user_id = %s
-        """, (plan, user_id))
-        conn.commit()
-        cur.close()
-        conn.close()
-        session['membership'] = plan
-        return render_template('success.html', plan=plan)
-    except Exception as e:
-        return f"Database Error: {e}"
+    plan = session.get('selected_plan', 'free')
+    membership = 'Student' if plan == 'pro' else 'Professor'
+    update_user_membership(session['user_id'], membership)
+
+    return jsonify({'status': 'success', 'message': 'Payment complete'})
+
+def update_user_membership(user_id, membership):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE userdocuments SET membership = %s WHERE user_id = %s", (membership, user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 
 @app.context_processor
 def inject_membership():
