@@ -350,13 +350,11 @@
   </div>
   
  <div style="position: absolute; top: 10px; right: 10px;">
-  {% if latest_membership == "Free" %}
-  <button onclick="showPopup()" disabled style="background-color: grey;">Generate</button>
-{% else %}
-  <a href="/generate">
-    <button style="background-color: green;">Generate</button>
-  </a>
-{% endif %}
+  {% if latest_membership != "Free" %}
+        <a href="/generate" class="btn btn-primary">Generate</a>
+    {% else %}
+        <button class="btn btn-secondary" onclick="alert('Only paid users can access this feature.')" disabled>Generate</button>
+    {% endif %}
 
 </div>
 
