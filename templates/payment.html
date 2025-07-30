@@ -3,39 +3,76 @@
 <head>
     <title>Choose Membership Plan</title>
     <style>
-body {
+        body {
             font-family: Arial, sans-serif;
             background-color: #eef2f7;
             padding: 40px;
         }
         .container {
-            max-width: 700px;
+            max-width: 1000px;  /* 增大容器宽度 */
             margin: auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;  /* 增大标题字体 */
+            margin-bottom: 40px;  /* 增加下边距 */
+            font-weight: normal;
+            color: #333;
+        }
+        .plans-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;  /* 增加卡片间距 */
+        }
+        .plan-card {
             background-color: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 12px;  /* 增大圆角 */
+            padding: 35px 30px;  /* 增加内边距 */
+            width: 30%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);  /* 增强阴影效果 */
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;  /* 添加悬停动画 */
         }
-        .plan {
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: border 0.3s;
+        .plan-card:hover {
+            transform: translateY(-5px);  /* 悬停时轻微上浮 */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
-        .plan:hover {
-            border-color: #007bff;
+        .plan-title {
+            font-size: 22px;  /* 增大标题字体 */
+            margin-bottom: 25px;  /* 增加下边距 */
+            font-weight: bold;
+            color: #2c3e50;
         }
-        .plan h3 {
-            margin: 0;
+        .plan-features {
+            margin: 25px 0;  /* 增加边距 */
+            text-align: left;
+            padding-left: 25px;  /* 增加左边距 */
+            min-height: 150px;  /* 设置最小高度使卡片大小一致 */
+        }
+        .plan-features p {
+            margin: 12px 0;  /* 增加行间距 */
+            color: #666;
+            font-size: 16px;  /* 增大字体 */
+            position: relative;
+            line-height: 1.5;
+        }
+        .plan-features p:before {
+            content: "-";
+            position: absolute;
+            left: -18px;  /* 调整项目符号位置 */
+            font-weight: bold;
         }
         .btn {
-            padding: 10px 20px;
+            padding: 12px 25px;  /* 增大按钮尺寸 */
             border: none;
-            border-radius: 7px;
+            border-radius: 6px;  /* 增大圆角 */
             background-color: #007bff;
             color: white;
             cursor: pointer;
+            font-size: 16px;  /* 增大字体 */
+            margin-top: 20px;  /* 增加上边距 */
+            width: 80%;  /* 调整按钮宽度 */
+            transition: background-color 0.3s ease;
         }
         .btn:hover {
             background-color: #0056b3;
@@ -44,21 +81,11 @@ body {
             background-color: #6c757d;
             cursor: not-allowed;
         }
+        
+        /* 弹窗样式保持不变 */
         .form-section {
             display: none;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-            margin-top: 10px;
         }
-        input[type="text"], input[type="number"] {
-            padding: 10px;
-            width: 100%;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #aaa;
-        }
-
-        /* New Popup Styles (matches your original design) */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -117,55 +144,66 @@ body {
             document.body.style.overflow = 'auto';
         }
     </script>
-
-
 </head>
 <body>
     <div class="container">
-        <h2>Select Your Membership Plan</h2>
+        <h1>Choose Your Plan</h1>
 
-        <!-- Free Plan -->
-        <div class="plan">
-            <h3>Free Plan - $0.00</h3>
-            <p>Basic access. Cannot generate documents.</p>
-            <button class="btn disabled-btn" disabled>Current Plan</button>
+        <div class="plans-container">
+            <!-- Free Plan -->
+            <div class="plan-card">
+                <div class="plan-title">Free User $0/month</div>
+                <div class="plan-features">
+                    <p>Basic features</p>
+                    <p>Limited access</p>
+                    <p>Community support</p>
+                </div>
+                <button class="btn disabled-btn" disabled>Current Plan</button>
+            </div>
+
+            <!-- Student Plan -->
+            <div class="plan-card">
+                <div class="plan-title">Student User $9.99/month</div>
+                <div class="plan-features">
+                    <p>Access to advanced features</p>
+                    <p>Full document generation</p>
+                    <p>Priority support</p>
+                </div>
+                <button class="btn" onclick="showCardForm('Student')">Select Plan</button>
+            </div>
+
+            <!-- Professor Plan -->
+            <div class="plan-card">
+                <div class="plan-title">Professor User $19.99/month</div>
+                <div class="plan-features">
+                    <p>Premium access with all features</p>
+                    <p>Unlimited document generation</p>
+                    <p>24/7 dedicated support</p>
+                </div>
+                <button class="btn" onclick="showCardForm('Professor')">Select Plan</button>
+            </div>
         </div>
 
-        <!-- Student Plan -->
-        <div class="plan">
-            <h3>Student Plan - $9.99</h3>
-            <p>Access to advanced features and full document generation.</p>
-            <button class="btn" onclick="showCardForm('Student')">Choose Student Plan</button>
-        </div>
-
-        <!-- Professor Plan -->
-        <div class="plan">
-            <h3>Professor Plan - $19.99</h3>
-            <p>Premium access with all features and unlimited document generation.</p>
-            <button class="btn" onclick="showCardForm('Professor')">Choose Professor Plan</button>
-        </div>
-
-        <!-- Popup Overlay -->
-<div class="popup-overlay" id="popup-overlay">
-    <div class="popup-content">
-        <button class="close-btn" onclick="closePopup()">&times;</button>
-        <div class="form-section">
-            <form method="POST" action="/payment_process">
-                <input type="hidden" name="selected_plan" id="selected_plan">
-                <h3>Enter Payment Details</h3>
-                <label>Card Number:</label>
-                <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
-                <label>Expiry Date:</label>
-                <input type="text" name="expiry" placeholder="MM/YY" required>
-                <label>CVV:</label>
-                <input type="number" name="cvv" placeholder="123" required>
-                <br><br>
-                <button class="btn" type="submit">Pay Now</button>
-            </form>
+        <!-- 弹窗代码保持不变 -->
+        <div class="popup-overlay" id="popup-overlay">
+            <div class="popup-content">
+                <button class="close-btn" onclick="closePopup()">&times;</button>
+                <div class="form-section">
+                    <form method="POST" action="/payment_process">
+                        <input type="hidden" name="selected_plan" id="selected_plan">
+                        <h3>Enter Payment Details</h3>
+                        <label>Card Number:</label>
+                        <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
+                        <label>Expiry Date:</label>
+                        <input type="text" name="expiry" placeholder="MM/YY" required>
+                        <label>CVV:</label>
+                        <input type="number" name="cvv" placeholder="123" required>
+                        <br><br>
+                        <button class="btn" type="submit">Pay Now</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-    </div>
-       
 </body>
 </html>
