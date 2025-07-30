@@ -412,18 +412,16 @@ def membership():
 
 @app.route('/select_plan', methods=['POST'])
 def select_plan():
-    if 'user_id' not in session:
-        return redirect('/login')  
+    plan = request.form.get('plan')
+    if not plan:
+        return "No plan selected", 400
 
-    data = request.get_json()     
-    plan = data.get('plan')
+    # Stop Professor from downgrading
+    if session.get('membership') == 'Professor' and plan == 'Student':
+        return "Professor cannot downgrade to Student", 403
+
     session['selected_plan'] = plan
-
-    if plan == 'free':
-        update_user_membership(session['user_id'], 'Free')
-        return jsonify({'status': 'success', 'message': 'Free plan activated'})
-
-    return jsonify({'status': 'redirect', 'redirect_url': '/payment'})  
+    return redirect('/payment')
 
 
 
@@ -503,6 +501,42 @@ def update_user_membership(user_id, membership):
     conn.commit()
     cur.close()
     conn.close()
+
+
+
+@app.route('/pay', methods=['POST'])
+def pay():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    membership_plan = session.get('selected_plan', 'Free')
+    user_name = session['user_name']
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get user ID
+    cur.execute("SELECT id FROM users WHERE name = %s", (user_name,))
+    user_id = cur.fetchone()[0]
+
+    # Check if entry already exists
+    cur.execute("SELECT * FROM userdocuments WHERE user_id = %s", (user_id,))
+    existing = cur.fetchone()
+
+    if existing:
+        cur.execute("UPDATE userdocuments SET membership = %s WHERE user_id = %s", (membership_plan, user_id))
+    else:
+        cur.execute("""
+            INSERT INTO userdocuments (user_id, name, email, profession, membership)
+            SELECT id, name, email, profession, %s FROM users WHERE id = %s
+        """, (membership_plan, user_id))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    session['membership'] = membership_plan
+    return render_template('success.html', membership=membership_plan)
 
 
 
