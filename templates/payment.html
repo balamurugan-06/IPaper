@@ -9,69 +9,69 @@
             padding: 40px;
         }
         .container {
-            max-width: 1000px;  /* 增大容器宽度 */
+            max-width: 1000px;
             margin: auto;
         }
         h1 {
             text-align: center;
-            font-size: 28px;  /* 增大标题字体 */
-            margin-bottom: 40px;  /* 增加下边距 */
+            font-size: 28px;
+            margin-bottom: 40px;
             font-weight: normal;
             color: #333;
         }
         .plans-container {
             display: flex;
             justify-content: space-between;
-            gap: 30px;  /* 增加卡片间距 */
+            gap: 30px;
         }
         .plan-card {
             background-color: #fff;
-            border-radius: 12px;  /* 增大圆角 */
-            padding: 35px 30px;  /* 增加内边距 */
+            border-radius: 12px;
+            padding: 35px 30px;
             width: 30%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);  /* 增强阴影效果 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;  /* 添加悬停动画 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .plan-card:hover {
-            transform: translateY(-5px);  /* 悬停时轻微上浮 */
+            transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
         .plan-title {
-            font-size: 22px;  /* 增大标题字体 */
-            margin-bottom: 25px;  /* 增加下边距 */
+            font-size: 22px;
+            margin-bottom: 25px;
             font-weight: bold;
             color: #2c3e50;
         }
         .plan-features {
-            margin: 25px 0;  /* 增加边距 */
+            margin: 25px 0;
             text-align: left;
-            padding-left: 25px;  /* 增加左边距 */
-            min-height: 150px;  /* 设置最小高度使卡片大小一致 */
+            padding-left: 25px;
+            min-height: 150px;
         }
         .plan-features p {
-            margin: 12px 0;  /* 增加行间距 */
+            margin: 12px 0;
             color: #666;
-            font-size: 16px;  /* 增大字体 */
+            font-size: 16px;
             position: relative;
             line-height: 1.5;
         }
         .plan-features p:before {
             content: "-";
             position: absolute;
-            left: -18px;  /* 调整项目符号位置 */
+            left: -18px;
             font-weight: bold;
         }
         .btn {
-            padding: 12px 25px;  /* 增大按钮尺寸 */
+            padding: 12px 25px;
             border: none;
-            border-radius: 6px;  /* 增大圆角 */
+            border-radius: 6px;
             background-color: #007bff;
             color: white;
             cursor: pointer;
-            font-size: 16px;  /* 增大字体 */
-            margin-top: 20px;  /* 增加上边距 */
-            width: 80%;  /* 调整按钮宽度 */
+            font-size: 16px;
+            margin-top: 20px;
+            width: 80%;
             transition: background-color 0.3s ease;
         }
         .btn:hover {
@@ -82,7 +82,7 @@
             cursor: not-allowed;
         }
         
-        /* 弹窗样式保持不变 */
+        /* Improved popup styles */
         .form-section {
             display: none;
         }
@@ -112,6 +112,7 @@
             width: 90%;
             max-width: 500px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
         }
         .close-btn {
             position: absolute;
@@ -128,9 +129,46 @@
         }
         .popup-content .form-section {
             display: block;
-            border-top: none;
-            padding-top: 0;
-            margin-top: 0;
+        }
+        
+        /* Payment form styles */
+        .payment-form {
+            margin-top: 20px;
+        }
+        .payment-form h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .payment-form label {
+            display: block;
+            margin: 15px 0 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        .payment-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .payment-form input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .payment-form .btn {
+            width: 100%;
+            margin-top: 25px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
         }
     </style>
     <script>
@@ -184,21 +222,31 @@
             </div>
         </div>
 
-        <!-- 弹窗代码保持不变 -->
+        <!-- Popup with payment form -->
         <div class="popup-overlay" id="popup-overlay">
             <div class="popup-content">
                 <button class="close-btn" onclick="closePopup()">&times;</button>
                 <div class="form-section">
-                    <form method="POST" action="/payment_process">
+                    <form method="POST" action="/payment_process" class="payment-form">
                         <input type="hidden" name="selected_plan" id="selected_plan">
                         <h3>Enter Payment Details</h3>
-                        <label>Card Number:</label>
-                        <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
-                        <label>Expiry Date:</label>
-                        <input type="text" name="expiry" placeholder="MM/YY" required>
-                        <label>CVV:</label>
-                        <input type="number" name="cvv" placeholder="123" required>
-                        <br><br>
+                        
+                        <div class="form-group">
+                            <label for="card_number">Card Number:</label>
+                            <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry">Expiry Date:</label>
+                                <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV:</label>
+                                <input type="number" id="cvv" name="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                        
                         <button class="btn" type="submit">Pay Now</button>
                     </form>
                 </div>
