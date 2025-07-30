@@ -344,14 +344,11 @@
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
   
- <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
-  <h1>Welcome, {{ user_name }}</h1>
-  <form method="post" action="/generate">
-    <button id="generateBtn" type="submit" class="btn btn-primary" {% if membership == 'Free' or membership == None %} disabled {% endif %}>
-      Generate
-    </button>
-  </form>
-</div>
+ <button id="generateBtn"
+          class="btn btn-primary"
+          {% if membership == 'Free' or membership == None %} disabled {% endif %}>
+    Generate
+  </button>
 
   
   <!-- Main -->
