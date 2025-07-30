@@ -3,7 +3,59 @@
 <head>
     <title>Choose Membership Plan</title>
     <style>
-        /* Make payment form appear as modal popup */
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #eef2f7;
+    padding: 40px;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+.plan {
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.plan:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
+
+.plan h3 {
+    margin: 0 0 10px 0;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 7px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.disabled-btn {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* MODAL PAYMENT SECTION STYLES */
 .form-section {
     position: fixed;
     top: 50%;
@@ -20,7 +72,6 @@
     animation: popupFade 0.4s ease-out;
 }
 
-/* Add fade-in animation */
 @keyframes popupFade {
     0% {
         transform: translate(-50%, -60%);
@@ -32,7 +83,6 @@
     }
 }
 
-/* Optional: dark background overlay */
 body::before {
     content: '';
     display: none;
@@ -43,13 +93,20 @@ body::before {
     z-index: 998;
 }
 
-/* Show overlay when form is visible */
 body.show-popup::before,
 body.show-popup #card-form {
     display: block;
 }
 
-/* Style input focus */
+input[type="text"],
+input[type="number"] {
+    padding: 10px;
+    width: 100%;
+    margin: 8px 0;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+}
+
 input[type="text"]:focus,
 input[type="number"]:focus {
     border-color: #007bff;
@@ -111,6 +168,7 @@ input[type="number"]:focus {
         document.body.classList.add('show-popup');
     }
 </script>
+
 
 </body>
 </html>
