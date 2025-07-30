@@ -537,6 +537,8 @@ def pay():
 
     session['membership'] = membership_plan
     return render_template('success.html', membership=membership_plan)
+    return redirect('/dashboard')
+
 
 
 
