@@ -3,116 +3,79 @@
 <head>
     <title>Choose Membership Plan</title>
     <style>
-        body {
-    font-family: Arial, sans-serif;
-    background-color: #eef2f7;
-    padding: 40px;
+body {
+  margin: 0;
+  padding: 40px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f3f6fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.container {
-    max-width: 700px;
-    margin: auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+.pricing-container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.plan {
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    cursor: pointer;
+.card {
+  width: 280px;
+  padding: 35px 25px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  text-align: center;
 }
 
-.plan:hover {
-    border-color: #007bff;
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.15);
 }
 
-.plan h3 {
-    margin: 0 0 10px 0;
+.card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #2c3e50;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 7px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.card .price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+  margin: 12px 0 20px;
 }
 
-.btn:hover {
-    background-color: #0056b3;
+.card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 25px;
 }
 
-.disabled-btn {
-    background-color: #6c757d;
-    cursor: not-allowed;
+.card ul li {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #555;
 }
 
-/* MODAL PAYMENT SECTION STYLES */
-.form-section {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    z-index: 999;
-    width: 90%;
-    max-width: 400px;
-    display: none;
-    animation: popupFade 0.4s ease-out;
+.card button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes popupFade {
-    0% {
-        transform: translate(-50%, -60%);
-        opacity: 0;
-    }
-    100% {
-        transform: translate(-50%, -50%);
-        opacity: 1;
-    }
+.card button:hover {
+  background-color: #0056b3;
 }
 
-body::before {
-    content: '';
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 998;
-}
-
-body.show-popup::before,
-body.show-popup #card-form {
-    display: block;
-}
-
-input[type="text"],
-input[type="number"] {
-    padding: 10px;
-    width: 100%;
-    margin: 8px 0;
-    border-radius: 5px;
-    border: 1px solid #aaa;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0,123,255,0.4);
-}
 
     </style>
 </head>
