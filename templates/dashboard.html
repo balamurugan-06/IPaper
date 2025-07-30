@@ -42,7 +42,14 @@
             align-items: center;
             gap: 10px;
         }
-        
+      
+.disabled-button {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+
         .btn {
             padding: 8px 16px;
             border: none;
@@ -354,7 +361,7 @@
     {% if latest_membership == "Student" or latest_membership == "Professor" %}
     <button id="generateBtn" class="btn btn-success">Generate</button>
 {% else %}
-    <button id="generateBtn" class="btn btn-secondary" onclick="showUpgradePopup()" disabled style="cursor: not-allowed;">Generate</button>
+      <button id="generateBtn" class="btn btn-secondary disabled-button" onclick="showUpgradePopup()" disabled>Generate</button>
 {% endif %}
 
 </div>
@@ -380,12 +387,8 @@
 
   <script>
     function showUpgradePopup() {
-        alert("Paid members only. Please purchase a plan.");
-    }
-
-    function closePopup() {
-        document.getElementById("upgradePopup").style.display = "none";
-    }
+    alert("You must upgrade to Student or Professor to use this feature.");
+}
 </script>
 
 
