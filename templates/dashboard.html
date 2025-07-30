@@ -359,17 +359,20 @@
       <button class="btn btn-role">{{ profession }}</button>
     </div>
   </div>
-<script>
+
+  <script>
 document.addEventListener('DOMContentLoaded', function () {
     const generateBtn = document.getElementById("generateBtn");
-    if (generateBtn.disabled) {
-        generateBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            alert("Upgrade your membership to access the Generate feature.");
-        });
-    }
+
+    {% if membership == 'Free' or membership == None %}
+    generateBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        alert("Only paid users can use this feature. Please upgrade your membership.");
+    });
+    {% endif %}
 });
 </script>
+
 
 </body>
 </html>
