@@ -180,7 +180,7 @@ def dashboard():
         latest_membership = membership_record[0] if membership_record and membership_record[0] else "Free"
 
         # Get user documents
-        cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
+        cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s AND document IS NOT NULL", (user_id,))
         documents = cur.fetchall()
 
         # Save membership in session
