@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Choose Membership Plan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f7;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        .plan {
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: border 0.3s;
+        }
+
+        .plan:hover {
+            border-color: #007bff;
+        }
+
+        .plan h3 {
+            margin: 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 7px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .disabled-btn {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .form-section {
+            display: none;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            width: 100%;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #aaa;
+        }
+    </style>
+    <script>
+        function showCardForm(plan) {
+            document.getElementById('card-form').style.display = 'block';
+            document.getElementById('selected_plan').value = plan;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Select Your Membership Plan</h2>
+
+        <!-- Free Plan -->
+        <div class="plan">
+            <h3>Free Plan - $0.00</h3>
+            <p>Basic access. Cannot generate documents.</p>
+            <button class="btn disabled-btn" disabled>Current Plan</button>
+        </div>
+
+        <!-- Student Plan -->
+        <div class="plan">
+            <h3>Student Plan - $9.99</h3>
+            <p>Access to advanced features and full document generation.</p>
+            <button class="btn" onclick="showCardForm('Student')">Choose Student Plan</button>
+        </div>
+
+        <!-- Professor Plan -->
+        <div class="plan">
+            <h3>Professor Plan - $19.99</h3>
+            <p>Premium access with all features and unlimited document generation.</p>
+            <button class="btn" onclick="showCardForm('Professor')">Choose Professor Plan</button>
+        </div>
+
+        <!-- Card Form -->
+        <div class="form-section" id="card-form">
+            <form method="POST" action="/payment_process">
+                <input type="hidden" name="selected_plan" id="selected_plan">
+
+                <h3>Enter Card Details</h3>
+                <label>Card Number:</label>
+                <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
+
+                <label>Expiry Date:</label>
+                <input type="text" name="expiry" placeholder="MM/YY" required>
+
+                <label>CVV:</label>
+                <input type="number" name="cvv" placeholder="123" required>
+
+                <br><br>
+                <button class="btn" type="submit">Pay Now</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
