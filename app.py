@@ -475,32 +475,53 @@ def payment_success():
 
 
 
-@app.route('/process_payment', methods=['POST'])
-def process_payment():
-    if 'user_id' not in session:
-        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+@app.route('/payment_process', methods=['POST'])
+def payment_process():
+    selected_plan = request.form.get('selected_plan')
+    if 'user_name' not in session or not selected_plan:
+        return redirect('/login')
 
-    card_number = request.form['cardNumber']
-    expiry = request.form['expiryDate']
-    cvv = request.form['cvv']
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    
-    if len(card_number) != 16 or len(cvv) != 3:
-        return jsonify({'status': 'error', 'message': 'Invalid card details'}), 400
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+        user = cur.fetchone()
+        user_id, email, profession = user
 
-    plan = session.get('selected_plan', 'free')
-    membership = 'Student' if plan == 'pro' else 'Professor'
-    update_user_membership(session['user_id'], membership)
+        # Only allow valid plan values
+        if selected_plan not in ['Student', 'Professor']:
+            return redirect('/membership')
 
-    return jsonify({'status': 'success', 'message': 'Payment complete'})
+        # Check for existing user document, if not exist, insert with membership
+        cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (user_id,))
+        existing_doc = cur.fetchone()
 
-def update_user_membership(user_id, membership):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("UPDATE userdocuments SET membership = %s WHERE user_id = %s", (membership, user_id))
-    conn.commit()
-    cur.close()
-    conn.close()
+        if existing_doc:
+            # Update latest document record with membership
+            cur.execute("""
+                UPDATE userdocuments 
+                SET membership = %s 
+                WHERE user_id = %s
+            """, (selected_plan, user_id))
+        else:
+            # Insert new document record with membership if none exists
+            cur.execute("""
+                INSERT INTO userdocuments (user_id, name, email, profession, membership)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (user_id, session['user_name'], email, profession, selected_plan))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # Update session
+        session['membership'] = selected_plan
+        return render_template("payment_success.html", selected_plan=selected_plan)
+
+    except Exception as e:
+        return f"Payment processing failed: {e}"
+
 
 
 
