@@ -329,24 +329,32 @@
       <input type="file" name="file" required>
       <button type="submit" class="btn btn-add">Add</button>
     </form>
+    
     <div class="file-list">
-      {% if documents %}
-        {% for document in documents %}
-            <li>
-                <a href="/view-document/{{ document[0] }}" target="_blank">
-                {{ document[1] }}
-                </a>
-                <a href="/delete-document/{{ document[0] }}" onclick="return confirm('Are you sure to delete this file?')">🗑</a>
-            </li>
-        {% endfor %}
-      {% else %}
-        <p>No files uploaded yet.</p>
+  {% if documents %}
+    {% set has_files = false %}
+    {% for document in documents %}
+      {% if document[1] %}
+        {% set has_files = true %}
+        <li>
+            <a href="/view-document/{{ document[0] }}" target="_blank">
+              {{ document[1] }}
+            </a>
+            <a href="/delete-document/{{ document[0] }}" onclick="return confirm('Are you sure to delete this file?')">🗑</a>
+        </li>
       {% endif %}
+    {% endfor %}
 
-     
-<p>Current Membership: {{ latest_membership }}</p>
+    {% if not has_files %}
+      <p>No files uploaded yet.</p>
+    {% endif %}
+  {% else %}
+    <p>No files uploaded yet.</p>
+  {% endif %}
 
-    </div>
+  <p>Current Membership: {{ latest_membership }}</p>
+</div>
+
     
     
     <form method="GET" action="/membership">
