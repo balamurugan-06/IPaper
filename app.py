@@ -422,6 +422,43 @@ def payment():
     return render_template('payment.html', plan=plan)
 
 
+@app.route('/payment_success', methods=['POST'])
+def payment_success():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    selected_plan = session.get('selected_plan')
+    name = session.get('user_name')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Get user_id
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
+        user_data = cur.fetchone()
+        if not user_data:
+            return "User not found"
+
+        user_id, email, profession = user_data
+
+        # Insert a new record with updated membership
+        cur.execute("""
+            INSERT INTO userdocuments (user_id, name, email, profession, membership)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, name, email, profession, selected_plan))
+        conn.commit()
+
+        session['membership'] = selected_plan
+
+        cur.close()
+        conn.close()
+
+        return redirect('/dashboard')
+    except Exception as e:
+        return f"Payment Error: {e}"
+
+
 @app.route('/process_payment', methods=['POST'])
 def process_payment():
     if 'user_id' not in session:
