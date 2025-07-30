@@ -189,6 +189,7 @@ def dashboard():
         cur.close()
         conn.close()
 
+        print("DEBUG: latest_membership =", latest_membership)
         return render_template(
             'dashboard.html',
             name=name,
