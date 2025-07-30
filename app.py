@@ -401,11 +401,12 @@ def delete_user(user_id):
     return redirect('/admin')
 
 
-@app.route('/membership', methods=['GET', 'POST'])
+@app.route('/membership')
 def membership():
-    selected_plan = request.form['plan']
-    session['selected_plan'] = selected_plan
-    return redirect('/payment')
+    if 'user_name' not in session:
+        return redirect('/login')
+    return render_template("payment.html")
+
 
 
 
