@@ -3,81 +3,94 @@
 <head>
     <title>Choose Membership Plan</title>
     <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #eef2f7;
-    padding: 40px;
-}
-.container {
-    max-width: 700px;
-    margin: auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-}
-.plan {
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    transition: border 0.3s;
-}
-.plan:hover {
-    border-color: #007bff;
-}
-.plan h3 {
-    margin: 0;
-}
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 7px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
-.btn:hover {
-    background-color: #0056b3;
-}
-.disabled-btn {
-    background-color: #6c757d;
-    cursor: not-allowed;
-}
+/* Add these styles to your existing style section */
 
-/* Popup Modal Styling */
-.form-section {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #ffffff;
-    padding: 30px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    border-radius: 10px;
-    z-index: 999;
-    width: 90%;
-    max-width: 400px;
-}
-.form-section::before {
-    content: "";
+/* Popup overlay */
+.popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
-    width: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: -1;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
 }
-input[type="text"],
-input[type="number"] {
-    padding: 10px;
-    width: 100%;
-    margin: 8px 0;
-    border-radius: 5px;
-    border: 1px solid #aaa;
+
+.popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
+
+/* Popup content */
+.popup-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.popup-overlay.active .popup-content {
+    transform: translateY(0);
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #777;
+    background: none;
+    border: none;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+/* Update the form-section to use popup styling */
+.form-section {
+    position: relative;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Update input styles for popup */
+.popup-content input[type="text"],
+.popup-content input[type="number"] {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.popup-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.popup-content h3 {
+    margin-top: 0;
+    color: #007bff;
+    text-align: center;
+}
+
+
 </style>
 
 </head>
@@ -106,34 +119,39 @@ input[type="number"] {
             <button class="btn" onclick="showCardForm('Professor')">Choose Professor Plan</button>
         </div>
 
-        <!-- Card Form -->
-        <div class="form-section" id="card-form">
+        <!-- Popup Overlay -->
+<div class="popup-overlay" id="popup-overlay">
+    <div class="popup-content">
+        <button class="close-btn" onclick="closePopup()">&times;</button>
+        <div class="form-section">
             <form method="POST" action="/payment_process">
                 <input type="hidden" name="selected_plan" id="selected_plan">
-
-                <h3>Enter Card Details</h3>
+                <h3>Enter Payment Details</h3>
                 <label>Card Number:</label>
                 <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
-
                 <label>Expiry Date:</label>
                 <input type="text" name="expiry" placeholder="MM/YY" required>
-
                 <label>CVV:</label>
                 <input type="number" name="cvv" placeholder="123" required>
-
                 <br><br>
                 <button class="btn" type="submit">Pay Now</button>
             </form>
         </div>
     </div>
-        <script>
-    function showCardForm(plan) {
-        document.getElementById('card-form').style.display = 'block';
-        document.getElementById('selected_plan').value = plan;
-        document.body.classList.add('show-popup');
-    }
-</script>
+</div>
+    </div>
+       <script>
+function showCardForm(plan) {
+    document.getElementById('selected_plan').value = plan;
+    document.getElementById('popup-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling when popup is open
+}
 
+function closePopup() {
+    document.getElementById('popup-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto'; // Re-enable scrolling
+}
+</script>
 
 </body>
 </html>
