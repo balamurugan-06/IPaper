@@ -173,11 +173,11 @@ def dashboard():
         # Get latest membership
         cur.execute("""
             SELECT membership FROM userdocuments 
-            WHERE user_id = %s 
+            WHERE user_id = %s AND membership IS NOT NULL
             ORDER BY id DESC LIMIT 1
         """, (user_id,))
         membership_record = cur.fetchone()
-        latest_membership = membership_record[0] if membership_record else "Free"
+        latest_membership = membership_record[0] if membership_record and membership_record[0] else "Free"
 
         # Get user documents
         cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
@@ -205,26 +205,42 @@ def upload_document():
     if 'user_name' not in session:
         return redirect('/login')
 
-    file = request.files['file']
-    if file and allowed_file(file.filename):
-        file_data = file.read()
-        filename = secure_filename(file.filename)
+    name = session['user_name']
+    file = request.files['document']
 
+    if file.filename == '':
+        flash('No file selected')
+        return redirect('/dashboard')
+
+    try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
-        user = cur.fetchone()
-        user_id, email, profession = user
 
+        # Get user ID
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
+        user_data = cur.fetchone()
+
+        if not user_data:
+            flash("User not found")
+            return redirect('/dashboard')
+
+        user_id, email, profession = user_data
+
+        # Store file (without setting membership)
         cur.execute("""
-            INSERT INTO userdocuments (user_id, name, email, profession, document, file_data)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, session['user_name'], email, profession, filename, psycopg2.Binary(file_data)))
+            INSERT INTO userdocuments (user_id, name, email, profession, document)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, name, email, profession, file.read()))  # Or file.filename if saving path
+
         conn.commit()
         cur.close()
         conn.close()
 
-    return redirect('/dashboard')
+        flash("Document uploaded successfully")
+        return redirect('/dashboard')
+
+    except Exception as e:
+        return f"Error uploading: {e}"
 
 
 
@@ -434,21 +450,22 @@ def payment_success():
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Get user_id
+        # Get user ID
         cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
         user_data = cur.fetchone()
+
         if not user_data:
             return "User not found"
 
         user_id, email, profession = user_data
 
-        # Insert a new record with updated membership
+        # Insert membership (no file upload)
         cur.execute("""
             INSERT INTO userdocuments (user_id, name, email, profession, membership)
             VALUES (%s, %s, %s, %s, %s)
         """, (user_id, name, email, profession, selected_plan))
-        conn.commit()
 
+        conn.commit()
         session['membership'] = selected_plan
 
         cur.close()
@@ -456,7 +473,8 @@ def payment_success():
 
         return redirect('/dashboard')
     except Exception as e:
-        return f"Payment Error: {e}"
+        return f"Error during payment: {e}"
+
 
 
 @app.route('/process_payment', methods=['POST'])
