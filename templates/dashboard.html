@@ -349,13 +349,20 @@
     <a href="/logout" class="logout-btn">Logout</a>
   </div>
   
- <div style="position: absolute; top: 10px; right: 10px;">
-  {% if latest_membership != "Free" %}
-        <a href="/generate" class="btn btn-primary">Generate</a>
+ <div style="text-align: right; margin-bottom: 10px;">
+    {% if latest_membership == "Student" or latest_membership == "Professor" %}
+        <button id="generateBtn" class="btn btn-success">Generate</button>
     {% else %}
-        <button class="btn btn-secondary" onclick="alert('Only paid users can access this feature.')" disabled>Generate</button>
+        <button id="generateBtn" class="btn btn-secondary" onclick="showUpgradePopup()" disabled>Generate</button>
     {% endif %}
+</div>
 
+  <div id="upgradePopup" style="display:none;">
+    <div style="padding:20px; background-color: white; border: 1px solid #ccc; border-radius: 10px;">
+        <h4>Paid Members Only</h4>
+        <p>This feature is only accessible to Student or Professor members.</p>
+        <button onclick="closePopup()" class="btn btn-primary">Okay</button>
+    </div>
 </div>
 
 
@@ -370,35 +377,14 @@
   </div>
 
   <script>
+    function showUpgradePopup() {
+        alert("Paid members only. Please purchase a plan.");
+    }
 
-  
-  function showPopup() {
-    alert("Only paid users (Student or Professor plans) can access this feature.");
-  }
-
-
-document.addEventListener('DOMContentLoaded', function () {
-  const btn = document.getElementById('generateBtn');
-
-  {% if latest_membership == 'Free' or latest_membership == None %}
-  if (btn) {
-    btn.disabled = true;
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      alert("Only paid users can use this feature. Please upgrade your membership.");
-    });
-  }
-  {% endif %}
-});
-
-  
-function showPopup() {
-    alert("Only paid users (Student or Professor) can access this feature.");
-}
-
-
+    function closePopup() {
+        document.getElementById("upgradePopup").style.display = "none";
+    }
 </script>
-
 
 
 </body>
