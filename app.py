@@ -401,7 +401,7 @@ def delete_user(user_id):
     return redirect('/admin')
 
 
-@app.route('/membership', methods=['POST'])
+@app.route('/membership', methods=['GET', 'POST'])
 def membership():
     selected_plan = request.form['plan']
     session['selected_plan'] = selected_plan
