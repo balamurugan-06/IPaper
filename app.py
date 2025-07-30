@@ -487,6 +487,7 @@ def payment_process():
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # Get user details
         cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
         user = cur.fetchone()
         user_id, email, profession = user
@@ -495,19 +496,29 @@ def payment_process():
         if selected_plan not in ['Student', 'Professor']:
             return redirect('/membership')
 
-        # Check for existing user document, if not exist, insert with membership
+        # Fetch current membership from userdocuments
+        cur.execute("SELECT membership FROM userdocuments WHERE user_id = %s ORDER BY id DESC LIMIT 1", (user_id,))
+        existing_membership_result = cur.fetchone()
+        current_membership = existing_membership_result[0] if existing_membership_result else 'Free'
+
+        # ❌ Prevent Professor from downgrading to Student
+        if current_membership == 'Professor' and selected_plan == 'Student':
+            flash("You are already on the Professor plan. Downgrade to Student is not allowed.")
+            return redirect('/membership')
+
+        # Check for existing document record
         cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (user_id,))
         existing_doc = cur.fetchone()
 
         if existing_doc:
-            # Update latest document record with membership
+            # Update membership
             cur.execute("""
                 UPDATE userdocuments 
                 SET membership = %s 
                 WHERE user_id = %s
             """, (selected_plan, user_id))
         else:
-            # Insert new document record with membership if none exists
+            # Insert new membership record
             cur.execute("""
                 INSERT INTO userdocuments (user_id, name, email, profession, membership)
                 VALUES (%s, %s, %s, %s, %s)
@@ -523,6 +534,7 @@ def payment_process():
 
     except Exception as e:
         return f"Payment processing failed: {e}"
+
 
 
 
