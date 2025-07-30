@@ -160,26 +160,45 @@ def dashboard():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+
+        # Get user ID and profession
         cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
         user = cur.fetchone()
+        if not user:
+            flash("User not found")
+            return redirect('/login')
+
         user_id, profession = user
 
+        # Get latest membership
         cur.execute("""
-        SELECT membership FROM userdocuments 
-        WHERE user_id = %s 
-        ORDER BY id DESC LIMIT 1
+            SELECT membership FROM userdocuments 
+            WHERE user_id = %s 
+            ORDER BY id DESC LIMIT 1
         """, (user_id,))
         membership_record = cur.fetchone()
         latest_membership = membership_record[0] if membership_record else "Free"
 
+        # Get user documents
         cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
         documents = cur.fetchall()
+
+        # Save membership in session
+        session['membership'] = latest_membership
+
         cur.close()
         conn.close()
-        session['membership'] = latest_membership
-        return render_template('dashboard.html', name=name, profession=profession, documents=documents, latest_membership=latest_membership)
+
+        return render_template(
+            'dashboard.html',
+            name=name,
+            profession=profession,
+            documents=documents,
+            latest_membership=latest_membership
+        )
     except Exception as e:
         return f"Dashboard Error: {e}"
+
 
 @app.route('/upload-document', methods=['POST'])
 def upload_document():
