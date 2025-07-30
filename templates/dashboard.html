@@ -352,10 +352,11 @@
   
  <div style="text-align: right; margin-bottom: 10px;">
     {% if latest_membership == "Student" or latest_membership == "Professor" %}
-        <button id="generateBtn" class="btn btn-success">Generate</button>
-    {% else %}
-        <button id="generateBtn" class="btn btn-secondary" onclick="showUpgradePopup()" disabled>Generate</button>
-    {% endif %}
+    <button id="generateBtn" class="btn btn-success">Generate</button>
+{% else %}
+    <button id="generateBtn" class="btn btn-secondary" onclick="showUpgradePopup()" disabled style="cursor: not-allowed;">Generate</button>
+{% endif %}
+
 </div>
 
   <div id="upgradePopup" style="display:none;">
