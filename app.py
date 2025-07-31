@@ -582,12 +582,14 @@ def pay():
     return render_template('success.html', membership=membership_plan)
     return redirect('/dashboard')
 
-
-
-
 @app.context_processor
 def inject_membership():
     return {'membership': session.get('membership', 'Free')}
+
+@app.route('/admin/templates')
+def manage_templates():
+    return render_template('template_management.html') 
+
 
 
 if __name__ == '__main__':
