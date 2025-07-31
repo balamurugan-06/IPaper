@@ -586,10 +586,71 @@ def pay():
 def inject_membership():
     return {'membership': session.get('membership', 'Free')}
 
+
 @app.route('/admin/templates')
 def manage_templates():
     return render_template('template_management.html') 
 
+@app.route('/template_management')
+def template_management():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM UserTemplate ORDER BY id DESC")
+        templates = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('template_management.html', templates=templates)
+    except Exception as e:
+        return f"Error loading templates: {e}"
+
+
+
+@app.route('/create_template', methods=['POST'])
+def create_template():
+    name = request.form.get('template_name')
+    prompt = request.form.get('template_prompt')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO UserTemplate (template_name, template_prompt) VALUES (%s, %s)", (name, prompt))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect('/template_management')
+    except Exception as e:
+        return f"Error creating template: {e}"
+
+
+@app.route('/edit_template/<int:id>', methods=['POST'])
+def edit_template(id):
+    name = request.form.get('edit_template_name')
+    prompt = request.form.get('edit_template_prompt')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE UserTemplate SET template_name = %s, template_prompt = %s WHERE id = %s", (name, prompt, id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect('/template_management')
+    except Exception as e:
+        return f"Error editing template: {e}"
+
+
+
+@app.route('/delete_template/<int:id>', methods=['POST'])
+def delete_template(id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM UserTemplate WHERE id = %s", (id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect('/template_management')
+    except Exception as e:
+        return f"Error deleting template: {e}"
 
 
 if __name__ == '__main__':
