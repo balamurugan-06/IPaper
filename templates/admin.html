@@ -60,6 +60,21 @@
       color: red;
       text-decoration: none;
     }
+
+    .admin-button {
+  padding: 20px 30px;
+  border: 1px solid white;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  text-decoration: none; /* For anchor tags */
+  display: inline-block;  /* Makes anchor look like button */
+}
+
   </style>
 </head>
 <body>
@@ -68,7 +83,8 @@
 
   <div class="button-container">
      <a href="/admin/users"><button class="admin-button">Manage User Account</button></a>
-    <button class="admin-button">Upload Summary Template</button>
+    <a href="/admin/templates"><button class="admin-button">Upload Summary Template</button></a>
+
   </div>
 
   <div id="userTable" class="hidden">
