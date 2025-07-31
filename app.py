@@ -169,6 +169,7 @@ def dashboard():
             return redirect('/login')
 
         user_id, profession = user
+        session['profession'] = profession
 
         # Get latest membership
         cur.execute("""
@@ -414,16 +415,23 @@ def membership():
 
 @app.route('/select_plan', methods=['POST'])
 def select_plan():
+    if 'user_name' not in session:
+        return redirect('/login')
+
     plan = request.form.get('plan')
     if not plan:
         return "No plan selected", 400
 
-    # Stop Professor from downgrading
-    if session.get('membership') == 'Professor' and plan == 'Student':
-        return "Professor cannot downgrade to Student", 403
+    profession = session.get('profession', '')
+    
+    # Block Professors from downgrading
+    if profession == 'Professor' and plan == 'Student':
+        flash("As a Professor, you cannot subscribe to the Student plan.", "error")
+        return redirect('/membership')
 
     session['selected_plan'] = plan
     return redirect('/payment')
+
 
 
 
@@ -502,8 +510,8 @@ def payment_process():
         current_membership = existing_membership_result[0] if existing_membership_result else 'Free'
 
         # ❌ Prevent Professor from downgrading to Student
-        if current_membership == 'Professor' and selected_plan == 'Student':
-            flash("You are already on the Professor plan. Downgrade to Student is not allowed.")
+        if profession == 'Professor' and selected_plan == 'Student':
+            flash("Professors cannot downgrade to the Student plan.", "error")
             return redirect('/membership')
 
         # Check for existing document record
