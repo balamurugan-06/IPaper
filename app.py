@@ -589,10 +589,6 @@ def inject_membership():
 
 @app.route('/admin/templates')
 def manage_templates():
-    return render_template('template_management.html') 
-
-@app.route('/template_management')
-def template_management():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -617,7 +613,7 @@ def create_template():
         conn.commit()
         cur.close()
         conn.close()
-        return redirect('/template_management')
+        return redirect('/admin/templates')
     except Exception as e:
         return f"Error creating template: {e}"
 
@@ -633,7 +629,7 @@ def edit_template(id):
         conn.commit()
         cur.close()
         conn.close()
-        return redirect('/template_management')
+        return redirect('/admin/templates')
     except Exception as e:
         return f"Error editing template: {e}"
 
@@ -648,12 +644,13 @@ def delete_template(id):
         conn.commit()
         cur.close()
         conn.close()
-        return redirect('/template_management')
+        return redirect('/admin/templates')
     except Exception as e:
         return f"Error deleting template: {e}"
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
