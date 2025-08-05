@@ -358,7 +358,7 @@ def admin_login():
             session['admin_logged_in'] = True
             return redirect('/admin')
         else:
-            flash("Invalid admin credentials", "error")
+            error = 'Invalid username or password.'
             return render_template('admin_login.html')
     return render_template('admin_login.html')
 
@@ -651,6 +651,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
