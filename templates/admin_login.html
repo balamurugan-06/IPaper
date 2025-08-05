@@ -8,6 +8,9 @@
   <div class="container">
     <h2>Admin Login</h2>
     <form method="POST">
+      {% if error %}
+        <p style="color: red;">{{ error }}</p>
+      {% endif %}
       <label for="username">Username</label>
       <input type="text" name="username" required>
 
@@ -24,3 +27,4 @@
   </div>
 </body>
 </html>
+
