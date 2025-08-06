@@ -486,6 +486,8 @@ def payment_success():
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
     selected_plan = request.form.get('selected_plan')
+    print("Selected plan:", selected_plan)  
+    print("Session user_name:", session.get('user_name'))
     if 'user_name' not in session or not selected_plan:
         return redirect('/login')
 
@@ -649,6 +651,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
