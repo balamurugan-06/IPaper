@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Choose Membership Plan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,11 +32,6 @@
             width: 30%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
         .plan-title {
             font-size: 22px;
@@ -72,26 +68,15 @@
             font-size: 16px;
             margin-top: 20px;
             width: 80%;
-            transition: background-color 0.3s ease;
-        }
-        .btn:hover {
-            background-color: #0056b3;
         }
         .disabled-btn {
             background-color: #6c757d;
             cursor: not-allowed;
         }
-        
-        /* Improved popup styles */
-        .form-section {
-            display: none;
-        }
+
         .popup-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
             display: flex;
             justify-content: center;
@@ -124,14 +109,7 @@
             background: none;
             border: none;
         }
-        .close-btn:hover {
-            color: #333;
-        }
-        .popup-content .form-section {
-            display: block;
-        }
-        
-        /* Payment form styles */
+
         .payment-form {
             margin-top: 20px;
         }
@@ -139,12 +117,14 @@
             margin-bottom: 20px;
             color: #2c3e50;
             text-align: center;
+            font-size: 24px;
         }
         .payment-form label {
             display: block;
             margin: 15px 0 5px;
             color: #555;
             font-weight: bold;
+            font-size: 14px;
         }
         .payment-form input {
             width: 100%;
@@ -153,30 +133,58 @@
             border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
+            margin-bottom: 10px;
         }
-        .payment-form input:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-        }
-        .payment-form .btn {
-            width: 100%;
-            margin-top: 25px;
-        }
+
         .form-row {
             display: flex;
             gap: 15px;
         }
-        .form-row .form-group {
+        .form-group {
             flex: 1;
+        }
+
+        .card-icons-wrapper {
+            position: relative;
+        }
+
+        .card-icons-wrapper input {
+            padding-right: 160px;
+        }
+
+        .card-icons-right {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-icons-right img {
+            height: 24px;
+            width: auto;
+        }
+
+        .total-display {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
         }
     </style>
     <script>
         function showCardForm(plan) {
             document.getElementById('selected_plan').value = plan;
+            document.getElementById('total-amount').textContent =
+                plan === 'Student' ? 'Total: $9.99/month' : 'Total: $19.99/month';
             document.getElementById('popup-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
+
         function closePopup() {
             document.getElementById('popup-overlay').classList.remove('active');
             document.body.style.overflow = 'auto';
@@ -184,74 +192,90 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Choose Your Plan</h1>
+<div class="container">
+    <h1>Choose Your Plan</h1>
 
-        <div class="plans-container">
-            <!-- Free Plan -->
-            <div class="plan-card">
-                <div class="plan-title">Free User $0/month</div>
-                <div class="plan-features">
-                    <p>Basic features</p>
-                    <p>Limited access</p>
-                    <p>Community support</p>
-                </div>
-                <button class="btn disabled-btn" disabled>Current Plan</button>
+    <div class="plans-container">
+        <div class="plan-card">
+            <div class="plan-title">Free User $0/month</div>
+            <div class="plan-features">
+                <p>Basic features</p>
+                <p>Limited access</p>
+                <p>Community support</p>
             </div>
-
-            <!-- Student Plan -->
-            <div class="plan-card">
-                <div class="plan-title">Student User $9.99/month</div>
-                <div class="plan-features">
-                    <p>Access to advanced features</p>
-                    <p>Full document generation</p>
-                    <p>Priority support</p>
-                </div>
-                <button class="btn" onclick="showCardForm('Student')">Select Plan</button>
-            </div>
-
-            <!-- Professor Plan -->
-            <div class="plan-card">
-                <div class="plan-title">Professor User $19.99/month</div>
-                <div class="plan-features">
-                    <p>Premium access with all features</p>
-                    <p>Unlimited document generation</p>
-                    <p>24/7 dedicated support</p>
-                </div>
-                <button class="btn" onclick="showCardForm('Professor')">Select Plan</button>
-            </div>
+            <button class="btn disabled-btn" disabled>Current Plan</button>
         </div>
 
-        <!-- Popup with payment form -->
-        <div class="popup-overlay" id="popup-overlay">
-            <div class="popup-content">
-                <button class="close-btn" onclick="closePopup()">&times;</button>
-                <div class="form-section">
-                    <form method="POST" action="/payment_process" class="payment-form">
-                        <input type="hidden" name="selected_plan" id="selected_plan">
-                        <h3>Enter Payment Details</h3>
-                        
-                        <div class="form-group">
-                            <label for="card_number">Card Number:</label>
-                            <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expiry">Expiry Date:</label>
-                                <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="cvv">CVV:</label>
-                                <input type="number" id="cvv" name="cvv" placeholder="123" required>
-                            </div>
-                        </div>
-                        
-                        <button class="btn" type="submit">Pay Now</button>
-                    </form>
-                </div>
+        <div class="plan-card">
+            <div class="plan-title">Pro User $9.99/month</div>
+            <div class="plan-features">
+                <p>Access to advanced features</p>
+                <p>Full document generation</p>
+                <p>Priority support</p>
             </div>
+            <button class="btn" onclick="showCardForm('Student')">Select Plan</button>
+        </div>
+
+        <div class="plan-card">
+            <div class="plan-title">Ultra User $19.99/month</div>
+            <div class="plan-features">
+                <p>Premium access with all features</p>
+                <p>Unlimited document generation</p>
+                <p>24/7 dedicated support</p>
+            </div>
+            <button class="btn" onclick="showCardForm('Professor')">Select Plan</button>
         </div>
     </div>
+
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closePopup()">&times;</button>
+            <form method="POST" action="/payment_process" class="payment-form">
+                <input type="hidden" name="selected_plan" id="selected_plan">
+                <h3>Enter Payment Details</h3>
+
+                <div class="total-display" id="total-amount">Total: $0/month</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First name</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last name</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                </div>
+
+                <div class="form-group card-icons-wrapper">
+                    <label for="card_number">Card number</label>
+                    <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
+                    <div class="card-icons-right">
+                        <img src="https://img.icons8.com/color/48/visa.png" alt="visa">
+                        <img src="https://img.icons8.com/color/48/mastercard.png" alt="mastercard">
+                        <img src="https://img.icons8.com/color/48/amex.png" alt="amex">
+                        <img src="https://img.icons8.com/color/48/discover.png" alt="discover">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry">MM/YY</label>
+                        <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+                    </div>
+                    <div class="form-group card-icons-wrapper">
+                        <label for="cvv">CVV</label>
+                        <input type="number" id="cvv" name="cvv" placeholder="123" required>
+                        <div class="card-icons-right">
+                            <img src="https://img.icons8.com/ios-filled/50/lock-2.png" alt="cvc">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" type="submit">SUBMIT PAYMENT</button>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>
