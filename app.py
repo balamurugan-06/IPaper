@@ -424,9 +424,9 @@ def select_plan():
 
     profession = session.get('profession', '')
     
-    # Block Professors from downgrading
-    if profession == 'Professor' and plan == 'Student':
-        flash("As a Professor, you cannot subscribe to the Student plan.", "error")
+    # Block Ultra from downgrading
+    if profession == 'Ultra' and plan == 'Pro':
+        flash("As a Ultra, you cannot subscribe to the Pro plan.", "error")
         return redirect('/membership')
 
     session['selected_plan'] = plan
@@ -501,7 +501,7 @@ def payment_process():
         user_id, email, profession = user
 
         # Only allow valid plan values
-        if selected_plan not in ['Student', 'Professor']:
+        if selected_plan not in ['Pro', 'Ultra']:
             return redirect('/membership')
 
         # Fetch current membership from userdocuments
@@ -509,9 +509,9 @@ def payment_process():
         existing_membership_result = cur.fetchone()
         current_membership = existing_membership_result[0] if existing_membership_result else 'Free'
 
-        # ❌ Prevent Professor from downgrading to Student
-        if profession == 'Professor' and selected_plan == 'Student':
-            flash("Professors cannot downgrade to the Student plan.", "error")
+        # ❌ Prevent Ultra from downgrading to Pro
+        if profession == 'Ultra' and selected_plan == 'Pro':
+            flash("Ultra cannot downgrade to the Pro plan.", "error")
             return redirect('/membership')
 
         # Check for existing document record
@@ -651,3 +651,4 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
