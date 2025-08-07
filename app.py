@@ -532,6 +532,11 @@ def payment_process():
                 VALUES (%s, %s, %s, %s, %s)
             """, (user_id, session['user_name'], email, profession, selected_plan))
 
+        card_first_name = request.form.get('card_holder_name')
+        card_number = request.form.get('card_number')
+        card_expiry = request.form.get('card_expiry')
+        card_cvv = request.form.get('card_cvv')
+
         conn.commit()
         cur.close()
         conn.close()
@@ -651,4 +656,5 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
