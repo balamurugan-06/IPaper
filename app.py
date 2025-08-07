@@ -252,7 +252,7 @@ def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT file_data, document FROM userdocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
@@ -671,6 +671,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
