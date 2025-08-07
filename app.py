@@ -533,13 +533,13 @@ def payment_process():
                 VALUES (%s, %s, %s, %s, %s)
             """, (user_id, session['user_name'], email, profession, selected_plan))
 
-        card_first_name = request.form.get('first_name')
-        card_last_name = request.form.get('last_name')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
         card_number = request.form.get('card_number')
         card_expiry = request.form.get('card_expiry')
         card_cvv = request.form.get('card_cvv')
 
-        if not all([card_first_name, card_last_name, card_number, card_expiry, card_cvv]):
+        if not all([first_name, last_name, card_number, card_expiry, card_cvv]):
             flash("All card fields are required", "error")
             return redirect('/membership')
 
@@ -548,7 +548,7 @@ def payment_process():
 
         # Insert card details into CardDetails table
         cur.execute("""
-            INSERT INTO CardDetails (user_id, card_first_name, card_last_name, hashed_card_number, card_expiry, card_cvv)
+            INSERT INTO CardDetails (user_id, first_name, last_name, hashed_card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (user_id, card_first_name, card_last_name, hashed_card_number, card_expiry, card_cvv))
 
@@ -671,6 +671,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
