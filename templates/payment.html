@@ -180,7 +180,7 @@
         function showCardForm(plan) {
             document.getElementById('selected_plan').value = plan;
             document.getElementById('total-amount').textContent =
-                plan === 'Student' ? 'Total: $9.99/month' : 'Total: $19.99/month';
+                plan === 'pro' ? 'Total: $9.99/month' : 'Total: $19.99/month';
             document.getElementById('popup-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -213,7 +213,7 @@
                 <p>Full document generation</p>
                 <p>Priority support</p>
             </div>
-            <button class="btn" onclick="showCardForm('Student')">Select Plan</button>
+            <button class="btn" onclick="showCardForm('Pro')">Select Plan</button>
         </div>
 
         <div class="plan-card">
@@ -223,7 +223,7 @@
                 <p>Unlimited document generation</p>
                 <p>24/7 dedicated support</p>
             </div>
-            <button class="btn" onclick="showCardForm('Professor')">Select Plan</button>
+            <button class="btn" onclick="showCardForm('Ultra')">Select Plan</button>
         </div>
     </div>
 
@@ -279,3 +279,4 @@
 </div>
 </body>
 </html>
+
