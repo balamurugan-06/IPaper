@@ -208,42 +208,40 @@ def upload_document():
     if 'user_name' not in session:
         return redirect('/login')
 
-    name = session['user_name']
-    file = request.files['file']
-
-    if file.filename == '':
-        flash('No file selected')
-        return redirect('/dashboard')
-
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        # Get user ID
-        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
-        user_data = cur.fetchone()
+            # Create uploads folder if it doesn't exist
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
 
-        if not user_data:
-            flash("User not found")
-            return redirect('/dashboard')
+            file.save(path)
 
-        user_id, email, profession = user_data
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+            user = cur.fetchone()
 
-        # Store file (without setting membership)
-        cur.execute("""
-            INSERT INTO userdocuments (user_id, name, email, profession, document)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, name, email, profession, file.read()))  # Or file.filename if saving path
+            if not user:
+                raise Exception("User not found in database.")
 
-        conn.commit()
-        cur.close()
-        conn.close()
+            user_id, email, profession = user
 
-        flash("Document uploaded successfully")
+            cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
+                        (user_id, session['user_name'], email, profession, filename))
+            conn.commit()
+            cur.close()
+            conn.close()
+
         return redirect('/dashboard')
 
     except Exception as e:
-        return f"Error uploading: {e}"
+        print(f"UPLOAD ERROR: {e}")  # ✅ Print actual error
+        flash(f"Upload failed: {e}", "error")
+        return redirect('/dashboard')
 
 
 
@@ -671,6 +669,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
