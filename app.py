@@ -538,7 +538,7 @@ def payment_process():
         card_expiry = request.form.get('card_expiry')
         card_cvv = request.form.get('card_cvv')
 
-        if not all([card_holder_name, card_number, card_expiry, card_cvv]):
+        if not all([card_first_name, card_last_name, card_number, card_expiry, card_cvv]):
             flash("All card fields are required", "error")
             return redirect('/membership')
 
@@ -549,7 +549,7 @@ def payment_process():
         cur.execute("""
             INSERT INTO CardDetails (user_id, card_first_name, card_last_name, hashed_card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, card_holder_name, hashed_card_number, card_expiry, card_cvv))
+        """, (user_id, card_first_name, card_last_name, hashed_card_number, card_expiry, card_cvv))
 
         conn.commit()
         cur.close()
@@ -670,6 +670,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
