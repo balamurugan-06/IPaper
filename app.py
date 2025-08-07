@@ -209,7 +209,13 @@ def upload_document():
         return redirect('/login')
 
     name = session['user_name']
-    file = request.files['document']
+
+    if 'file' not in request.files:
+        flash('No file part in the request')
+        return redirect('/dashboard')
+
+    
+    file = request.files['file']
 
     if file.filename == '':
         flash('No file selected')
@@ -671,6 +677,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
