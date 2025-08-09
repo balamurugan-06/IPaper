@@ -250,7 +250,7 @@ def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT document FROM userdocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT document, filename FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
@@ -262,7 +262,7 @@ def view_document(doc_id):
 
             response = make_response(pdf_bytes)
             response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename=filename)
+            response.headers.set('Content-Disposition', f'inline; filename="{filename}"')
             return response
         else:
             return "Document not found", 404
@@ -669,6 +669,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
