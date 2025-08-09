@@ -211,6 +211,7 @@ def upload_document():
     try:
         file = request.files['file']
         if file and allowed_file(file.filename):
+            file_data = file.read()
             filename = secure_filename(file.filename)
             path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
@@ -231,7 +232,7 @@ def upload_document():
             user_id, email, profession = user
 
             cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
-                        (user_id, session['user_name'], email, profession, filename))
+                        (user_id, session['user_name'], email, profession, psycopg2.Binary(file_data)))
             conn.commit()
             cur.close()
             conn.close()
@@ -250,13 +251,13 @@ def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT file_data, document FROM userdocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
-        if result:
-            file_data, filename = result
+        if result and result[0]:
+            file_data = result[0]
             
             pdf_bytes = bytes(file_data)
 
@@ -669,6 +670,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
