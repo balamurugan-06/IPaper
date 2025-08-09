@@ -213,14 +213,7 @@ def upload_document():
         if file and allowed_file(file.filename):
             file_data = file.read()
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            # Create uploads folder if it doesn't exist
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-
-            file.save(path)
-
+            
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
@@ -264,13 +257,14 @@ def view_document(doc_id):
 
             response = make_response(file_data)
             response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename=filename)
+            response.headers.set('Content-Disposition', 'inline', filename='document.pdf')
             return response
         else:
             return "Document not found", 404
 
     except Exception as e:
         return f"Error displaying document: {e}", 500
+
 
 
 
@@ -671,6 +665,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
