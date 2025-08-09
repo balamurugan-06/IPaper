@@ -264,7 +264,7 @@ def view_document(doc_id):
 
             response = make_response(file_data)
             response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename='document.pdf')
+            response.headers.set('Content-Disposition', 'inline', filename=filename)
             return response
         else:
             return "Document not found", 404
@@ -671,6 +671,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
