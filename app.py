@@ -238,33 +238,30 @@ def upload_document():
         return redirect('/dashboard')
 
 
-
 @app.route('/view-document/<int:doc_id>')
 def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT document FROM userdocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT file_data, document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
-        if result and result[0]:
-            file_data = result[0]
+        if result:
+            file_data, filename = result
             
-            if isinstance(file_data, memoryview):
-                file_data = file_data.tobytes()
+            pdf_bytes = bytes(file_data)
 
-            response = make_response(file_data)
+            response = make_response(pdf_bytes)
             response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename='document.pdf')
+            response.headers.set('Content-Disposition', 'inline', filename=filename)
             return response
         else:
             return "Document not found", 404
 
     except Exception as e:
         return f"Error displaying document: {e}", 500
-
 
 
 
@@ -665,6 +662,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
