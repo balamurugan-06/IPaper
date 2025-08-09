@@ -548,7 +548,7 @@ def payment_process():
         cur.execute("""
             INSERT INTO CardDetails (user_id, first_name, last_name, hashed_card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, card_first_name, card_last_name, hashed_card_number, card_expiry, card_cvv))
+        """, (user_id, first_name, last_name, hashed_card_number, card_expiry, card_cvv))
 
         conn.commit()
         cur.close()
@@ -669,6 +669,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
