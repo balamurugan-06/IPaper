@@ -211,9 +211,9 @@ def upload_document():
     try:
         file = request.files['file']
         if file and allowed_file(file.filename):
-            file_data = file.read()
-            filename = secure_filename(file.filename)
-            
+            file_data = file.read()  # Binary PDF content
+            filename = secure_filename(file.filename)  # Store name in `document` column
+
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
@@ -224,8 +224,12 @@ def upload_document():
 
             user_id, email, profession = user
 
-            cur.execute("INSERT INTO UserDocuments (user_id, name, email, profession, document) VALUES (%s, %s, %s, %s, %s)",
-                        (user_id, session['user_name'], email, profession, psycopg2.Binary(file_data)))
+            # Store filename in `document` and bytes in `file_data`
+            cur.execute("""
+                INSERT INTO UserDocuments (user_id, name, email, profession, document, file_data)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, session['user_name'], email, profession, filename, psycopg2.Binary(file_data)))
+            
             conn.commit()
             cur.close()
             conn.close()
@@ -233,9 +237,10 @@ def upload_document():
         return redirect('/dashboard')
 
     except Exception as e:
-        print(f"UPLOAD ERROR: {e}")  # ✅ Print actual error
+        print(f"UPLOAD ERROR: {e}")
         flash(f"Upload failed: {e}", "error")
         return redirect('/dashboard')
+
 
 
 @app.route('/view-document/<int:doc_id>')
@@ -248,20 +253,23 @@ def view_document(doc_id):
         cur.close()
         conn.close()
 
-        if result:
+        if result and result[0]:
             file_data, filename = result
-            
-            pdf_bytes = bytes(file_data)
 
-            response = make_response(pdf_bytes)
+            # Convert from memoryview to bytes if needed
+            if isinstance(file_data, memoryview):
+                file_data = file_data.tobytes()
+
+            response = make_response(file_data)
             response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename=filename)
+            response.headers.set('Content-Disposition', 'inline', filename=filename or "document.pdf")
             return response
         else:
             return "Document not found", 404
 
     except Exception as e:
         return f"Error displaying document: {e}", 500
+
 
 
 
@@ -662,6 +670,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
