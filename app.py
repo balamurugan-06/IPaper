@@ -537,20 +537,29 @@ def payment_process():
         card_number = request.form.get('card_number')
         card_expiry = request.form.get('card_expiry')
         card_cvv = request.form.get('card_cvv')
+        selected_plan = request.form.get('selected_plan')
 
         if not all([first_name, last_name, card_number, card_expiry, card_cvv]):
             flash("All card fields are required", "error")
             return redirect('/membership')
 
-        # Hash card number
+        # Hash card number for security
         hashed_card_number = bcrypt.hashpw(card_number.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # Insert card details into CardDetails table
-        cur.execute("""
-            INSERT INTO CardDetails (user_id, first_name, last_name, hashed_card_number, card_expiry, card_cvv)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (user_id, first_name, last_name, hashed_card_number, card_expiry, card_cvv))
+        conn = get_db_connection()
+        cur = conn.cursor()
 
+        cur.execute("""
+            INSERT INTO CardDetails (user_id, first_name, last_name, card_number, card_expiry, card_cvv)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            session['user_id'],
+            first_name,
+            last_name,
+            hashed_card_number,
+            card_expiry,
+            card_cvv
+        ))
         conn.commit()
         cur.close()
         conn.close()
@@ -670,6 +679,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
