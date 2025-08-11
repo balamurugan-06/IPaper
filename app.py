@@ -12,7 +12,8 @@ from flask_session import Session
 import bcrypt
 import os
 import re
-
+import psycopg2
+from psycopg2 import sql
 
 load_dotenv()
 
@@ -698,6 +699,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
