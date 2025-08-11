@@ -208,33 +208,38 @@ def upload_document():
     if 'user_name' not in session:
         return redirect('/login')
 
-    try:
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            file_data = file.read()  # Binary PDF content
-            filename = secure_filename(file.filename)  # Store name in `document` column
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_data = file.read()
 
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
-            user = cur.fetchone()
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-            if not user:
-                raise Exception("User not found in database.")
+        # Get user info
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (session['user_name'],))
+        user = cur.fetchone()
+        if not user:
+            raise Exception("User not found")
+        user_id, email, profession = user
 
-            user_id, email, profession = user
+        # Create large object (LOB)
+        lo_oid = conn.lobject(0, 'wb').oid  # create new large object
+        lo = conn.lobject(lo_oid, 'wb')
+        lo.write(file_data)
+        lo.close()
 
-            # Store filename in `document` and bytes in `file_data`
-            cur.execute("""
-                INSERT INTO UserDocuments (user_id, name, email, profession, document, file_data)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (user_id, session['user_name'], email, profession, filename, psycopg2.Binary(file_data)))
-            
-            conn.commit()
-            cur.close()
-            conn.close()
+        # Store OID in the table
+        cur.execute("""
+            INSERT INTO userdocuments (user_id, name, email, profession, file_oid, document)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, session['user_name'], email, profession, lo_oid, filename))
 
-        return redirect('/dashboard')
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    return redirect('/dashboard')
 
     except Exception as e:
         print(f"UPLOAD ERROR: {e}")
@@ -248,24 +253,26 @@ def view_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT file_data, document FROM userdocuments WHERE id = %s", (doc_id,))
+        cur.execute("SELECT file_oid, document FROM userdocuments WHERE id = %s", (doc_id,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
-        if result and result[0]:
-            file_data, filename = result
-
-            # Convert from memoryview to bytes if needed
-            if isinstance(file_data, memoryview):
-                file_data = file_data.tobytes()
-
-            response = make_response(file_data)
-            response.headers.set('Content-Type', 'application/pdf')
-            response.headers.set('Content-Disposition', 'inline', filename=filename or "document.pdf")
-            return response
-        else:
+        if not result or result[0] is None:
             return "Document not found", 404
+
+        file_oid, filename = result
+
+        conn = get_db_connection()
+        lo = conn.lobject(file_oid, 'rb')
+        file_data = lo.read()
+        lo.close()
+        conn.close()
+
+        response = make_response(file_data)
+        response.headers.set('Content-Type', 'application/pdf')
+        response.headers.set('Content-Disposition', 'inline', filename=filename)
+        return response
 
     except Exception as e:
         return f"Error displaying document: {e}", 500
@@ -691,6 +698,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
