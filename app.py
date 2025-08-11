@@ -12,8 +12,7 @@ from flask_session import Session
 import bcrypt
 import os
 import re
-import psycopg2
-from psycopg2 import sql
+
 
 load_dotenv()
 
@@ -242,10 +241,6 @@ def upload_document():
 
     return redirect('/dashboard')
 
-    except Exception as e:
-        print(f"UPLOAD ERROR: {e}")
-        flash(f"Upload failed: {e}", "error")
-        return redirect('/dashboard')
 
 
 
@@ -568,9 +563,6 @@ def payment_process():
 
 
 
-
-
-
 @app.route('/pay', methods=['POST'])
 def pay():
     if 'user_name' not in session:
@@ -609,6 +601,7 @@ def pay():
 @app.context_processor
 def inject_membership():
     return {'membership': session.get('membership', 'Free')}
+
 
 @app.context_processor
 def inject_membership():
@@ -699,7 +692,6 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 
 
