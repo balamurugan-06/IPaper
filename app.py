@@ -503,73 +503,61 @@ def payment_process():
         if selected_plan not in ['Pro', 'Ultra']:
             return redirect('/membership')
 
-        # Fetch current membership from userdocuments
-        cur.execute("SELECT membership FROM userdocuments WHERE user_id = %s ORDER BY id DESC LIMIT 1", (user_id,))
-        existing_membership_result = cur.fetchone()
-        current_membership = existing_membership_result[0] if existing_membership_result else 'Free'
-
-        # ❌ Prevent Ultra from downgrading to Pro
-        if profession == 'Ultra' and selected_plan == 'Pro':
-            flash("Ultra cannot downgrade to the Pro plan.", "error")
-            return redirect('/membership')
-
-        # Check for existing document record
+        # Check for existing membership
         cur.execute("SELECT id FROM userdocuments WHERE user_id = %s", (user_id,))
         existing_doc = cur.fetchone()
 
         if existing_doc:
-            # Update membership
             cur.execute("""
                 UPDATE userdocuments 
                 SET membership = %s 
                 WHERE user_id = %s
             """, (selected_plan, user_id))
         else:
-            # Insert new membership record
             cur.execute("""
                 INSERT INTO userdocuments (user_id, name, email, profession, membership)
                 VALUES (%s, %s, %s, %s, %s)
             """, (user_id, session['user_name'], email, profession, selected_plan))
 
+        # ✅ Insert card details in SAME connection
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         card_number = request.form.get('card_number')
         card_expiry = request.form.get('card_expiry')
         card_cvv = request.form.get('card_cvv')
-        selected_plan = request.form.get('selected_plan')
 
         if not all([first_name, last_name, card_number, card_expiry, card_cvv]):
             flash("All card fields are required", "error")
             return redirect('/membership')
 
-        # Hash card number for security
         hashed_card_number = bcrypt.hashpw(card_number.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-        conn = get_db_connection()
-        cur = conn.cursor()
 
         cur.execute("""
             INSERT INTO CardDetails (user_id, first_name, last_name, card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (
-            session['user_id'],
+            user_id,
             first_name,
             last_name,
             hashed_card_number,
             card_expiry,
             card_cvv
         ))
+
+        # ✅ Commit once after both inserts/updates
         conn.commit()
-        session['membership'] = selected_plan
+
+        # Close connection
         cur.close()
         conn.close()
 
         # Update session
-        
+        session['membership'] = selected_plan
         return render_template("payment_success.html", selected_plan=selected_plan)
 
     except Exception as e:
         return f"Payment processing failed: {e}"
+
 
 
 
@@ -703,6 +691,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
