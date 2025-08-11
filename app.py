@@ -474,10 +474,9 @@ def payment_success():
         """, (user_id, name, email, profession, selected_plan))
 
         conn.commit()
-        session['membership'] = selected_plan
-
         cur.close()
         conn.close()
+        session['membership'] = selected_plan
 
         return redirect('/dashboard')
     except Exception as e:
@@ -561,11 +560,12 @@ def payment_process():
             card_cvv
         ))
         conn.commit()
+        session['membership'] = selected_plan
         cur.close()
         conn.close()
 
         # Update session
-        session['membership'] = selected_plan
+        
         return render_template("payment_success.html", selected_plan=selected_plan)
 
     except Exception as e:
@@ -607,12 +607,36 @@ def pay():
     conn.close()
 
     session['membership'] = membership_plan
-    return render_template('success.html', membership=membership_plan)
+    
     return redirect('/dashboard')
 
 @app.context_processor
 def inject_membership():
     return {'membership': session.get('membership', 'Free')}
+
+@app.context_processor
+def inject_membership():
+    membership = session.get('membership')
+    # If session doesn't have it but user is logged in, fetch latest from DB
+    if not membership and 'user_name' in session:
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT membership
+                FROM userdocuments
+                WHERE user_id = (SELECT id FROM users WHERE name = %s)
+                ORDER BY id DESC
+                LIMIT 1
+            """, (session['user_name'],))
+            row = cur.fetchone()
+            cur.close()
+            conn.close()
+            membership = row[0] if row and row[0] else 'Free'
+            session['membership'] = membership  # cache it
+        except Exception:
+            membership = 'Free'
+    return {'membership': membership or 'Free'}
 
 
 @app.route('/admin/templates')
@@ -679,6 +703,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
