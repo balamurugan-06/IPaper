@@ -500,15 +500,18 @@
     <button class="generate-button">Generate now</button>
   </div>
 </div>
-<script>
-  // Shortcuts
+
+  <script>
+  /* -------------------------------
+     Helpers
+  ---------------------------------*/
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const root = document.documentElement;
   const app = $('#app');
 
   /* -------------------------------
-     Panel Collapse / Resize
+     Panel Collapse
   ---------------------------------*/
   function initWidths(){
     root.style.setProperty('--ls-w', '220px');
@@ -542,12 +545,12 @@
   $('#btnLS').onclick=()=>{
     const s=state();
     applyCollapse(!s.hasLS,s.hasUS);
-  }
+  };
 
   $('#btnUS').onclick=()=>{
     const s=state();
     applyCollapse(s.hasLS,!s.hasUS);
-  }
+  };
 
   /* -------------------------------
      Template Modal
@@ -588,11 +591,83 @@
   };
 
   /* -------------------------------
-     Document Management (with API)
+     Categories (Backend Driven)
   ---------------------------------*/
-  async function loadDocuments() {
+  async function loadCategories() {
     try {
-      const res = await fetch('/get-documents');
+      const res = await fetch('/get-categories');
+      const cats = await res.json();
+
+      // remove old categories except "All Documents"
+      $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
+
+      cats.forEach(cat => {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category';
+        categoryEl.dataset.category = cat.id;
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'category-title';
+        titleEl.textContent = cat.name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-category';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          if (confirm(`Delete category "${cat.name}"?`)) {
+            await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
+            loadCategories();
+          }
+        };
+
+        categoryEl.appendChild(titleEl);
+        categoryEl.appendChild(deleteBtn);
+
+        // Insert after "All Documents"
+        $('.category[data-category="all"]').after(categoryEl);
+
+        // On click, filter documents by category
+        categoryEl.addEventListener('click', () => {
+          loadDocuments(cat.id);
+          $$('.category').forEach(c => c.classList.remove('active-category'));
+          categoryEl.classList.add('active-category');
+        });
+      });
+    } catch (err) {
+      console.error("Failed to load categories:", err);
+    }
+  }
+
+  // Add category button
+  $('#addCategoryBtn').onclick = async () => {
+    const name = prompt('Enter new category name:');
+    if (name && name.trim()) {
+      try {
+        const res = await fetch('/add-category', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim() })
+        });
+        if (res.ok) {
+          loadCategories();
+        } else {
+          alert('Failed to add category');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error adding category');
+      }
+    }
+  };
+
+  /* -------------------------------
+     Documents (Backend Driven)
+  ---------------------------------*/
+  async function loadDocuments(categoryId = null) {
+    try {
+      const url = categoryId ? `/get-documents?category=${categoryId}` : '/get-documents';
+      const res = await fetch(url);
       const docs = await res.json();
 
       const container = $('#documents-container');
@@ -615,7 +690,7 @@
     delBtn.onclick = async (e) => {
       e.stopPropagation();
       if (confirm(`Delete "${doc.filename}"?`)) {
-        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+        await fetch(`/delete-document/${doc.id}`, { method: 'DELETE' });
         loadDocuments();
       }
     };
@@ -625,25 +700,30 @@
   }
 
   /* -------------------------------
-     Init on Page Load
+     Init
   ---------------------------------*/
   document.addEventListener('DOMContentLoaded', () => {
     initResizeButtons();
     const s = state();
-    const btnLS = $('#btnLS');
-    const btnUS = $('#btnUS');
-    if(btnLS){ btnLS.textContent = s.hasLS ? '«' : '»'; }
-    if(btnUS){ btnUS.textContent = s.hasUS ? '«' : '»'; }
+    if($('#btnLS')) $('#btnLS').textContent = s.hasLS ? '«' : '»';
+    if($('#btnUS')) $('#btnUS').textContent = s.hasUS ? '«' : '»';
 
+    loadCategories();
     loadDocuments();
+
+    // Default select "All Documents"
+    $('.category[data-category="all"]').addEventListener('click', () => {
+      loadDocuments();
+      $$('.category').forEach(c => c.classList.remove('active-category'));
+      $('.category[data-category="all"]').classList.add('active-category');
+    });
   });
-
 </script>
-
 
 
 </body>
 </html>
+
 
 
 
