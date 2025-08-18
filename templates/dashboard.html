@@ -360,24 +360,10 @@
   
   <aside id="ls" class="sidebar ls">
     <div class="pane-title">
-      Categories
-      <button id="addCategoryBtn" class="add-category-icon">+</button>
+      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
     </div>
-    
-    <div class="category" data-category="all">
+    <div class="category active-category" data-category="all">
       <div class="category-title">All Documents</div>
-    </div>
-    <div class="category" data-category="healthcare">
-      <div class="category-title">Healthcare</div>
-      <button class="delete-category" data-category="healthcare">×</button>
-    </div>
-    <div class="category" data-category="law">
-      <div class="category-title">Law</div>
-      <button class="delete-category" data-category="law">×</button>
-    </div>
-    <div class="category" data-category="engineering">
-      <div class="category-title">Engineering</div>
-      <button class="delete-category" data-category="engineering">×</button>
     </div>
     <div class="account-section">
       <div class="pane-title">Account</div>
@@ -388,12 +374,9 @@
     </div>
   </aside>
 
-  <!-- 分割线 (不再可拖动) -->
   <div id="bar-ls" class="resizer">
     <button id="btnLS" class="collapse-btn">«</button>
   </div>
-
-  <!-- 左2 栏 - 上传和文档列表 -->
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
@@ -406,13 +389,9 @@
     <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
     <div id="documents-container" class="documents-list"></div>
   </aside>
-
-  <!-- 分割线 (不再可拖动) -->
   <div id="bar-us" class="resizer">
     <button id="btnUS" class="collapse-btn">«</button>
   </div>
-
-  <!-- 主内容 -->
   <main class="main">
     <div class="topbar">
       <div class="muted">Welcome, {{ name }}</div>
@@ -422,6 +401,8 @@
         <button id="generateBtn" class="action-btn">Generate</button>
       </div>
     </div>
+    <h1>Welcome, {{ name }}</h1>
+    <p class="muted"></p>
   </main>
 </div>
 
@@ -904,5 +885,6 @@
 </script>
 </body>
 </html>
+
 
 
