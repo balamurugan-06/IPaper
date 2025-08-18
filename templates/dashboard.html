@@ -547,10 +547,37 @@
     initResizeButtons();
     loadDocuments();
   });
+
+  document.addEventListener("DOMContentLoaded", function () {
+  const addCategoryBtn = document.getElementById("addCategoryBtn");
+  const sidebar = document.getElementById("ls");
+
+  addCategoryBtn.addEventListener("click", function () {
+    const categoryName = prompt("Enter new category name:");
+    if (categoryName) {
+      // Create new category div
+      const newCategory = document.createElement("div");
+      newCategory.classList.add("category");
+      newCategory.dataset.category = categoryName.toLowerCase().replace(/\s+/g, "-");
+
+      // Add inner title
+      const categoryTitle = document.createElement("div");
+      categoryTitle.classList.add("category-title");
+      categoryTitle.textContent = categoryName;
+
+      newCategory.appendChild(categoryTitle);
+
+      // Insert before the account section
+      const accountSection = sidebar.querySelector(".account-section");
+      sidebar.insertBefore(newCategory, accountSection);
+    }
+  });
+});
 </script>
 
 </body>
 </html>
+
 
 
 
