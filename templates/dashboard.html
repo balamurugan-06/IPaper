@@ -502,54 +502,159 @@
 </div>
 
 <script>
-  const $ = selector => document.querySelector(selector);
-  const $$= selector => document.querySelectorAll(selector);
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+  const root = document.documentElement;
   const app = $('#app');
 
-  function initResizeButtons() {
-    $('#btnLS').textContent = '«';
-    $('#btnUS').textContent = '«';
+  function initWidths() {
+    root.style.setProperty('--ls-w', '220px');
+    root.style.setProperty('--us-w', '260px');
+  }
+  initWidths();
+
+  function applyCollapse(ls, us) {
+    app.classList.toggle('collapse-ls', !ls);
+    app.classList.toggle('collapse-us', !us);
+    app.classList.toggle('collapse-both', !ls && !us);
+
+    const btnLS = document.getElementById('btnLS');
+    const btnUS = document.getElementById('btnUS');
+    if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
+    if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
   }
 
-  $('#btnLS').onclick = () => app.classList.toggle('collapse-ls');
-  $('#btnUS').onclick = () => app.classList.toggle('collapse-us');
-
-  function createDocumentItem(doc) {
-    const div = document.createElement('div');
-    div.className = 'document-item';
-    div.textContent = doc.filename;
-    div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'document-delete-btn';
-    delBtn.textContent = '×';
-    delBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (confirm(`Delete "${doc.filename}"?`)) {
-        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
-        loadDocuments();
-      }
-    };
-    div.appendChild(delBtn);
-    return div;
+  function state() {
+    return {
+      hasLS: !app.classList.contains('collapse-ls'),
+      hasUS: !app.classList.contains('collapse-us')
+    }
   }
 
-  async function loadDocuments() {
-    const res = await fetch('/get-documents');
-    const docs = await res.json();
-
-    const container = $('#documents-container');
-    container.innerHTML = '';
-    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+  $('#btnLS').onclick = () => {
+    const s = state();
+    applyCollapse(!s.hasLS, s.hasUS);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons();
-    loadDocuments();
+  $('#btnUS').onclick = () => {
+    const s = state();
+    applyCollapse(s.hasLS, !s.hasUS);
+  }
+
+  $('#downloadBtn').onclick = () => {
+    alert('Download functionality will be implemented here');
+  };
+
+  $('#generateBtn').onclick = () => {
+    $('#templateSelectorModal').classList.remove('hidden');
+    showTemplateContent('meeting');
+    $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
+  };
+
+  function showTemplateContent(contentId) {
+    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
+      el.classList.add('hidden');
+    });
+    const contentElement = document.getElementById(contentId + '-content');
+    if (contentElement) {
+      contentElement.classList.remove('hidden');
+    }
+    document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
+      el.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+  }
+
+  document.querySelector('.template-selector-modal .generate-button').onclick = function () {
+    alert('Generating summary with selected template...');
+    $('#templateSelectorModal').classList.add('hidden');
+  };
+
+  $('#templateSelectorModal').onclick = function (e) {
+    if (e.target === this) {
+      this.classList.add('hidden');
+    }
+  };
+
+  // -------- Document Management --------
+  document.addEventListener('DOMContentLoaded', function () {
+    const documentsContainer = $('#documents-container');
+    const currentCategoryDisplay = $('#current-category');
+    const uploadForm = $('#uploadForm');
+
+    // categories
+    let categories = ['healthcare', 'law', 'engineering'];
+    let currentCategory = 'all';
+
+    // Fetch documents from backend
+    async function fetchDocuments() {
+      const res = await fetch('/api/documents');
+      const data = await res.json();
+      displayDocuments(data);
+    }
+
+    // Delete document (calls backend)
+    async function deleteDocument(docId) {
+      if (!confirm("Are you sure you want to delete this document?")) return;
+      await fetch(`/delete-document/${docId}`, { method: 'GET' });
+      fetchDocuments();
+    }
+
+    // Render docs
+    function displayDocuments(docs) {
+      documentsContainer.innerHTML = '';
+      currentCategoryDisplay.textContent = `Showing: All Documents`;
+      docs.forEach(doc => {
+        const docItem = document.createElement('div');
+        docItem.className = 'document-item';
+        docItem.textContent = doc.document;
+        docItem.onclick = () => {
+          window.open(`/view-document/${doc.id}`, '_blank');
+        };
+
+        // delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'document-delete-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteDocument(doc.id);
+        };
+        docItem.appendChild(deleteBtn);
+
+        documentsContainer.appendChild(docItem);
+      });
+    }
+
+    // File upload (calls backend)
+    uploadForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(uploadForm);
+      await fetch('/upload-document', {
+        method: 'POST',
+        body: formData
+      });
+      uploadForm.reset();
+      fetchDocuments();
+    });
+
+    // Initial fetch
+    fetchDocuments();
   });
+
+  // init button arrows
+  (function () {
+    const s = state();
+    const btnLS = document.getElementById('btnLS');
+    const btnUS = document.getElementById('btnUS');
+    if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; }
+    if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
+  })();
 </script>
+
 </body>
 </html>
+
 
 
 
