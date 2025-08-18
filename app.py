@@ -691,9 +691,34 @@ def delete_template(id):
     except Exception as e:
         return f"Error deleting template: {e}"
 
+@app.route('/get-documents', methods=['GET'])
+def get_documents():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Fetch user ID
+    cur.execute("SELECT id FROM users WHERE name = %s", (session['user_name'],))
+    user = cur.fetchone()
+    if not user:
+        cur.close()
+        conn.close()
+        return jsonify([])
+
+    user_id = user[0]
+    cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
+    docs = [{"id": row[0], "filename": row[1]} for row in cur.fetchall()]
+
+    cur.close()
+    conn.close()
+    return jsonify(docs)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
