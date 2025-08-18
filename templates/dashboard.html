@@ -500,19 +500,108 @@
     <button class="generate-button">Generate now</button>
   </div>
 </div>
-
 <script>
-  const $ = selector => document.querySelector(selector);
-  const $$= selector => document.querySelectorAll(selector);
+  // Shortcuts
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const root = document.documentElement;
   const app = $('#app');
+
+  /* -------------------------------
+     Panel Collapse / Resize
+  ---------------------------------*/
+  function initWidths(){
+    root.style.setProperty('--ls-w', '220px');
+    root.style.setProperty('--us-w', '260px');
+  }
+  initWidths();
+
+  function applyCollapse(ls,us){
+    app.classList.toggle('collapse-ls',!ls);
+    app.classList.toggle('collapse-us',!us);
+    app.classList.toggle('collapse-both',!ls&&!us);
+
+    const btnLS = $('#btnLS');
+    const btnUS = $('#btnUS');
+    if(btnLS){ btnLS.textContent = ls ? '«' : '»'; }
+    if(btnUS){ btnUS.textContent = us ? '«' : '»'; }
+  }
+
+  function state(){
+    return{
+      hasLS:!app.classList.contains('collapse-ls'),
+      hasUS:!app.classList.contains('collapse-us')
+    }
+  }
 
   function initResizeButtons() {
     $('#btnLS').textContent = '«';
     $('#btnUS').textContent = '«';
   }
 
-  $('#btnLS').onclick = () => app.classList.toggle('collapse-ls');
-  $('#btnUS').onclick = () => app.classList.toggle('collapse-us');
+  $('#btnLS').onclick=()=>{
+    const s=state();
+    applyCollapse(!s.hasLS,s.hasUS);
+  }
+
+  $('#btnUS').onclick=()=>{
+    const s=state();
+    applyCollapse(s.hasLS,!s.hasUS);
+  }
+
+  /* -------------------------------
+     Template Modal
+  ---------------------------------*/
+  $('#downloadBtn').onclick=()=>{
+    alert('Download functionality will be implemented here');
+  };
+
+  $('#generateBtn').onclick=()=>{
+    $('#templateSelectorModal').classList.remove('hidden');
+    showTemplateContent('meeting');
+    $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
+  };
+
+  function showTemplateContent(contentId) {
+    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
+      el.classList.add('hidden');
+    });
+    const contentElement = document.getElementById(contentId + '-content');
+    if (contentElement) {
+      contentElement.classList.remove('hidden');
+    }
+    document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
+      el.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+  }
+
+  document.querySelector('.template-selector-modal .generate-button').onclick = function() {
+    alert('Generating summary with selected template...');
+    $('#templateSelectorModal').classList.add('hidden');
+  };
+
+  $('#templateSelectorModal').onclick = function(e) {
+    if (e.target === this) {
+      this.classList.add('hidden');
+    }
+  };
+
+  /* -------------------------------
+     Document Management (with API)
+  ---------------------------------*/
+  async function loadDocuments() {
+    try {
+      const res = await fetch('/get-documents');
+      const docs = await res.json();
+
+      const container = $('#documents-container');
+      container.innerHTML = '';
+      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    } catch (err) {
+      console.error("Failed to load documents:", err);
+    }
+  }
 
   function createDocumentItem(doc) {
     const div = document.createElement('div');
@@ -531,52 +620,31 @@
       }
     };
     div.appendChild(delBtn);
+
     return div;
   }
 
-  async function loadDocuments() {
-    const res = await fetch('/get-documents');
-    const docs = await res.json();
-
-    const container = $('#documents-container');
-    container.innerHTML = '';
-    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-  }
-
+  /* -------------------------------
+     Init on Page Load
+  ---------------------------------*/
   document.addEventListener('DOMContentLoaded', () => {
     initResizeButtons();
+    const s = state();
+    const btnLS = $('#btnLS');
+    const btnUS = $('#btnUS');
+    if(btnLS){ btnLS.textContent = s.hasLS ? '«' : '»'; }
+    if(btnUS){ btnUS.textContent = s.hasUS ? '«' : '»'; }
+
     loadDocuments();
   });
 
-  document.addEventListener("DOMContentLoaded", function () {
-  const addCategoryBtn = document.getElementById("addCategoryBtn");
-  const sidebar = document.getElementById("ls");
-
-  addCategoryBtn.addEventListener("click", function () {
-    const categoryName = prompt("Enter new category name:");
-    if (categoryName) {
-      // Create new category div
-      const newCategory = document.createElement("div");
-      newCategory.classList.add("category");
-      newCategory.dataset.category = categoryName.toLowerCase().replace(/\s+/g, "-");
-
-      // Add inner title
-      const categoryTitle = document.createElement("div");
-      categoryTitle.classList.add("category-title");
-      categoryTitle.textContent = categoryName;
-
-      newCategory.appendChild(categoryTitle);
-
-      // Insert before the account section
-      const accountSection = sidebar.querySelector(".account-section");
-      sidebar.insertBefore(newCategory, accountSection);
-    }
-  });
-});
 </script>
+
+
 
 </body>
 </html>
+
 
 
 
