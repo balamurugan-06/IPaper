@@ -502,227 +502,273 @@
 </div>
 
   <script>
-  /* -------------------------------
-     Helpers
-  ---------------------------------*/
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
-  const root = document.documentElement;
-  const app = $('#app');
+/* -------------------------------
+   Helpers
+---------------------------------*/
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const root = document.documentElement;
+const app = $('#app');
 
-  /* -------------------------------
-     Panel Collapse
-  ---------------------------------*/
-  function initWidths(){
-    root.style.setProperty('--ls-w', '220px');
-    root.style.setProperty('--us-w', '260px');
+/* -------------------------------
+   Panel Collapse
+---------------------------------*/
+function initWidths(){
+  root.style.setProperty('--ls-w', '220px');
+  root.style.setProperty('--us-w', '260px');
+}
+initWidths();
+
+function applyCollapse(ls,us){
+  app.classList.toggle('collapse-ls',!ls);
+  app.classList.toggle('collapse-us',!us);
+  app.classList.toggle('collapse-both',!ls&&!us);
+
+  const btnLS = $('#btnLS');
+  const btnUS = $('#btnUS');
+  if(btnLS){ btnLS.textContent = ls ? '«' : '»'; }
+  if(btnUS){ btnUS.textContent = us ? '«' : '»'; }
+}
+
+function state(){
+  return{
+    hasLS:!app.classList.contains('collapse-ls'),
+    hasUS:!app.classList.contains('collapse-us')
   }
-  initWidths();
+}
 
-  function applyCollapse(ls,us){
-    app.classList.toggle('collapse-ls',!ls);
-    app.classList.toggle('collapse-us',!us);
-    app.classList.toggle('collapse-both',!ls&&!us);
+function initResizeButtons() {
+  $('#btnLS').textContent = '«';
+  $('#btnUS').textContent = '«';
+}
 
-    const btnLS = $('#btnLS');
-    const btnUS = $('#btnUS');
-    if(btnLS){ btnLS.textContent = ls ? '«' : '»'; }
-    if(btnUS){ btnUS.textContent = us ? '«' : '»'; }
+$('#btnLS').onclick=()=>{
+  const s=state();
+  applyCollapse(!s.hasLS,s.hasUS);
+};
+
+$('#btnUS').onclick=()=>{
+  const s=state();
+  applyCollapse(s.hasLS,!s.hasUS);
+};
+
+/* -------------------------------
+   Template Modal
+---------------------------------*/
+$('#downloadBtn').onclick=()=>{
+  alert('Download functionality will be implemented here');
+};
+
+$('#generateBtn').onclick=()=>{
+  $('#templateSelectorModal').classList.remove('hidden');
+  showTemplateContent('meeting');
+  $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
+};
+
+function showTemplateContent(contentId) {
+  document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
+    el.classList.add('hidden');
+  });
+  const contentElement = document.getElementById(contentId + '-content');
+  if (contentElement) {
+    contentElement.classList.remove('hidden');
   }
+  document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
+    el.classList.remove('active');
+  });
+  event.currentTarget.classList.add('active');
+}
 
-  function state(){
-    return{
-      hasLS:!app.classList.contains('collapse-ls'),
-      hasUS:!app.classList.contains('collapse-us')
+document.querySelector('.template-selector-modal .generate-button').onclick = function() {
+  alert('Generating summary with selected template...');
+  $('#templateSelectorModal').classList.add('hidden');
+};
+
+$('#templateSelectorModal').onclick = function(e) {
+  if (e.target === this) {
+    this.classList.add('hidden');
+  }
+};
+
+/* -------------------------------
+   Documents (Draggable)
+---------------------------------*/
+function createDocumentItem(doc) {
+  const div = document.createElement('div');
+  div.className = 'document-item';
+  div.textContent = doc.filename;
+  div.draggable = true; 
+  div.dataset.docId = doc.id;
+
+  // click = open
+  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
+
+  // delete
+  const delBtn = document.createElement('button');
+  delBtn.className = 'document-delete-btn';
+  delBtn.textContent = '×';
+  delBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (confirm(`Delete "${doc.filename}"?`)) {
+      await fetch(`/delete-document/${doc.id}`, { method: 'DELETE' });
+      loadDocuments();
     }
-  }
-
-  function initResizeButtons() {
-    $('#btnLS').textContent = '«';
-    $('#btnUS').textContent = '«';
-  }
-
-  $('#btnLS').onclick=()=>{
-    const s=state();
-    applyCollapse(!s.hasLS,s.hasUS);
   };
+  div.appendChild(delBtn);
 
-  $('#btnUS').onclick=()=>{
-    const s=state();
-    applyCollapse(s.hasLS,!s.hasUS);
-  };
+  // drag event
+  div.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('docId', doc.id);
+  });
 
-  /* -------------------------------
-     Template Modal
-  ---------------------------------*/
-  $('#downloadBtn').onclick=()=>{
-    alert('Download functionality will be implemented here');
-  };
+  return div;
+}
 
-  $('#generateBtn').onclick=()=>{
-    $('#templateSelectorModal').classList.remove('hidden');
-    showTemplateContent('meeting');
-    $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
-  };
+/* -------------------------------
+   Make Categories Drop Targets
+---------------------------------*/
+function makeCategoryDroppable(categoryEl, catId) {
+  categoryEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    categoryEl.classList.add('drop-hover');
+  });
 
-  function showTemplateContent(contentId) {
-    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
-      el.classList.add('hidden');
-    });
-    const contentElement = document.getElementById(contentId + '-content');
-    if (contentElement) {
-      contentElement.classList.remove('hidden');
-    }
-    document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
-      el.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-  }
+  categoryEl.addEventListener('dragleave', () => {
+    categoryEl.classList.remove('drop-hover');
+  });
 
-  document.querySelector('.template-selector-modal .generate-button').onclick = function() {
-    alert('Generating summary with selected template...');
-    $('#templateSelectorModal').classList.add('hidden');
-  };
+  categoryEl.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    categoryEl.classList.remove('drop-hover');
 
-  $('#templateSelectorModal').onclick = function(e) {
-    if (e.target === this) {
-      this.classList.add('hidden');
-    }
-  };
-
-  /* -------------------------------
-     Categories (Backend Driven)
-  ---------------------------------*/
-  async function loadCategories() {
-    try {
-      const res = await fetch('/get-categories');
-      const cats = await res.json();
-
-      // remove old categories except "All Documents"
-      $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
-
-      cats.forEach(cat => {
-        const categoryEl = document.createElement('div');
-        categoryEl.className = 'category';
-        categoryEl.dataset.category = cat.id;
-
-        const titleEl = document.createElement('div');
-        titleEl.className = 'category-title';
-        titleEl.textContent = cat.name;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-category';
-        deleteBtn.textContent = '×';
-        deleteBtn.onclick = async (e) => {
-          e.stopPropagation();
-          if (confirm(`Delete category "${cat.name}"?`)) {
-            await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
-            loadCategories();
-          }
-        };
-
-        categoryEl.appendChild(titleEl);
-        categoryEl.appendChild(deleteBtn);
-
-        // Insert after "All Documents"
-        $('.category[data-category="all"]').after(categoryEl);
-
-        // On click, filter documents by category
-        categoryEl.addEventListener('click', () => {
-          loadDocuments(cat.id);
-          $$('.category').forEach(c => c.classList.remove('active-category'));
-          categoryEl.classList.add('active-category');
-        });
-      });
-    } catch (err) {
-      console.error("Failed to load categories:", err);
-    }
-  }
-
-  // Add category button
-  $('#addCategoryBtn').onclick = async () => {
-    const name = prompt('Enter new category name:');
-    if (name && name.trim()) {
+    const docId = e.dataTransfer.getData('docId');
+    if (docId) {
       try {
-        const res = await fetch('/add-category', {
+        await fetch('/assign-category', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.trim() })
+          body: JSON.stringify({ documentId: docId, categoryId: catId })
         });
-        if (res.ok) {
-          loadCategories();
-        } else {
-          alert('Failed to add category');
-        }
+        loadDocuments(catId);
       } catch (err) {
         console.error(err);
-        alert('Error adding category');
+        alert('Failed to assign document to category');
       }
     }
-  };
-
-  /* -------------------------------
-     Documents (Backend Driven)
-  ---------------------------------*/
-  async function loadDocuments(categoryId = null) {
-    try {
-      const url = categoryId ? `/get-documents?category=${categoryId}` : '/get-documents';
-      const res = await fetch(url);
-      const docs = await res.json();
-
-      const container = $('#documents-container');
-      container.innerHTML = '';
-      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-    } catch (err) {
-      console.error("Failed to load documents:", err);
-    }
-  }
-
-  function createDocumentItem(doc) {
-    const div = document.createElement('div');
-    div.className = 'document-item';
-    div.textContent = doc.filename;
-    div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'document-delete-btn';
-    delBtn.textContent = '×';
-    delBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (confirm(`Delete "${doc.filename}"?`)) {
-        await fetch(`/delete-document/${doc.id}`, { method: 'DELETE' });
-        loadDocuments();
-      }
-    };
-    div.appendChild(delBtn);
-
-    return div;
-  }
-
-  /* -------------------------------
-     Init
-  ---------------------------------*/
-  document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons();
-    const s = state();
-    if($('#btnLS')) $('#btnLS').textContent = s.hasLS ? '«' : '»';
-    if($('#btnUS')) $('#btnUS').textContent = s.hasUS ? '«' : '»';
-
-    loadCategories();
-    loadDocuments();
-
-    // Default select "All Documents"
-    $('.category[data-category="all"]').addEventListener('click', () => {
-      loadDocuments();
-      $$('.category').forEach(c => c.classList.remove('active-category'));
-      $('.category[data-category="all"]').classList.add('active-category');
-    });
   });
-</script>
+}
 
+/* -------------------------------
+   Categories
+---------------------------------*/
+async function loadCategories() {
+  try {
+    const res = await fetch('/get-categories');
+    const cats = await res.json();
+
+    $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
+
+    cats.forEach(cat => {
+      const categoryEl = document.createElement('div');
+      categoryEl.className = 'category';
+      categoryEl.dataset.category = cat.id;
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'category-title';
+      titleEl.textContent = cat.name;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-category';
+      deleteBtn.textContent = '×';
+      deleteBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete category "${cat.name}"?`)) {
+          await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
+          loadCategories();
+        }
+      };
+
+      categoryEl.appendChild(titleEl);
+      categoryEl.appendChild(deleteBtn);
+
+      // enable drop
+      makeCategoryDroppable(categoryEl, cat.id);
+
+      $('.category[data-category="all"]').after(categoryEl);
+
+      categoryEl.addEventListener('click', () => {
+        loadDocuments(cat.id);
+        $$('.category').forEach(c => c.classList.remove('active-category'));
+        categoryEl.classList.add('active-category');
+      });
+    });
+  } catch (err) {
+    console.error("Failed to load categories:", err);
+  }
+}
+
+// add category
+$('#addCategoryBtn').onclick = async () => {
+  const name = prompt('Enter new category name:');
+  if (name && name.trim()) {
+    try {
+      const res = await fetch('/add-category', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() })
+      });
+      if (res.ok) {
+        loadCategories();
+      } else {
+        alert('Failed to add category');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error adding category');
+    }
+  }
+};
+
+/* -------------------------------
+   Load Documents
+---------------------------------*/
+async function loadDocuments(categoryId = null) {
+  try {
+    const url = categoryId ? `/get-documents?category=${categoryId}` : '/get-documents';
+    const res = await fetch(url);
+    const docs = await res.json();
+
+    const container = $('#documents-container');
+    container.innerHTML = '';
+    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+  } catch (err) {
+    console.error("Failed to load documents:", err);
+  }
+}
+
+/* -------------------------------
+   Init
+---------------------------------*/
+document.addEventListener('DOMContentLoaded', () => {
+  initResizeButtons();
+  const s = state();
+  if($('#btnLS')) $('#btnLS').textContent = s.hasLS ? '«' : '»';
+  if($('#btnUS')) $('#btnUS').textContent = s.hasUS ? '«' : '»';
+
+  loadCategories();
+  loadDocuments();
+
+  $('.category[data-category="all"]').addEventListener('click', () => {
+    loadDocuments();
+    $$('.category').forEach(c => c.classList.remove('active-category'));
+    $('.category[data-category="all"]').classList.add('active-category');
+  });
+});
+</script>
 
 </body>
 </html>
+
 
 
 
