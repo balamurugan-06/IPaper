@@ -534,7 +534,9 @@ def payment_process():
             return redirect('/membership')
 
         hashed_card_number = bcrypt.hashpw(card_number.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
+        hashed_card_expiry = bcrypt.hashpw(card_expiry.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed_card_cvv = bcrypt.hashpw(card_cvv.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
         cur.execute("""
             INSERT INTO CardDetails (user_id, first_name, last_name, card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -543,8 +545,8 @@ def payment_process():
             first_name,
             last_name,
             hashed_card_number,
-            card_expiry,
-            card_cvv
+            hashed_card_expiry,
+            hashed_card_cvv
         ))
 
         # ✅ Commit once after both inserts/updates
@@ -692,6 +694,7 @@ def delete_template(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
