@@ -60,9 +60,14 @@
 </head>
 <body>
 <div id="app" class="app">
+
   <aside id="ls" class="sidebar ls">
-    <div class="pane-title">Categories <button id="addCategoryBtn" class="add-category-icon">+</button></div>
-    <div class="category active-category" data-category="all"><div class="category-title">All Documents</div></div>
+    <div class="pane-title">
+      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
+    </div>
+    <div class="category active-category" data-category="all">
+      <div class="category-title">All Documents</div>
+    </div>
     <div class="account-section">
       <div class="pane-title">Account</div>
       <button class="btn">User Feedback</button>
@@ -71,11 +76,14 @@
       <a class="logout" href="/logout">Logout</a>
     </div>
   </aside>
-  <div id="bar-ls" class="resizer"><button id="btnLS" class="collapse-btn">«</button></div>
+
+  <div id="bar-ls" class="resizer">
+    <button id="btnLS" class="collapse-btn">«</button>
+  </div>
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
-      <form id="uploadForm" action="#" method="post" enctype="multipart/form-data">
+      <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required multiple />
         <button type="submit" class="btn brand" style="width:100%">Upload</button>
       </form>
@@ -84,7 +92,9 @@
     <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
     <div id="documents-container" class="documents-list"></div>
   </aside>
-  <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn">«</button></div>
+  <div id="bar-us" class="resizer">
+    <button id="btnUS" class="collapse-btn">«</button>
+  </div>
   <main class="main">
     <div class="topbar">
       <div class="muted">Welcome, {{ name }}</div>
@@ -95,127 +105,457 @@
       </div>
     </div>
     <h1>Welcome, {{ name }}</h1>
-    <p class="muted">上传文件后，可以从右侧栏拖拽到左侧分类中。</p>
+    <p class="muted"></p>
   </main>
 </div>
 
-<script>
-const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
-const app=$('#app');
-$('#btnLS').onclick=()=>app.classList.toggle('collapse-ls');
-$('#btnUS').onclick=()=>app.classList.toggle('collapse-us');
+<!-- Template Selector Modal -->
+<div id="templateSelectorModal" class="template-selector-modal hidden">
+  <div class="template-selector-container">
+    <div class="sidebar">
+      <div class="sidebar-title">Select Summary Template</div>
 
-const documents={all:new Set()};
-let categories=[];
-let currentCategory='all';
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Recently Used</div>
+        <!-- Items would go here -->
+      </div>
 
-function createDocumentItem(name){
-  const div=document.createElement('div');
-  div.className='document-item';
-  div.textContent=name;
-  div.draggable=true;
-  div.dataset.fileName=name;
-  const del=document.createElement('button');
-  del.className='document-delete-btn';
-  del.textContent='×';
-  del.onclick=e=>{e.stopPropagation();deleteDocument(name)};
-  div.appendChild(del);
-  div.addEventListener('dragstart',e=>{div.classList.add('dragging');e.dataTransfer.setData('text/plain',name)});
-  div.addEventListener('dragend',()=>div.classList.remove('dragging'));
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">General</div>
+        <div class="sidebar-item" onclick="showTemplateContent('meeting')">
+          Meeting
+          <div class="arrow-icon"></div>
+        </div>
+        <div class="sidebar-item" onclick="showTemplateContent('speech')">
+          Speech
+          <div class="arrow-icon"></div>
+        </div>
+        <div class="sidebar-item" onclick="showTemplateContent('call')">
+          Call
+          <div class="arrow-icon"></div>
+        </div>
+        <div class="sidebar-item">
+          Interview
+          <div class="arrow-icon"></div>
+        </div>
+        <div class="sidebar-item">
+          Medical
+          <div class="arrow-icon"></div>
+        </div>
+        <div class="sidebar-item">
+          Sales
+          <div class="arrow-icon"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div id="meeting-content" class="hidden">
+        <div class="content-container">
+          <div class="content-box">
+            <div class="content-box-title">Meeting Summary Template</div>
+            <div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div>
+            <div class="content-box-footer">
+              <span>Last used: 2 days ago</span>
+            </div>
+          </div>
+          <div class="content-box">
+            <div class="content-box-title">Detailed Meeting Notes</div>
+            <div class="content-box-description">Comprehensive template for capturing all meeting details.</div>
+            <div class="content-box-footer">
+              <span>Last used: 1 week ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="speech-content" class="hidden">
+        <div class="content-container">
+          <div class="content-box">
+            <div class="content-box-title">Speech Summary</div>
+            <div class="content-box-description">Captures main arguments and key quotes from speeches.</div>
+            <div class="content-box-footer">
+              <span>Last used: 3 days ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="call-content" class="hidden">
+        <div class="content-container">
+          <div class="content-box">
+            <div class="content-box-title">Call Transcript Summary</div>
+            <div class="content-box-description">Summarizes phone call transcripts with key points.</div>
+            <div class="content-box-footer">
+              <span>Last used: Yesterday</span>
+            </div>
+          </div>
+          <div class="content-box">
+            <div class="content-box-title">Customer Support Call</div>
+            <div class="content-box-description">Specialized template for customer support calls.</div>
+            <div class="content-box-footer">
+              <span>Last used: 5 days ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-button">Generate now</button>
+  </div>
+</div>
+
+  <script>
+/* -------------------------------
+   Helpers
+---------------------------------*/
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const root = document.documentElement;
+const app = $('#app');
+
+/* -------------------------------
+   Panel Collapse
+   Frontend Categories & Documents
+---------------------------------*/
+function initWidths(){
+  root.style.setProperty('--ls-w', '220px');
+  root.style.setProperty('--us-w', '260px');
+}
+initWidths();
+
+function applyCollapse(ls,us){
+  app.classList.toggle('collapse-ls',!ls);
+  app.classList.toggle('collapse-us',!us);
+  app.classList.toggle('collapse-both',!ls&&!us);
+
+  const btnLS = $('#btnLS');
+  const btnUS = $('#btnUS');
+  if(btnLS){ btnLS.textContent = ls ? '«' : '»'; }
+  if(btnUS){ btnUS.textContent = us ? '«' : '»'; }
+}
+
+function state(){
+  return{
+    hasLS:!app.classList.contains('collapse-ls'),
+    hasUS:!app.classList.contains('collapse-us')
+  }
+}
+
+function initResizeButtons() {
+  $('#btnLS').textContent = '«';
+  $('#btnUS').textContent = '«';
+let categories = JSON.parse(localStorage.getItem('categories') || '[]');
+let documents = [
+  { filename: "Doc1.pdf", category: null },
+  { filename: "Doc2.pdf", category: null },
+  { filename: "Doc3.pdf", category: null }
+];
+
+// Save categories to localStorage
+function saveCategories() {
+  localStorage.setItem('categories', JSON.stringify(categories));
+}
+
+$('#btnLS').onclick=()=>{
+  const s=state();
+  applyCollapse(!s.hasLS,s.hasUS);
+};
+
+$('#btnUS').onclick=()=>{
+  const s=state();
+  applyCollapse(s.hasLS,!s.hasUS);
+};
+
+/* -------------------------------
+   Template Modal
+   Render Categories
+---------------------------------*/
+$('#downloadBtn').onclick=()=>{
+  alert('Download functionality will be implemented here');
+};
+function loadCategories() {
+  $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
+
+  categories.forEach((cat, index) => {
+    const categoryEl = document.createElement('div');
+    categoryEl.className = 'category';
+    categoryEl.dataset.category = index;
+    categoryEl.innerHTML = `
+      <div class="category-title">${cat}</div>
+      <button class="delete-category">×</button>
+    `;
+
+    // Delete category
+    categoryEl.querySelector('.delete-category').onclick = (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete category "${cat}"?`)) {
+        categories.splice(index, 1);
+        saveCategories();
+        loadCategories();
+        renderDocuments();
+      }
+    };
+
+    // Click to filter documents
+    categoryEl.addEventListener('click', () => {
+      $('#current-category').textContent = `Showing: ${cat}`;
+      $$('.category').forEach(c => c.classList.remove('active-category'));
+      categoryEl.classList.add('active-category');
+      renderDocuments(index);
+    });
+
+$('#generateBtn').onclick=()=>{
+  $('#templateSelectorModal').classList.remove('hidden');
+  showTemplateContent('meeting');
+  $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
+};
+    // Enable drop
+    makeCategoryDroppable(categoryEl, index);
+
+function showTemplateContent(contentId) {
+  document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
+    el.classList.add('hidden');
+  });
+  const contentElement = document.getElementById(contentId + '-content');
+  if (contentElement) {
+    contentElement.classList.remove('hidden');
+  }
+  document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
+    el.classList.remove('active');
+    $('.category[data-category="all"]').after(categoryEl);
+  });
+  event.currentTarget.classList.add('active');
+}
+
+document.querySelector('.template-selector-modal .generate-button').onclick = function() {
+  alert('Generating summary with selected template...');
+  $('#templateSelectorModal').classList.add('hidden');
+};
+
+$('#templateSelectorModal').onclick = function(e) {
+  if (e.target === this) {
+    this.classList.add('hidden');
+// Add category
+$('#addCategoryBtn').onclick = () => {
+  const name = prompt('Enter new category name:');
+  if (name && name.trim()) {
+    categories.push(name.trim());
+    saveCategories();
+    loadCategories();
+  }
+};
+
+/* -------------------------------
+   Documents (Draggable)
+   Drag & Drop Documents
+---------------------------------*/
+function createDocumentItem(doc) {
+function createDocumentItem(doc, docIndex) {
+  const div = document.createElement('div');
+  div.className = 'document-item';
+  div.textContent = doc.filename;
+  div.draggable = true; 
+  div.dataset.docId = doc.id;
+  div.draggable = true;
+  div.dataset.docIndex = docIndex;
+
+  // click = open
+  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
+  // Drag start
+  div.addEventListener('dragstart', (e) => {
+    div.classList.add('dragging');
+    e.dataTransfer.setData('docIndex', docIndex);
+  });
+
+  // delete
+  div.addEventListener('dragend', () => {
+    div.classList.remove('dragging');
+  });
+
+  // Delete document
+  const delBtn = document.createElement('button');
+  delBtn.className = 'document-delete-btn';
+  delBtn.textContent = '×';
+  delBtn.onclick = async (e) => {
+  delBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (confirm(`Delete "${doc.filename}"?`)) {
+      await fetch(`/delete-document/${doc.id}`, { method: 'DELETE' });
+      loadDocuments();
+      documents.splice(docIndex, 1);
+      renderDocuments();
+    }
+  };
+  div.appendChild(delBtn);
+
+  // drag event
+  div.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('docId', doc.id);
+  });
+
   return div;
 }
 
-function deleteDocument(n){
-  for(const c in documents) documents[c].delete(n);
-  displayDocuments();
-}
+/* -------------------------------
+   Make Categories Drop Targets
+---------------------------------*/
+function makeCategoryDroppable(categoryEl, catId) {
+// Make category a drop target
+function makeCategoryDroppable(categoryEl, catIndex) {
+  categoryEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    categoryEl.classList.add('drop-hover');
+@@ -637,135 +618,49 @@
+    categoryEl.classList.remove('drop-hover');
+  });
 
-function displayDocuments(){
-  const cont=$('#documents-container');
-  cont.innerHTML='';
-  $('#current-category').textContent=`Showing: ${getCategoryName(currentCategory)}`;
-  const list=currentCategory==='all'?Array.from(documents.all):Array.from(documents[currentCategory]||[]);
-  list.forEach(f=>cont.appendChild(createDocumentItem(f)))
-}
+  categoryEl.addEventListener('drop', async (e) => {
+  categoryEl.addEventListener('drop', (e) => {
+    e.preventDefault();
+    categoryEl.classList.remove('drop-hover');
 
-function getCategoryName(id){
-  if(id==='all') return 'All Documents';
-  const el=$(`.category[data-category="${id}"]`);
-  return el?el.querySelector('.category-title').textContent:id;
-}
-
-function addCategory(name){
-  const id=name.toLowerCase().replace(/\s+/g,'-');
-  if(categories.includes(id)) return alert('Category exists');
-  categories.push(id); documents[id]=new Set();
-  renderCategories();
-}
-
-function renderCategories(){
-  $$('.category:not([data-category="all"])').forEach(el=>el.remove());
-  categories.forEach(c=>{
-    const el=document.createElement('div');
-    el.className='category';
-    el.dataset.category=c;
-    const t=document.createElement('div');
-    t.className='category-title';
-    t.textContent=c;
-    const del=document.createElement('button');
-    del.className='delete-category';
-    del.textContent='×';
-    del.onclick=e=>{e.stopPropagation();deleteCategory(c)};
-    el.appendChild(t); el.appendChild(del);
-    $('.category[data-category="all"]').after(el);
-    el.onclick=()=>setCurrentCategory(c);
-    setupDropZone(el);
+    const docId = e.dataTransfer.getData('docId');
+    if (docId) {
+      try {
+        await fetch('/assign-category', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentId: docId, categoryId: catId })
+        });
+        loadDocuments(catId);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to assign document to category');
+      }
+    const docIndex = e.dataTransfer.getData('docIndex');
+    if (docIndex !== '') {
+      documents[docIndex].category = catIndex;
+      renderDocuments(catIndex);
+    }
   });
 }
 
-function setCurrentCategory(c){
-  currentCategory=c;
-  $$('.category').forEach(x=>x.classList.remove('active-category'));
-  $(`.category[data-category="${c}"]`).classList.add('active-category');
-  displayDocuments()
+/* -------------------------------
+   Categories
+   Render Documents
+---------------------------------*/
+async function loadCategories() {
+  try {
+    const res = await fetch('/get-categories');
+    const cats = await res.json();
+
+    $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
+
+    cats.forEach(cat => {
+      const categoryEl = document.createElement('div');
+      categoryEl.className = 'category';
+      categoryEl.dataset.category = cat.id;
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'category-title';
+      titleEl.textContent = cat.name;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-category';
+      deleteBtn.textContent = '×';
+      deleteBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete category "${cat.name}"?`)) {
+          await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
+          loadCategories();
+        }
+      };
+
+      categoryEl.appendChild(titleEl);
+      categoryEl.appendChild(deleteBtn);
+
+      // enable drop
+      makeCategoryDroppable(categoryEl, cat.id);
+
+      $('.category[data-category="all"]').after(categoryEl);
+
+      categoryEl.addEventListener('click', () => {
+        loadDocuments(cat.id);
+        $$('.category').forEach(c => c.classList.remove('active-category'));
+        categoryEl.classList.add('active-category');
+      });
+    });
+  } catch (err) {
+    console.error("Failed to load categories:", err);
+  }
+}
+function renderDocuments(filterCat = null) {
+  const container = $('#documents-container');
+  container.innerHTML = '';
+
+// add category
+$('#addCategoryBtn').onclick = async () => {
+  const name = prompt('Enter new category name:');
+  if (name && name.trim()) {
+    try {
+      const res = await fetch('/add-category', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() })
+      });
+      if (res.ok) {
+        loadCategories();
+      } else {
+        alert('Failed to add category');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error adding category');
+  documents.forEach((doc, idx) => {
+    if (filterCat === null || doc.category === filterCat) {
+      container.appendChild(createDocumentItem(doc, idx));
+    }
+  }
+};
+
+/* -------------------------------
+   Load Documents
+---------------------------------*/
+async function loadDocuments(categoryId = null) {
+  try {
+    const url = categoryId ? `/get-documents?category=${categoryId}` : '/get-documents';
+    const res = await fetch(url);
+    const docs = await res.json();
+
+    const container = $('#documents-container');
+    container.innerHTML = '';
+    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+  } catch (err) {
+    console.error("Failed to load documents:", err);
+  }
+  });
 }
 
-function setupDropZone(el){
-  el.addEventListener('dragover',e=>e.preventDefault());
-  el.addEventListener('drop',e=>{
-    e.preventDefault();
-    const f=e.dataTransfer.getData('text/plain');
-    const cat=el.dataset.category;
-    if(cat==='all') return;
-    documents[cat].add(f);
-    documents.all.delete(f);
-    if(currentCategory===cat||currentCategory==='all') displayDocuments()
-  })
-}
+/* -------------------------------
+   Init
+---------------------------------*/
+document.addEventListener('DOMContentLoaded', () => {
+  initResizeButtons();
+  const s = state();
+  if($('#btnLS')) $('#btnLS').textContent = s.hasLS ? '«' : '»';
+  if($('#btnUS')) $('#btnUS').textContent = s.hasUS ? '«' : '»';
 
-function deleteCategory(id){
-  if(id==='all') return;
-  categories=categories.filter(c=>c!==id);
-  delete documents[id];
-  if(currentCategory===id) setCurrentCategory('all');
-  renderCategories();
-}
+  loadCategories();
+  loadDocuments();
 
-$('#addCategoryBtn').onclick=()=>{
-  const n=prompt('Enter new category name:');
-  if(n&&n.trim()) addCategory(n.trim())
-}
+  // Default: show All Documents
+  $('.category[data-category="all"]').addEventListener('click', () => {
+    loadDocuments();
+    $('#current-category').textContent = "Showing: All Documents";
+    $$('.category').forEach(c => c.classList.remove('active-category'));
+    $('.category[data-category="all"]').classList.add('active-category');
+    renderDocuments();
+  });
 
-$('#uploadForm').onsubmit=e=>{
-  e.preventDefault();
-  const files=e.target.querySelector('input[type=file]').files;
-  for(let f of files) documents.all.add(f.name);
-  if(currentCategory==='all') displayDocuments();
-  e.target.reset()
-}
-
-$('.category[data-category="all"]').onclick=()=>setCurrentCategory('all');
-setupDropZone($('.category[data-category="all"]'));
-setCurrentCategory('all');
+  renderDocuments();
+});
 </script>
+
 </body>
 </html>
+
