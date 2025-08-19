@@ -502,152 +502,154 @@
 </div>
 
 <script>
-   
-    const $ = selector => document.querySelector(selector);
-    const $$= selector => document.querySelectorAll(selector);
-    const app = $('#app');
   
-    function initResizeButtons() {
-      $('#btnLS').textContent = '«';
-      $('#btnUS').textContent = '«';
-    }
-  
-    // Add these new functions for state management
-    function state() {
-      return {
-        hasLS: !app.classList.contains('collapse-ls'),
-        hasUS: !app.classList.contains('collapse-us')
-      }
-    }
-  
-    function applyCollapse(ls, us) {
-      app.classList.toggle('collapse-ls', !ls);
-      app.classList.toggle('collapse-us', !us);
-      app.classList.toggle('collapse-both', !ls && !us);
-      
-      // Update button directions
-      const btnLS = document.getElementById('btnLS');
-      const btnUS = document.getElementById('btnUS');
-      if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
-      if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
-    }
-  
-    // Update the button click handlers
-    $('#btnLS').onclick = () => {
-      const s = state();
-      applyCollapse(!s.hasLS, s.hasUS);
-    };
-  
-    $('#btnUS').onclick = () => {
-      const s = state();
-      applyCollapse(s.hasLS, !s.hasUS);
-    };
-  
+const $ = selector => document.querySelector(selector);
+const $$= selector => document.querySelectorAll(selector);
+const app = $('#app');
 
-  function createDocumentItem(doc) {
-    const div = document.createElement('div');
-    div.className = 'document-item';
-    div.textContent = doc.filename;
-    div.setAttribute("draggable", true);
+function initResizeButtons() {
+  $('#btnLS').textContent = '«';
+  $('#btnUS').textContent = '«';
+}
 
-    div.addEventListener("dragstart", () => div.classList.add("dragging"));
-    div.addEventListener("dragend", () => div.classList.remove("dragging"));
-    div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'document-delete-btn';
-    delBtn.textContent = '×';
-    delBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (confirm(`Delete "${doc.filename}"?`)) {
-        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
-        loadDocuments();
-      }
-    };
-    div.appendChild(delBtn);
-    return div;
+// State & collapse buttons
+function state() {
+  return {
+    hasLS: !app.classList.contains('collapse-ls'),
+    hasUS: !app.classList.contains('collapse-us')
   }
+}
+function applyCollapse(ls, us) {
+  app.classList.toggle('collapse-ls', !ls);
+  app.classList.toggle('collapse-us', !us);
+  app.classList.toggle('collapse-both', !ls && !us);
+  $('#btnLS').textContent = ls ? '«' : '»';
+  $('#btnUS').textContent = us ? '«' : '»';
+}
+$('#btnLS').onclick = () => { const s = state(); applyCollapse(!s.hasLS, s.hasUS); };
+$('#btnUS').onclick = () => { const s = state(); applyCollapse(s.hasLS, !s.hasUS); };
 
-  async function loadDocuments() {
-    const res = await fetch('/get-documents');
-    const docs = await res.json();
+// ===== DOCUMENTS =====
+function createDocumentItem(doc) {
+  const div = document.createElement('div');
+  div.className = 'document-item';
+  div.textContent = doc.filename;
+  div.setAttribute("draggable", true);
 
-    const container = $('#documents-container');
-    container.innerHTML = '';
-    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-  }
+  div.addEventListener("dragstart", () => div.classList.add("dragging"));
+  div.addEventListener("dragend", () => div.classList.remove("dragging"));
+  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons();
-    loadDocuments();
-  });
+  const delBtn = document.createElement('button');
+  delBtn.className = 'document-delete-btn';
+  delBtn.textContent = '×';
+  delBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (confirm(`Delete "${doc.filename}"?`)) {
+      await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+      loadDocuments();
+    }
+  };
+  div.appendChild(delBtn);
+  return div;
+}
 
-  document.addEventListener("DOMContentLoaded", function () {
-  const addCategoryBtn = document.getElementById("addCategoryBtn");
+async function loadDocuments() {
+  const res = await fetch('/get-documents');
+  const docs = await res.json();
+  const container = $('#documents-container');
+  container.innerHTML = '';
+  docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+}
+
+// ===== CATEGORIES =====
+async function loadCategories() {
+  const res = await fetch('/get-categories'); // backend: return [{id,name}]
+  const cats = await res.json();
+
   const sidebar = document.getElementById("ls");
+  sidebar.querySelectorAll(".category:not([data-category='all'])").forEach(el => el.remove());
+  const accountSection = sidebar.querySelector(".account-section");
 
-  // Enable drag-drop for categories
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".category").forEach(cat => {
-    cat.addEventListener("dragover", e => e.preventDefault());
-    cat.addEventListener("drop", e => {
+  cats.forEach(cat => {
+    const newCategory = document.createElement("div");
+    newCategory.classList.add("category");
+    newCategory.dataset.category = cat.id;
+
+    const categoryTitle = document.createElement("div");
+    categoryTitle.classList.add("category-title");
+    categoryTitle.textContent = cat.name;
+
+    // delete button only for subfolders
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete-category");
+    deleteBtn.textContent = "×";
+    deleteBtn.onclick = async () => {
+      if (confirm(`Delete "${cat.name}"?`)) {
+        await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
+        loadCategories();
+      }
+    };
+
+    newCategory.appendChild(categoryTitle);
+    newCategory.appendChild(deleteBtn);
+
+    // Drag-drop target
+    newCategory.addEventListener("dragover", e => e.preventDefault());
+    newCategory.addEventListener("drop", async e => {
       e.preventDefault();
       const dragged = document.querySelector(".dragging");
       if (dragged) {
-        cat.appendChild(dragged);
-        
+        newCategory.appendChild(dragged);
+        const docId = dragged.getAttribute("data-id");
+        await fetch(`/move-document/${docId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ categoryId: cat.id })
+        });
       }
     });
-  });
-});
 
-    
-  addCategoryBtn.addEventListener("click", function () {
+    sidebar.insertBefore(newCategory, accountSection);
+  });
+}
+
+// ===== ADD NEW CATEGORY =====
+document.addEventListener("DOMContentLoaded", () => {
+  const addCategoryBtn = document.getElementById("addCategoryBtn");
+  addCategoryBtn.addEventListener("click", async () => {
     const categoryName = prompt("Enter new category name:");
     if (categoryName) {
-      // Create new category div
-      const newCategory = document.createElement("div");
-      newCategory.classList.add("category");
-      newCategory.dataset.category = categoryName.toLowerCase().replace(/\s+/g, "-");
-
-      // Add inner title
-      const categoryTitle = document.createElement("div");
-      categoryTitle.classList.add("category-title");
-      categoryTitle.textContent = categoryName;
-
-      newCategory.appendChild(categoryTitle);
-
-      // Insert before the account section
-      const accountSection = sidebar.querySelector(".account-section");
-      sidebar.insertBefore(newCategory, accountSection);
+      await fetch("/add-category", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: categoryName })
+      });
+      loadCategories();
     }
   });
+
+  initResizeButtons();
+  loadDocuments();
+  loadCategories();
 });
 
-  const modal = document.getElementById("templateSelectorModal");
+// ===== MODAL GENERATE =====
+const modal = document.getElementById("templateSelectorModal");
 const generateBtn = document.getElementById("generateBtn");
 const modalGenerateBtn = modal.querySelector(".generate-button");
 
-// open modal
-generateBtn.addEventListener("click", () => {
-  modal.classList.remove("hidden");
-});
-
-// close modal when clicking outside
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.classList.add("hidden");
-  }
-});
-
-// handle "Generate now"
+generateBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
 modalGenerateBtn.addEventListener("click", () => {
-  alert("Generating summary…"); 
+  alert("Generating summary…");
   modal.classList.add("hidden");
 });
-
+  
 </script>
+
 
 </body>
 </html>
+
 
