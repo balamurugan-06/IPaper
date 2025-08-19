@@ -30,341 +30,39 @@
     .btn.brand{background:var(--brand);color:#fff;}
     .btn.inline{width:auto;margin:0 8px 0 0;padding:8px 10px;}
     .muted{color:var(--muted);}
-    /* 移除分割线的拖拽样式 */
-    .resizer{
-      position:relative;
-      background:transparent;
-      width:var(--bar-w);
-    }
-    .resizer::after{
-      content:"";
-      position:absolute;
-      top:0;
-      bottom:0;
-      left:calc(50% - 1px);
-      width:2px;
-      background:#e0e0e0;
-    }
+    .resizer{position:relative;background:transparent;width:var(--bar-w);}
+    .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:2px;background:#e0e0e0;}
     .topbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px;background:var(--card);border-bottom:1px solid #eee;}
     .upload-card{background:#fafafa;border:1px dashed #ddd;border-radius:12px;padding:14px;}
     input[type="file"]{width:100%;margin:10px 0;}
     .logout{display:block;margin-top:12px;color:var(--muted);text-decoration:none;}
-    .collapse-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      width: 18px;
-      height: 24px;
-      border: none;
-      border-radius: 4px;
-      background: #ddd;
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1;
-    }
-    .collapse-btn:hover { background: #bbb; }
-    .document-item {
-      position: relative;
-      padding: 8px 24px 8px 8px;
-      margin: 4px 0;
-      background: #f0f0f0;
-      border-radius: 6px;
-      cursor: grab;
-      border: 1px solid #ddd;
-    }
-    .document-item:hover {
-      background: #e0e0e0;
-    }
-    .document-item.dragging {
-      opacity: 0.5;
-    }
-    .document-delete-btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
-      border: none;
-      background: #ffebee;
-      border-radius: 50%;
-      cursor: pointer;
-      color: #c62828;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-    .document-delete-btn:hover {
-      background: #ffcdd2;
-    }
-    .category {
-      margin-bottom: 12px;
-      position: relative;
-      padding-right: 30px;
-    }
-    .category-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .documents-list {
-      min-height: 20px;
-      padding: 4px;
-      border-radius: 6px;
-      background: #f8f8f8;
-    }
-    .active-category {
-      background: #e8f5e9;
-    }
-    .delete-category {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 20px;
-      height: 20px;
-      border: none;
-      background: #ffebee;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #c62828;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .delete-category:hover {
-      background: #ffcdd2;
-    }
-    .action-btn {
-      background: var(--brand);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-    .action-btn:hover {
-      opacity: 0.9;
-    }
-    .action-btn.secondary {
-      background: #4caf50;
-    }
-    .topbar-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 8px;
-    }
-    .add-category-icon {
-      background: var(--brand);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .add-category-icon:hover {
-      opacity: 0.9;
-    }
-    /* When a sidebar is collapsed, fully hide its visuals (no shadow, no padding, no overflow). */
-    .app.collapse-ls #ls,
-    .app.collapse-both #ls {
-      box-shadow: none !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      width: 0 !important;
-      min-width: 0 !important;
-    }
-    /* Hide the left resizer's vertical line when LS is collapsed to avoid a pale seam */
-    .app.collapse-ls #bar-ls::after,
-    .app.collapse-both #bar-ls::after { opacity: 0; }
-    .app.collapse-us #us,
-    .app.collapse-both #us {
-      box-shadow: none !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      width: 0 !important;
-      min-width: 0 !important;
-    }
-    /* Hide the right resizer's vertical line when US is collapsed */
-    .app.collapse-us #bar-us::after,
-    .app.collapse-both #bar-us::after { opacity: 0; }
-    /* Prevent the collapsed pane from capturing clicks */
-    .app.collapse-ls #ls,
-    .app.collapse-us #us { pointer-events: none; }
-    /* Keep the resizer buttons clickable */
-    #bar-ls, #bar-us { position: relative; }
-    #bar-ls .collapse-btn, #bar-us .collapse-btn { pointer-events: auto; }
-    /* Stick account section to bottom of left sidebar */
-    .ls {
-      display: flex;
-      flex-direction: column;
-    }
-    .account-section {
-      margin-top: auto; /* push to bottom */
-    }
-
-    /* Template Selector Modal Styles */
-    .template-selector-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1001;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .template-selector-container {
-      width: 70%;
-      height: 70%;
-      max-width: 800px;
-      max-height: 600px;
-      background: white;
-      border-radius: 8px;
-      display: flex;
-      position: relative;
-    }
-
-    .template-selector-modal .sidebar {
-      width: 200px;
-      background-color: #f8f8f8;
-      border-right: 1px solid #e0e0e0;
-      padding: 15px;
-      overflow-y: auto;
-    }
-
-    .template-selector-modal .sidebar-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-
-    .template-selector-modal .sidebar-section {
-      margin-bottom: 20px;
-    }
-
-    .template-selector-modal .sidebar-section-title {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    .template-selector-modal .sidebar-item {
-      padding: 6px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .template-selector-modal .sidebar-item:hover {
-      background-color: #e9e9e9;
-    }
-
-    .template-selector-modal .sidebar-item.active {
-      background-color: #e0e0e0;
-      font-weight: bold;
-    }
-
-    .template-selector-modal .arrow-icon {
-      width: 0;
-      height: 0;
-      border-top: 4px solid transparent;
-      border-bottom: 4px solid transparent;
-      border-left: 4px solid #666;
-      margin-left: 8px;
-    }
-
-    .template-selector-modal .content-area {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .template-selector-modal .content-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-content: flex-start;
-    }
-
-    .template-selector-modal .content-box {
-      width: 240px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .template-selector-modal .content-box-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .template-selector-modal .content-box-description {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .template-selector-modal .content-box-footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #999;
-    }
-
-    .template-selector-modal .generate-button {
-      position: absolute;
-      bottom: 15px;
-      right: 15px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .template-selector-modal .generate-button:hover {
-      background-color: #0069d9;
-    }
-
-    .hidden {
-      display: none;
-    }
+    .collapse-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;width:18px;height:24px;border:none;border-radius:4px;background:#ddd;cursor:pointer;font-size:12px;line-height:1;}
+    .collapse-btn:hover{background:#bbb;}
+    .document-item{position:relative;padding:8px 24px 8px 8px;margin:4px 0;background:#f0f0f0;border-radius:6px;cursor:grab;border:1px solid #ddd;}
+    .document-item:hover{background:#e0e0e0;}
+    .document-item.dragging{opacity:.5;}
+    .document-delete-btn{position:absolute;top:2px;right:2px;width:16px;height:16px;border:none;background:#ffebee;border-radius:50%;cursor:pointer;color:#c62828;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0;}
+    .document-delete-btn:hover{background:#ffcdd2;}
+    .category{margin-bottom:12px;position:relative;padding-right:30px;}
+    .category-title{font-weight:bold;margin-bottom:6px;}
+    .documents-list{min-height:20px;padding:4px;border-radius:6px;background:#f8f8f8;}
+    .active-category{background:#e8f5e9;}
+    .delete-category{position:absolute;top:0;right:0;width:20px;height:20px;border:none;background:#ffebee;border-radius:4px;cursor:pointer;color:#c62828;font-size:12px;display:flex;align-items:center;justify-content:center;}
+    .delete-category:hover{background:#ffcdd2;}
+    .action-btn{background:var(--brand);color:white;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;font-weight:600;margin-left:8px;}
+    .action-btn.secondary{background:#4caf50;}
+    .topbar-actions{margin-left:auto;display:flex;gap:8px;}
+    .add-category-icon{background:var(--brand);color:white;border:none;border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;}
+    .add-category-icon:hover{opacity:.9;}
+    .ls{display:flex;flex-direction:column;}
+    .account-section{margin-top:auto;}
   </style>
 </head>
 <body>
 <div id="app" class="app">
-  
   <aside id="ls" class="sidebar ls">
-    <div class="pane-title">
-      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
-    </div>
-    <div class="category active-category" data-category="all">
-      <div class="category-title">All Documents</div>
-    </div>
+    <div class="pane-title">Categories <button id="addCategoryBtn" class="add-category-icon">+</button></div>
+    <div class="category active-category" data-category="all"><div class="category-title">All Documents</div></div>
     <div class="account-section">
       <div class="pane-title">Account</div>
       <button class="btn">User Feedback</button>
@@ -373,14 +71,11 @@
       <a class="logout" href="/logout">Logout</a>
     </div>
   </aside>
-
-  <div id="bar-ls" class="resizer">
-    <button id="btnLS" class="collapse-btn">«</button>
-  </div>
+  <div id="bar-ls" class="resizer"><button id="btnLS" class="collapse-btn">«</button></div>
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
-      <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
+      <form id="uploadForm" action="#" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required multiple />
         <button type="submit" class="btn brand" style="width:100%">Upload</button>
       </form>
@@ -389,9 +84,7 @@
     <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
     <div id="documents-container" class="documents-list"></div>
   </aside>
-  <div id="bar-us" class="resizer">
-    <button id="btnUS" class="collapse-btn">«</button>
-  </div>
+  <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn">«</button></div>
   <main class="main">
     <div class="topbar">
       <div class="muted">Welcome, {{ name }}</div>
@@ -402,276 +95,127 @@
       </div>
     </div>
     <h1>Welcome, {{ name }}</h1>
-    <p class="muted"></p>
+    <p class="muted">上传文件后，可以从右侧栏拖拽到左侧分类中。</p>
   </main>
 </div>
 
-<!-- Template Selector Modal -->
-<div id="templateSelectorModal" class="template-selector-modal hidden">
-  <div class="template-selector-container">
-    <div class="sidebar">
-      <div class="sidebar-title">Select Summary Template</div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Recently Used</div>
-        <!-- Items would go here -->
-      </div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">General</div>
-        <div class="sidebar-item" onclick="showTemplateContent('meeting')">
-          Meeting
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item" onclick="showTemplateContent('speech')">
-          Speech
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item" onclick="showTemplateContent('call')">
-          Call
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Interview
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Medical
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Sales
-          <div class="arrow-icon"></div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="content-area">
-      <div id="meeting-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Meeting Summary Template</div>
-            <div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div>
-            <div class="content-box-footer">
-              <span>Last used: 2 days ago</span>
-            </div>
-          </div>
-          <div class="content-box">
-            <div class="content-box-title">Detailed Meeting Notes</div>
-            <div class="content-box-description">Comprehensive template for capturing all meeting details.</div>
-            <div class="content-box-footer">
-              <span>Last used: 1 week ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const app=$('#app');
+$('#btnLS').onclick=()=>app.classList.toggle('collapse-ls');
+$('#btnUS').onclick=()=>app.classList.toggle('collapse-us');
 
-      <div id="speech-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Speech Summary</div>
-            <div class="content-box-description">Captures main arguments and key quotes from speeches.</div>
-            <div class="content-box-footer">
-              <span>Last used: 3 days ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="call-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Call Transcript Summary</div>
-            <div class="content-box-description">Summarizes phone call transcripts with key points.</div>
-            <div class="content-box-footer">
-              <span>Last used: Yesterday</span>
-            </div>
-          </div>
-          <div class="content-box">
-            <div class="content-box-title">Customer Support Call</div>
-            <div class="content-box-description">Specialized template for customer support calls.</div>
-            <div class="content-box-footer">
-              <span>Last used: 5 days ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <button class="generate-button">Generate now</button>
-  </div>
-</div>
+const documents={all:new Set()};
+let categories=[];
+let currentCategory='all';
 
-  <script>
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-
-/* -------------------------------
-   Frontend Categories & Documents
----------------------------------*/
-let categories = JSON.parse(localStorage.getItem('categories') || '[]');
-let documents = [
-  { filename: "Doc1.pdf", category: null },
-  { filename: "Doc2.pdf", category: null },
-  { filename: "Doc3.pdf", category: null }
-];
-
-// Save categories to localStorage
-function saveCategories() {
-  localStorage.setItem('categories', JSON.stringify(categories));
-}
-
-/* -------------------------------
-   Render Categories
----------------------------------*/
-function loadCategories() {
-  $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
-
-  categories.forEach((cat, index) => {
-    const categoryEl = document.createElement('div');
-    categoryEl.className = 'category';
-    categoryEl.dataset.category = index;
-    categoryEl.innerHTML = `
-      <div class="category-title">${cat}</div>
-      <button class="delete-category">×</button>
-    `;
-
-    // Delete category
-    categoryEl.querySelector('.delete-category').onclick = (e) => {
-      e.stopPropagation();
-      if (confirm(`Delete category "${cat}"?`)) {
-        categories.splice(index, 1);
-        saveCategories();
-        loadCategories();
-        renderDocuments();
-      }
-    };
-
-    // Click to filter documents
-    categoryEl.addEventListener('click', () => {
-      $('#current-category').textContent = `Showing: ${cat}`;
-      $$('.category').forEach(c => c.classList.remove('active-category'));
-      categoryEl.classList.add('active-category');
-      renderDocuments(index);
-    });
-
-    // Enable drop
-    makeCategoryDroppable(categoryEl, index);
-
-    $('.category[data-category="all"]').after(categoryEl);
-  });
-}
-
-// Add category
-$('#addCategoryBtn').onclick = () => {
-  const name = prompt('Enter new category name:');
-  if (name && name.trim()) {
-    categories.push(name.trim());
-    saveCategories();
-    loadCategories();
-  }
-};
-
-/* -------------------------------
-   Drag & Drop Documents
----------------------------------*/
-function createDocumentItem(doc, docIndex) {
-  const div = document.createElement('div');
-  div.className = 'document-item';
-  div.textContent = doc.filename;
-  div.draggable = true;
-  div.dataset.docIndex = docIndex;
-
-  // Drag start
-  div.addEventListener('dragstart', (e) => {
-    div.classList.add('dragging');
-    e.dataTransfer.setData('docIndex', docIndex);
-  });
-
-  div.addEventListener('dragend', () => {
-    div.classList.remove('dragging');
-  });
-
-  // Delete document
-  const delBtn = document.createElement('button');
-  delBtn.className = 'document-delete-btn';
-  delBtn.textContent = '×';
-  delBtn.onclick = (e) => {
-    e.stopPropagation();
-    if (confirm(`Delete "${doc.filename}"?`)) {
-      documents.splice(docIndex, 1);
-      renderDocuments();
-    }
-  };
-  div.appendChild(delBtn);
-
+function createDocumentItem(name){
+  const div=document.createElement('div');
+  div.className='document-item';
+  div.textContent=name;
+  div.draggable=true;
+  div.dataset.fileName=name;
+  const del=document.createElement('button');
+  del.className='document-delete-btn';
+  del.textContent='×';
+  del.onclick=e=>{e.stopPropagation();deleteDocument(name)};
+  div.appendChild(del);
+  div.addEventListener('dragstart',e=>{div.classList.add('dragging');e.dataTransfer.setData('text/plain',name)});
+  div.addEventListener('dragend',()=>div.classList.remove('dragging'));
   return div;
 }
 
-// Make category a drop target
-function makeCategoryDroppable(categoryEl, catIndex) {
-  categoryEl.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    categoryEl.classList.add('drop-hover');
-  });
+function deleteDocument(n){
+  for(const c in documents) documents[c].delete(n);
+  displayDocuments();
+}
 
-  categoryEl.addEventListener('dragleave', () => {
-    categoryEl.classList.remove('drop-hover');
-  });
+function displayDocuments(){
+  const cont=$('#documents-container');
+  cont.innerHTML='';
+  $('#current-category').textContent=`Showing: ${getCategoryName(currentCategory)}`;
+  const list=currentCategory==='all'?Array.from(documents.all):Array.from(documents[currentCategory]||[]);
+  list.forEach(f=>cont.appendChild(createDocumentItem(f)))
+}
 
-  categoryEl.addEventListener('drop', (e) => {
-    e.preventDefault();
-    categoryEl.classList.remove('drop-hover');
+function getCategoryName(id){
+  if(id==='all') return 'All Documents';
+  const el=$(`.category[data-category="${id}"]`);
+  return el?el.querySelector('.category-title').textContent:id;
+}
 
-    const docIndex = e.dataTransfer.getData('docIndex');
-    if (docIndex !== '') {
-      documents[docIndex].category = catIndex;
-      renderDocuments(catIndex);
-    }
+function addCategory(name){
+  const id=name.toLowerCase().replace(/\s+/g,'-');
+  if(categories.includes(id)) return alert('Category exists');
+  categories.push(id); documents[id]=new Set();
+  renderCategories();
+}
+
+function renderCategories(){
+  $$('.category:not([data-category="all"])').forEach(el=>el.remove());
+  categories.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='category';
+    el.dataset.category=c;
+    const t=document.createElement('div');
+    t.className='category-title';
+    t.textContent=c;
+    const del=document.createElement('button');
+    del.className='delete-category';
+    del.textContent='×';
+    del.onclick=e=>{e.stopPropagation();deleteCategory(c)};
+    el.appendChild(t); el.appendChild(del);
+    $('.category[data-category="all"]').after(el);
+    el.onclick=()=>setCurrentCategory(c);
+    setupDropZone(el);
   });
 }
 
-/* -------------------------------
-   Render Documents
----------------------------------*/
-function renderDocuments(filterCat = null) {
-  const container = $('#documents-container');
-  container.innerHTML = '';
-
-  documents.forEach((doc, idx) => {
-    if (filterCat === null || doc.category === filterCat) {
-      container.appendChild(createDocumentItem(doc, idx));
-    }
-  });
+function setCurrentCategory(c){
+  currentCategory=c;
+  $$('.category').forEach(x=>x.classList.remove('active-category'));
+  $(`.category[data-category="${c}"]`).classList.add('active-category');
+  displayDocuments()
 }
 
-/* -------------------------------
-   Init
----------------------------------*/
-document.addEventListener('DOMContentLoaded', () => {
-  loadCategories();
+function setupDropZone(el){
+  el.addEventListener('dragover',e=>e.preventDefault());
+  el.addEventListener('drop',e=>{
+    e.preventDefault();
+    const f=e.dataTransfer.getData('text/plain');
+    const cat=el.dataset.category;
+    if(cat==='all') return;
+    documents[cat].add(f);
+    documents.all.delete(f);
+    if(currentCategory===cat||currentCategory==='all') displayDocuments()
+  })
+}
 
-  // Default: show All Documents
-  $('.category[data-category="all"]').addEventListener('click', () => {
-    $('#current-category').textContent = "Showing: All Documents";
-    $$('.category').forEach(c => c.classList.remove('active-category'));
-    $('.category[data-category="all"]').classList.add('active-category');
-    renderDocuments();
-  });
+function deleteCategory(id){
+  if(id==='all') return;
+  categories=categories.filter(c=>c!==id);
+  delete documents[id];
+  if(currentCategory===id) setCurrentCategory('all');
+  renderCategories();
+}
 
-  renderDocuments();
-});
+$('#addCategoryBtn').onclick=()=>{
+  const n=prompt('Enter new category name:');
+  if(n&&n.trim()) addCategory(n.trim())
+}
+
+$('#uploadForm').onsubmit=e=>{
+  e.preventDefault();
+  const files=e.target.querySelector('input[type=file]').files;
+  for(let f of files) documents.all.add(f.name);
+  if(currentCategory==='all') displayDocuments();
+  e.target.reset()
+}
+
+$('.category[data-category="all"]').onclick=()=>setCurrentCategory('all');
+setupDropZone($('.category[data-category="all"]'));
+setCurrentCategory('all');
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
