@@ -502,132 +502,113 @@
 </div>
 
   <script>
-/* -------------------------------
-   Helpers
----------------------------------*/
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
-const root = document.documentElement;
-const app = $('#app');
 
 /* -------------------------------
-   Panel Collapse
+   Frontend Categories & Documents
 ---------------------------------*/
-function initWidths(){
-  root.style.setProperty('--ls-w', '220px');
-  root.style.setProperty('--us-w', '260px');
+let categories = JSON.parse(localStorage.getItem('categories') || '[]');
+let documents = [
+  { filename: "Doc1.pdf", category: null },
+  { filename: "Doc2.pdf", category: null },
+  { filename: "Doc3.pdf", category: null }
+];
+
+// Save categories to localStorage
+function saveCategories() {
+  localStorage.setItem('categories', JSON.stringify(categories));
 }
-initWidths();
-
-function applyCollapse(ls,us){
-  app.classList.toggle('collapse-ls',!ls);
-  app.classList.toggle('collapse-us',!us);
-  app.classList.toggle('collapse-both',!ls&&!us);
-
-  const btnLS = $('#btnLS');
-  const btnUS = $('#btnUS');
-  if(btnLS){ btnLS.textContent = ls ? '«' : '»'; }
-  if(btnUS){ btnUS.textContent = us ? '«' : '»'; }
-}
-
-function state(){
-  return{
-    hasLS:!app.classList.contains('collapse-ls'),
-    hasUS:!app.classList.contains('collapse-us')
-  }
-}
-
-function initResizeButtons() {
-  $('#btnLS').textContent = '«';
-  $('#btnUS').textContent = '«';
-}
-
-$('#btnLS').onclick=()=>{
-  const s=state();
-  applyCollapse(!s.hasLS,s.hasUS);
-};
-
-$('#btnUS').onclick=()=>{
-  const s=state();
-  applyCollapse(s.hasLS,!s.hasUS);
-};
 
 /* -------------------------------
-   Template Modal
+   Render Categories
 ---------------------------------*/
-$('#downloadBtn').onclick=()=>{
-  alert('Download functionality will be implemented here');
-};
+function loadCategories() {
+  $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
 
-$('#generateBtn').onclick=()=>{
-  $('#templateSelectorModal').classList.remove('hidden');
-  showTemplateContent('meeting');
-  $$('.template-selector-modal .sidebar-item')[0].classList.add('active');
-};
+  categories.forEach((cat, index) => {
+    const categoryEl = document.createElement('div');
+    categoryEl.className = 'category';
+    categoryEl.dataset.category = index;
+    categoryEl.innerHTML = `
+      <div class="category-title">${cat}</div>
+      <button class="delete-category">×</button>
+    `;
 
-function showTemplateContent(contentId) {
-  document.querySelectorAll('.template-selector-modal .content-area > div').forEach(el => {
-    el.classList.add('hidden');
+    // Delete category
+    categoryEl.querySelector('.delete-category').onclick = (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete category "${cat}"?`)) {
+        categories.splice(index, 1);
+        saveCategories();
+        loadCategories();
+        renderDocuments();
+      }
+    };
+
+    // Click to filter documents
+    categoryEl.addEventListener('click', () => {
+      $('#current-category').textContent = `Showing: ${cat}`;
+      $$('.category').forEach(c => c.classList.remove('active-category'));
+      categoryEl.classList.add('active-category');
+      renderDocuments(index);
+    });
+
+    // Enable drop
+    makeCategoryDroppable(categoryEl, index);
+
+    $('.category[data-category="all"]').after(categoryEl);
   });
-  const contentElement = document.getElementById(contentId + '-content');
-  if (contentElement) {
-    contentElement.classList.remove('hidden');
-  }
-  document.querySelectorAll('.template-selector-modal .sidebar-item').forEach(el => {
-    el.classList.remove('active');
-  });
-  event.currentTarget.classList.add('active');
 }
 
-document.querySelector('.template-selector-modal .generate-button').onclick = function() {
-  alert('Generating summary with selected template...');
-  $('#templateSelectorModal').classList.add('hidden');
-};
-
-$('#templateSelectorModal').onclick = function(e) {
-  if (e.target === this) {
-    this.classList.add('hidden');
+// Add category
+$('#addCategoryBtn').onclick = () => {
+  const name = prompt('Enter new category name:');
+  if (name && name.trim()) {
+    categories.push(name.trim());
+    saveCategories();
+    loadCategories();
   }
 };
 
 /* -------------------------------
-   Documents (Draggable)
+   Drag & Drop Documents
 ---------------------------------*/
-function createDocumentItem(doc) {
+function createDocumentItem(doc, docIndex) {
   const div = document.createElement('div');
   div.className = 'document-item';
   div.textContent = doc.filename;
-  div.draggable = true; 
-  div.dataset.docId = doc.id;
+  div.draggable = true;
+  div.dataset.docIndex = docIndex;
 
-  // click = open
-  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
+  // Drag start
+  div.addEventListener('dragstart', (e) => {
+    div.classList.add('dragging');
+    e.dataTransfer.setData('docIndex', docIndex);
+  });
 
-  // delete
+  div.addEventListener('dragend', () => {
+    div.classList.remove('dragging');
+  });
+
+  // Delete document
   const delBtn = document.createElement('button');
   delBtn.className = 'document-delete-btn';
   delBtn.textContent = '×';
-  delBtn.onclick = async (e) => {
+  delBtn.onclick = (e) => {
     e.stopPropagation();
     if (confirm(`Delete "${doc.filename}"?`)) {
-      await fetch(`/delete-document/${doc.id}`, { method: 'DELETE' });
-      loadDocuments();
+      documents.splice(docIndex, 1);
+      renderDocuments();
     }
   };
   div.appendChild(delBtn);
 
-  // drag event
-  div.addEventListener('dragstart', (e) => {
-    e.dataTransfer.setData('docId', doc.id);
-  });
-
   return div;
 }
 
-/* -------------------------------
-   Make Categories Drop Targets
----------------------------------*/
-function makeCategoryDroppable(categoryEl, catId) {
+// Make category a drop target
+function makeCategoryDroppable(categoryEl, catIndex) {
   categoryEl.addEventListener('dragover', (e) => {
     e.preventDefault();
     categoryEl.classList.add('drop-hover');
@@ -637,137 +618,52 @@ function makeCategoryDroppable(categoryEl, catId) {
     categoryEl.classList.remove('drop-hover');
   });
 
-  categoryEl.addEventListener('drop', async (e) => {
+  categoryEl.addEventListener('drop', (e) => {
     e.preventDefault();
     categoryEl.classList.remove('drop-hover');
 
-    const docId = e.dataTransfer.getData('docId');
-    if (docId) {
-      try {
-        await fetch('/assign-category', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ documentId: docId, categoryId: catId })
-        });
-        loadDocuments(catId);
-      } catch (err) {
-        console.error(err);
-        alert('Failed to assign document to category');
-      }
+    const docIndex = e.dataTransfer.getData('docIndex');
+    if (docIndex !== '') {
+      documents[docIndex].category = catIndex;
+      renderDocuments(catIndex);
     }
   });
 }
 
 /* -------------------------------
-   Categories
+   Render Documents
 ---------------------------------*/
-async function loadCategories() {
-  try {
-    const res = await fetch('/get-categories');
-    const cats = await res.json();
+function renderDocuments(filterCat = null) {
+  const container = $('#documents-container');
+  container.innerHTML = '';
 
-    $$('#ls .category:not([data-category="all"])').forEach(el => el.remove());
-
-    cats.forEach(cat => {
-      const categoryEl = document.createElement('div');
-      categoryEl.className = 'category';
-      categoryEl.dataset.category = cat.id;
-
-      const titleEl = document.createElement('div');
-      titleEl.className = 'category-title';
-      titleEl.textContent = cat.name;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'delete-category';
-      deleteBtn.textContent = '×';
-      deleteBtn.onclick = async (e) => {
-        e.stopPropagation();
-        if (confirm(`Delete category "${cat.name}"?`)) {
-          await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
-          loadCategories();
-        }
-      };
-
-      categoryEl.appendChild(titleEl);
-      categoryEl.appendChild(deleteBtn);
-
-      // enable drop
-      makeCategoryDroppable(categoryEl, cat.id);
-
-      $('.category[data-category="all"]').after(categoryEl);
-
-      categoryEl.addEventListener('click', () => {
-        loadDocuments(cat.id);
-        $$('.category').forEach(c => c.classList.remove('active-category'));
-        categoryEl.classList.add('active-category');
-      });
-    });
-  } catch (err) {
-    console.error("Failed to load categories:", err);
-  }
-}
-
-// add category
-$('#addCategoryBtn').onclick = async () => {
-  const name = prompt('Enter new category name:');
-  if (name && name.trim()) {
-    try {
-      const res = await fetch('/add-category', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() })
-      });
-      if (res.ok) {
-        loadCategories();
-      } else {
-        alert('Failed to add category');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Error adding category');
+  documents.forEach((doc, idx) => {
+    if (filterCat === null || doc.category === filterCat) {
+      container.appendChild(createDocumentItem(doc, idx));
     }
-  }
-};
-
-/* -------------------------------
-   Load Documents
----------------------------------*/
-async function loadDocuments(categoryId = null) {
-  try {
-    const url = categoryId ? `/get-documents?category=${categoryId}` : '/get-documents';
-    const res = await fetch(url);
-    const docs = await res.json();
-
-    const container = $('#documents-container');
-    container.innerHTML = '';
-    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-  } catch (err) {
-    console.error("Failed to load documents:", err);
-  }
+  });
 }
 
 /* -------------------------------
    Init
 ---------------------------------*/
 document.addEventListener('DOMContentLoaded', () => {
-  initResizeButtons();
-  const s = state();
-  if($('#btnLS')) $('#btnLS').textContent = s.hasLS ? '«' : '»';
-  if($('#btnUS')) $('#btnUS').textContent = s.hasUS ? '«' : '»';
-
   loadCategories();
-  loadDocuments();
 
+  // Default: show All Documents
   $('.category[data-category="all"]').addEventListener('click', () => {
-    loadDocuments();
+    $('#current-category').textContent = "Showing: All Documents";
     $$('.category').forEach(c => c.classList.remove('active-category'));
     $('.category[data-category="all"]').classList.add('active-category');
+    renderDocuments();
   });
+
+  renderDocuments();
 });
 </script>
-
 </body>
 </html>
+
 
 
 
