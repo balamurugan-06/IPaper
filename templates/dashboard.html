@@ -502,23 +502,46 @@
 </div>
 
 <script>
-  const $ = selector => document.querySelector(selector);
-  const $$= selector => document.querySelectorAll(selector);
-  const app = $('#app');
-
-  function initResizeButtons() {
-    $('#btnLS').textContent = '«';
-    $('#btnUS').textContent = '«';
-  }
-
-  $('#btnLS').onclick = () => {
-  app.classList.toggle('collapse-ls');
-  $('#btnLS').textContent = app.classList.contains('collapse-ls') ? '»' : '«';
-  };
-  $('#btnUS').onclick = () => {
-  app.classList.toggle('collapse-us');
-  $('#btnUS').textContent = app.classList.contains('collapse-us') ? '»' : '«';
-  };
+   
+    const $ = selector => document.querySelector(selector);
+    const $$= selector => document.querySelectorAll(selector);
+    const app = $('#app');
+  
+    function initResizeButtons() {
+      $('#btnLS').textContent = '«';
+      $('#btnUS').textContent = '«';
+    }
+  
+    // Add these new functions for state management
+    function state() {
+      return {
+        hasLS: !app.classList.contains('collapse-ls'),
+        hasUS: !app.classList.contains('collapse-us')
+      }
+    }
+  
+    function applyCollapse(ls, us) {
+      app.classList.toggle('collapse-ls', !ls);
+      app.classList.toggle('collapse-us', !us);
+      app.classList.toggle('collapse-both', !ls && !us);
+      
+      // Update button directions
+      const btnLS = document.getElementById('btnLS');
+      const btnUS = document.getElementById('btnUS');
+      if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
+      if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
+    }
+  
+    // Update the button click handlers
+    $('#btnLS').onclick = () => {
+      const s = state();
+      applyCollapse(!s.hasLS, s.hasUS);
+    };
+  
+    $('#btnUS').onclick = () => {
+      const s = state();
+      applyCollapse(s.hasLS, !s.hasUS);
+    };
   
 
   function createDocumentItem(doc) {
@@ -627,3 +650,4 @@ modalGenerateBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
