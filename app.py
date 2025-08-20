@@ -715,9 +715,112 @@ def get_documents():
     conn.close()
     return jsonify(docs)
 
+# Get categories
+@app.route("/get-categories", methods=["GET"])
+def get_categories():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify([])
+
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY id", (user_id,))
+    cats = cur.fetchall()
+    conn.close()
+    return jsonify(cats)
+
+# Add category
+@app.route("/add-category", methods=["POST"])
+def add_category():
+    user_id = session.get("user_id")
+    if not user_id:
+        return "Unauthorized", 403
+    data = request.get_json()
+    name = data.get("name")
+
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(
+        "INSERT INTO usercategories (user_id, name) VALUES (%s, %s) RETURNING id, name",
+        (user_id, name)
+    )
+    new_cat = cur.fetchone()
+    conn.commit()
+    conn.close()
+    return jsonify(new_cat)
+
+# Delete category
+@app.route("/delete-category/<int:cat_id>", methods=["DELETE"])
+def delete_category(cat_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return "Unauthorized", 403
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM usercategories WHERE id = %s AND user_id = %s RETURNING id", (cat_id, user_id))
+    deleted = cur.fetchone()
+    conn.commit()
+    conn.close()
+    if deleted:
+        return jsonify({"status": "deleted"})
+    else:
+        return jsonify({"error": "not found"}), 404
+
+# Move document into category
+@app.route("/move-document/<int:doc_id>", methods=["POST"])
+def move_document(doc_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return "Unauthorized", 403
+    data = request.get_json()
+    category_id = data.get("categoryId")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Ensure category belongs to user
+    if category_id:
+        cur.execute("SELECT 1 FROM usercategories WHERE id = %s AND user_id = %s", (category_id, user_id))
+        if not cur.fetchone():
+            conn.close()
+            return "Invalid category", 400
+
+    cur.execute(
+        "UPDATE userdocuments SET category_id = %s WHERE id = %s AND user_id = %s RETURNING id",
+        (category_id, doc_id, user_id)
+    )
+    updated = cur.fetchone()
+    conn.commit()
+    conn.close()
+    if updated:
+        return jsonify({"status": "ok"})
+    else:
+        return jsonify({"error": "not found"}), 404
+
+@app.route("/get-documents", methods=["GET"])
+def get_documents():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify([])
+
+    category_id = request.args.get("category_id")  # optional query param
+
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    if category_id and category_id != "all":
+        cur.execute("SELECT id, name, file_oid FROM userdocuments WHERE user_id = %s AND category_id = %s",
+                    (user_id, category_id))
+    else:
+        cur.execute("SELECT id, name, file_oid FROM userdocuments WHERE user_id = %s", (user_id,))
+    docs = cur.fetchall()
+    conn.close()
+    return jsonify(docs)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
