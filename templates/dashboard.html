@@ -502,7 +502,6 @@
 </div>
 
 <script>
-  
 const $ = selector => document.querySelector(selector);
 const $$= selector => document.querySelectorAll(selector);
 const app = $('#app');
@@ -535,6 +534,7 @@ function createDocumentItem(doc) {
   div.className = 'document-item';
   div.textContent = doc.filename;
   div.setAttribute("draggable", true);
+  div.setAttribute("data-id", doc.id);   // ✅ Added so drag-drop works
 
   div.addEventListener("dragstart", () => div.classList.add("dragging"));
   div.addEventListener("dragend", () => div.classList.remove("dragging"));
@@ -554,8 +554,9 @@ function createDocumentItem(doc) {
   return div;
 }
 
-async function loadDocuments() {
-  const res = await fetch('/get-documents');
+// ✅ Updated to accept categoryId
+async function loadDocuments(categoryId = "all") {
+  const res = await fetch(`/get-documents?category_id=${categoryId}`);
   const docs = await res.json();
   const container = $('#documents-container');
   container.innerHTML = '';
@@ -610,6 +611,13 @@ async function loadCategories() {
       }
     });
 
+    // ✅ Click to filter docs
+    newCategory.addEventListener("click", () => {
+      document.querySelectorAll(".category").forEach(c => c.classList.remove("active-category"));
+      newCategory.classList.add("active-category");
+      loadDocuments(newCategory.dataset.category);
+    });
+
     sidebar.insertBefore(newCategory, accountSection);
   });
 }
@@ -645,11 +653,12 @@ modalGenerateBtn.addEventListener("click", () => {
   alert("Generating summary…");
   modal.classList.add("hidden");
 });
-  
 </script>
+
 
 
 </body>
 </html>
+
 
 
