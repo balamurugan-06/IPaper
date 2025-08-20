@@ -798,8 +798,8 @@ def move_document(doc_id):
     else:
         return jsonify({"error": "not found"}), 404
 
-@app.route("/get-documents", methods=["GET"])
-def get_documents():
+@app.route("/get-documents-basic", methods=["GET"])
+def get_documents_basic():
     user_id = session.get("user_id")
     if not user_id:
         return jsonify([])
@@ -820,6 +820,7 @@ def get_documents():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
