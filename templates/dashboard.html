@@ -561,11 +561,17 @@ async function loadDocuments(categoryId = "all") {
   const container = $('#documents-container');
   container.innerHTML = '';
   docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+  const current = $('#current-category');
+  if (current) {
+    const active = document.querySelector('.category.active-category .category-title');
+    const title = active ? active.textContent.trim() : 'All Documents';
+    current.textContent = `Showing: ${title}`;
+  }
 }
 
 // ===== CATEGORIES =====
 async function loadCategories() {
-  const res = await fetch('/get-categories'); // backend: return [{id,name}]
+  const res = await fetch('/get-categories');
   const cats = await res.json();
 
   const sidebar = document.getElementById("ls");
@@ -627,19 +633,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const addCategoryBtn = document.getElementById("addCategoryBtn");
   addCategoryBtn.addEventListener("click", async () => {
     const categoryName = prompt("Enter new category name:");
-    if (categoryName) {
-      await fetch("/add-category", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryName })
-      });
-      loadCategories();
+    if (!categoryName) return;
+
+    // Flat folder (no parent). If you later support nesting, send { name, parent_id }
+    const res = await fetch("/add-category", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: categoryName })
+    });
+
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      alert(j.error || "Failed to create category");
+      return;
     }
+
+    await loadCategories();
   });
 
+  // initial boot
   initResizeButtons();
-  loadDocuments();
+  loadDocuments("all");   // uses the new endpoint
   loadCategories();
+
+  // make "All Documents" clickable too
+  const allCat = document.querySelector(".category[data-category='all']");
+  if (allCat) {
+    allCat.addEventListener("click", () => {
+      document.querySelectorAll(".category").forEach(c => c.classList.remove("active-category"));
+      allCat.classList.add("active-category");
+      loadDocuments("all");
+    });
+  }
 });
 
 // ===== MODAL GENERATE =====
@@ -659,6 +684,7 @@ modalGenerateBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
 
