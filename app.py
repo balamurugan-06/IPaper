@@ -224,12 +224,12 @@ def upload_document():
         user_id, email, profession = user
 
         # Create large object (LOB)
-        lo_oid = conn.lobject(0, 'wb').oid  # create new large object
-        lo = conn.lobject(lo_oid, 'wb')
+        lo = conn.lobject(0, 'wb')
         lo.write(file_data)
+        lo_oid = lo.oid
         lo.close()
 
-        # Store OID in the table
+        # Store filename in "document"
         cur.execute("""
             INSERT INTO userdocuments (user_id, name, email, profession, file_oid, document)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -240,6 +240,7 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
+
 
 
 
@@ -807,32 +808,25 @@ def get_documents_basic():
     if not user_id:
         return jsonify([])
 
-    category_id = request.args.get("category_id")  # optional query param
+    category_id = request.args.get("category_id")
 
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     if category_id and category_id != "all":
-        cur.execute("""
-            SELECT id, document AS filename, file_oid, category_id
-            FROM userdocuments
-            WHERE user_id = %s AND category_id = %s
-            ORDER BY id DESC
-        """, (user_id, category_id))
+        cur.execute("SELECT id, document AS filename, file_oid FROM userdocuments WHERE user_id = %s AND category_id = %s",
+                    (user_id, category_id))
     else:
-        cur.execute("""
-            SELECT id, document AS filename, file_oid, category_id
-            FROM userdocuments
-            WHERE user_id = %s
-            ORDER BY id DESC
-        """, (user_id,))
+        cur.execute("SELECT id, document AS filename, file_oid FROM userdocuments WHERE user_id = %s", (user_id,))
     docs = cur.fetchall()
     conn.close()
     return jsonify(docs)
 
 
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
