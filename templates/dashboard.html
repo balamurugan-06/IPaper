@@ -1,693 +1,404 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>User Dashboard — Document Upload</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Dashboard</title>
+  
   <style>
-    :root{
-      --ls-min:140px; --ls-max:360px; --ls-w:220px;
-      --us-min:160px; --us-max:420px; --us-w:260px;
-      --bar-w:6px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08),0 6px 20px rgba(0,0,0,.06);
-      --bg:#f5f5f7; --card:#fff; --text:#222; --muted:#666; --brand:#2962ff;
-    }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg);}
-    .app{height:100vh;display:grid;
-      grid-template-columns:var(--ls-w) var(--bar-w) var(--us-w) var(--bar-w) 1fr;
-      transition:grid-template-columns .2s ease;}
-    .collapse-ls{grid-template-columns:0 var(--bar-w) var(--us-w) var(--bar-w) 1fr;}
-    .collapse-us{grid-template-columns:var(--ls-w) var(--bar-w) 0 var(--bar-w) 1fr;}
-    .collapse-both{grid-template-columns:0 0 0 0 1fr;}
-    .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;}
-    .ls{padding:14px;position:relative;overflow-y:visible;}
-    .us{padding:16px;position:relative;overflow:auto;}
-    .main{background:transparent;padding:24px;overflow:auto;}
-    .pane-title{font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:2px 0 10px;display:flex;align-items:center;justify-content:space-between;}
-    .btn{border:0;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer;
-         background:#eceff1;color:#111;width:100%;text-align:left;margin-bottom:8px;}
-    .btn.brand{background:var(--brand);color:#fff;}
-    .btn.inline{width:auto;margin:0 8px 0 0;padding:8px 10px;}
-    .muted{color:var(--muted);}
-    /* 移除分割线的拖拽样式 */
-    .resizer{
-      position:relative;
-      background:transparent;
-      width:var(--bar-w);
-    }
-    .resizer::after{
-      content:"";
-      position:absolute;
-      top:0;
-      bottom:0;
-      left:calc(50% - 1px);
-      width:2px;
-      background:#e0e0e0;
-    }
-    .topbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px;background:var(--card);border-bottom:1px solid #eee;}
-    .upload-card{background:#fafafa;border:1px dashed #ddd;border-radius:12px;padding:14px;}
-    input[type="file"]{width:100%;margin:10px 0;}
-    .logout{display:block;margin-top:12px;color:var(--muted);text-decoration:none;}
-    .collapse-btn {
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+      
+.disabled-button {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .btn-generate {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-user {
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-user:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .btn-role {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        
+        .btn-role:hover {
+            background-color: #d0e4f7;
+        }
+        
+        .logout-btn {
+            color: #666;
+            text-decoration: none;
+            margin-top: auto;
+            padding: 10px 0;
+            display: block;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        
+        .todo-item {
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        
+        .important {
+            font-weight: bold;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+        }
+        
+        /* File list styles */
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            margin: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        
+        .file-item {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .file-actions {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .file-delete {
+            color: #ff4444;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #999;
+        }
+        
+        .selected-files {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .file-badge {
+            display: inline-block;
+            background-color: #f1f1f1;
+            padding: 3px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .btn-upload {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            padding: 10px 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-upload.active {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+.top-right-button {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      width: 18px;
-      height: 24px;
+      top: 20px;
+      right: 30px;
+    }
+
+    .purchase-button {
+      margin: 20px auto;
+      display: block;
+    }
+
+    .btn {
+      padding: 10px 20px;
       border: none;
-      border-radius: 4px;
-      background: #ddd;
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1;
-    }
-    .collapse-btn:hover { background: #bbb; }
-    .document-item {
-      position: relative;
-      padding: 8px 24px 8px 8px;
-      margin: 4px 0;
-      background: #f0f0f0;
-      border-radius: 6px;
-      cursor: grab;
-      border: 1px solid #ddd;
-    }
-    .document-item:hover {
-      background: #e0e0e0;
-    }
-    .document-item.dragging {
-      opacity: 0.5;
-    }
-    .document-delete-btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
-      border: none;
-      background: #ffebee;
-      border-radius: 50%;
-      cursor: pointer;
-      color: #c62828;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-    .document-delete-btn:hover {
-      background: #ffcdd2;
-    }
-    .category {
-      margin-bottom: 12px;
-      position: relative;
-      padding-right: 30px;
-    }
-    .category-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .documents-list {
-      min-height: 20px;
-      padding: 4px;
-      border-radius: 6px;
-      background: #f8f8f8;
-    }
-    .active-category {
-      background: #e8f5e9;
-    }
-    .delete-category {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 20px;
-      height: 20px;
-      border: none;
-      background: #ffebee;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #c62828;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .delete-category:hover {
-      background: #ffcdd2;
-    }
-    .action-btn {
-      background: var(--brand);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-    .action-btn:hover {
-      opacity: 0.9;
-    }
-    .action-btn.secondary {
-      background: #4caf50;
-    }
-    .topbar-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 8px;
-    }
-    .add-category-icon {
-      background: var(--brand);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .add-category-icon:hover {
-      opacity: 0.9;
-    }
-    /* When a sidebar is collapsed, fully hide its visuals (no shadow, no padding, no overflow). */
-    .app.collapse-ls #ls,
-    .app.collapse-both #ls {
-      box-shadow: none !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      width: 0 !important;
-      min-width: 0 !important;
-    }
-    /* Hide the left resizer's vertical line when LS is collapsed to avoid a pale seam */
-    .app.collapse-ls #bar-ls::after,
-    .app.collapse-both #bar-ls::after { opacity: 0; }
-    .app.collapse-us #us,
-    .app.collapse-both #us {
-      box-shadow: none !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      width: 0 !important;
-      min-width: 0 !important;
-    }
-    /* Hide the right resizer's vertical line when US is collapsed */
-    .app.collapse-us #bar-us::after,
-    .app.collapse-both #bar-us::after { opacity: 0; }
-    /* Prevent the collapsed pane from capturing clicks */
-    .app.collapse-ls #ls,
-    .app.collapse-us #us { pointer-events: none; }
-    /* Keep the resizer buttons clickable */
-    #bar-ls, #bar-us { position: relative; }
-    #bar-ls .collapse-btn, #bar-us .collapse-btn { pointer-events: auto; }
-    /* Stick account section to bottom of left sidebar */
-    .ls {
-      display: flex;
-      flex-direction: column;
-    }
-    .account-section {
-      margin-top: auto; /* push to bottom */
-    }
-
-    /* Template Selector Modal Styles */
-    .template-selector-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1001;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .template-selector-container {
-      width: 70%;
-      height: 70%;
-      max-width: 800px;
-      max-height: 600px;
-      background: white;
-      border-radius: 8px;
-      display: flex;
-      position: relative;
-    }
-
-    .template-selector-modal .sidebar {
-      width: 200px;
-      background-color: #f8f8f8;
-      border-right: 1px solid #e0e0e0;
-      padding: 15px;
-      overflow-y: auto;
-    }
-
-    .template-selector-modal .sidebar-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-
-    .template-selector-modal .sidebar-section {
-      margin-bottom: 20px;
-    }
-
-    .template-selector-modal .sidebar-section-title {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    .template-selector-modal .sidebar-item {
-      padding: 6px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .template-selector-modal .sidebar-item:hover {
-      background-color: #e9e9e9;
-    }
-
-    .template-selector-modal .sidebar-item.active {
-      background-color: #e0e0e0;
-      font-weight: bold;
-    }
-
-    .template-selector-modal .arrow-icon {
-      width: 0;
-      height: 0;
-      border-top: 4px solid transparent;
-      border-bottom: 4px solid transparent;
-      border-left: 4px solid #666;
-      margin-left: 8px;
-    }
-
-    .template-selector-modal .content-area {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .template-selector-modal .content-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-content: flex-start;
-    }
-
-    .template-selector-modal .content-box {
-      width: 240px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .template-selector-modal .content-box-title {
-      font-weight: bold;
-      margin-bottom: 8px;
+      border-radius: 5px;
       font-size: 14px;
-    }
-
-    .template-selector-modal .content-box-description {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .template-selector-modal .content-box-footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #999;
-    }
-
-    .template-selector-modal .generate-button {
-      position: absolute;
-      bottom: 15px;
-      right: 15px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
     }
 
-    .template-selector-modal .generate-button:hover {
-      background-color: #0069d9;
+    .btn-primary {
+      background-color: #007BFF;
+      color: white;
     }
 
-    .hidden {
-      display: none;
+    .btn-primary:hover {
+      background-color: #0056b3;
     }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #1e7e34;
+    }
+    .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+}
+
+.btn:hover {
+    background-color: #2980b9;
+}
+
+/* Style for the Purchase button hover */
+#purchaseBtn {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#purchaseBtn:hover {
+  background-color: #e68900;
+}
+
+/* Position the Generate button at the top right */
+#generateBtn {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background-color: #2196F3;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#generateBtn:hover {
+  background-color: #1976d2;
+}
+
   </style>
 </head>
 <body>
-<div id="app" class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Chatlists</h2>
+    <form action="/upload-document" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button type="submit" class="btn btn-add">Add</button>
+    </form>
+    
+    <div class="file-list">
+  {% if documents %}
+    {% set has_files = false %}
+    {% for document in documents %}
+      {% if document[1] %}
+        {% set has_files = true %}
+        <li>
+            <a href="/view-document/{{ document[0] }}" target="_blank">
+              {{ document[1] }}
+            </a>
+            <a href="/delete-document/{{ document[0] }}" onclick="return confirm('Are you sure to delete this file?')">🗑</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if not has_files %}
+      <p>No files uploaded yet.</p>
+    {% endif %}
+  {% else %}
+    <p>No files uploaded yet.</p>
+  {% endif %}
+
+  <p>Current Membership: {{ latest_membership }}</p>
+</div>
+
+    
+    
+    <form method="GET" action="/membership">
+    <button class="btn btn-warning">Purchase</button>
+</form>
+
+    
+    <a href="/logout" class="logout-btn">Logout</a>
+  </div>
   
-  <aside id="ls" class="sidebar ls">
-    <div class="pane-title">
-      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
-    </div>
-    <div class="category active-category" data-category="all">
-      <div class="category-title">All Documents</div>
-    </div>
-    <div class="account-section">
-      <div class="pane-title">Account</div>
-      <button class="btn">User Feedback</button>
-      <button class="btn">{{ latest_membership }}</button>
-      <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
-      <a class="logout" href="/logout">Logout</a>
-    </div>
-  </aside>
+ <div style="text-align: right; margin-bottom: 10px;">
+    {% if latest_membership == "Student" or latest_membership == "Professor" %}
+    <button id="generateBtn" class="btn btn-success">Generate</button>
+{% else %}
+      <button id="generateBtn" class="btn btn-secondary disabled-button" onclick="showUpgradePopup()" disabled>Generate</button>
+{% endif %}
 
-  <div id="bar-ls" class="resizer">
-    <button id="btnLS" class="collapse-btn">«</button>
-  </div>
-  <aside id="us" class="sidebar us">
-    <div class="pane-title">Upload Document</div>
-    <div class="upload-card">
-      <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required multiple />
-        <button type="submit" class="btn brand" style="width:100%">Upload</button>
-      </form>
+</div>
+
+  <div id="upgradePopup" style="display:none;">
+    <div style="padding:20px; background-color: white; border: 1px solid #ccc; border-radius: 10px;">
+        <h4>Paid Members Only</h4>
+        <p>This feature is only accessible to Student or Professor members.</p>
+        <button onclick="closePopup()" class="btn btn-primary">Okay</button>
     </div>
-    <div class="pane-title" style="margin-top:16px">Documents</div>
-    <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
-    <div id="documents-container" class="documents-list"></div>
-  </aside>
-  <div id="bar-us" class="resizer">
-    <button id="btnUS" class="collapse-btn">«</button>
-  </div>
-  <main class="main">
-    <div class="topbar">
-      <div class="muted">Welcome, {{ name }}</div>
-      <div class="muted">{{ profession }}</div>
-      <div class="topbar-actions">
-        <button id="downloadBtn" class="action-btn secondary">Download</button>
-        <button id="generateBtn" class="action-btn">Generate</button>
-      </div>
-    </div>
+</div>
+
+
+
+  
+  <div class="main-content">
     <h1>Welcome, {{ name }}</h1>
-    <p class="muted"></p>
-  </main>
-</div>
-
-<!-- Template Selector Modal -->
-<div id="templateSelectorModal" class="template-selector-modal hidden">
-  <div class="template-selector-container">
-    <div class="sidebar">
-      <div class="sidebar-title">Select Summary Template</div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Recently Used</div>
-        <!-- Items would go here -->
-      </div>
-      
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">General</div>
-        <div class="sidebar-item" onclick="showTemplateContent('meeting')">
-          Meeting
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item" onclick="showTemplateContent('speech')">
-          Speech
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item" onclick="showTemplateContent('call')">
-          Call
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Interview
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Medical
-          <div class="arrow-icon"></div>
-        </div>
-        <div class="sidebar-item">
-          Sales
-          <div class="arrow-icon"></div>
-        </div>
-      </div>
+    <div class="user-info">
+      <button class="btn btn-user">{{ name }}</button>
+      <button class="btn btn-role">{{ profession }}</button>
     </div>
-    
-    <div class="content-area">
-      <div id="meeting-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Meeting Summary Template</div>
-            <div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div>
-            <div class="content-box-footer">
-              <span>Last used: 2 days ago</span>
-            </div>
-          </div>
-          <div class="content-box">
-            <div class="content-box-title">Detailed Meeting Notes</div>
-            <div class="content-box-description">Comprehensive template for capturing all meeting details.</div>
-            <div class="content-box-footer">
-              <span>Last used: 1 week ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="speech-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Speech Summary</div>
-            <div class="content-box-description">Captures main arguments and key quotes from speeches.</div>
-            <div class="content-box-footer">
-              <span>Last used: 3 days ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="call-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box">
-            <div class="content-box-title">Call Transcript Summary</div>
-            <div class="content-box-description">Summarizes phone call transcripts with key points.</div>
-            <div class="content-box-footer">
-              <span>Last used: Yesterday</span>
-            </div>
-          </div>
-          <div class="content-box">
-            <div class="content-box-title">Customer Support Call</div>
-            <div class="content-box-description">Specialized template for customer support calls.</div>
-            <div class="content-box-footer">
-              <span>Last used: 5 days ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <button class="generate-button">Generate now</button>
   </div>
-</div>
 
-<script>
-const $ = selector => document.querySelector(selector);
-const $$= selector => document.querySelectorAll(selector);
-const app = $('#app');
-
-function initResizeButtons() {
-  $('#btnLS').textContent = '«';
-  $('#btnUS').textContent = '«';
+  <script>
+    function showUpgradePopup() {
+    alert("You must upgrade to Student or Professor to use this feature.");
 }
-
-// State & collapse buttons
-function state() {
-  return {
-    hasLS: !app.classList.contains('collapse-ls'),
-    hasUS: !app.classList.contains('collapse-us')
-  }
-}
-function applyCollapse(ls, us) {
-  app.classList.toggle('collapse-ls', !ls);
-  app.classList.toggle('collapse-us', !us);
-  app.classList.toggle('collapse-both', !ls && !us);
-  $('#btnLS').textContent = ls ? '«' : '»';
-  $('#btnUS').textContent = us ? '«' : '»';
-}
-$('#btnLS').onclick = () => { const s = state(); applyCollapse(!s.hasLS, s.hasUS); };
-$('#btnUS').onclick = () => { const s = state(); applyCollapse(s.hasLS, !s.hasUS); };
-
-// ===== DOCUMENTS =====
-function createDocumentItem(doc) {
-  const div = document.createElement('div');
-  div.className = 'document-item';
-  div.textContent = doc.filename || doc.document || 'Untitled';
-  div.setAttribute("draggable", true);
-  div.setAttribute("data-id", doc.id);   // ✅ Added so drag-drop works
-
-  div.addEventListener("dragstart", () => div.classList.add("dragging"));
-  div.addEventListener("dragend", () => div.classList.remove("dragging"));
-  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'document-delete-btn';
-  delBtn.textContent = '×';
-  delBtn.onclick = async (e) => {
-    e.stopPropagation();
-    if (confirm(`Delete "${doc.filename || doc.document}"?`)) {
-      await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
-      loadDocuments();
-    }
-  };
-  div.appendChild(delBtn);
-  return div;
-}
-
-// ✅ Updated to accept categoryId
-async function loadDocuments(categoryId = "all") {
-  const res = await fetch(`/get-documents-basic?category_id=${categoryId}`);
-  const docs = await res.json();
-  const container = $('#documents-container');
-  container.innerHTML = '';
-  docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-  const current = $('#current-category');
-  if (current) {
-    const active = document.querySelector('.category.active-category .category-title');
-    const title = active ? active.textContent.trim() : 'All Documents';
-    current.textContent = `Showing: ${title}`;
-  }
-}
-
-// ===== CATEGORIES =====
-async function loadCategories() {
-  const res = await fetch('/get-categories');
-  const cats = await res.json();
-
-  const sidebar = document.getElementById("ls");
-  sidebar.querySelectorAll(".category:not([data-category='all'])").forEach(el => el.remove());
-  const accountSection = sidebar.querySelector(".account-section");
-
-  cats.forEach(cat => {
-    const newCategory = document.createElement("div");
-    newCategory.classList.add("category");
-    newCategory.dataset.category = cat.id;
-
-    const categoryTitle = document.createElement("div");
-    categoryTitle.classList.add("category-title");
-    categoryTitle.textContent = cat.name;
-
-    // delete button only for subfolders
-    const deleteBtn = document.createElement("button");
-    deleteBtn.classList.add("delete-category");
-    deleteBtn.textContent = "×";
-    deleteBtn.onclick = async () => {
-      if (confirm(`Delete "${cat.name}"?`)) {
-        await fetch(`/delete-category/${cat.id}`, { method: 'DELETE' });
-        loadCategories();
-      }
-    };
-
-    newCategory.appendChild(categoryTitle);
-    newCategory.appendChild(deleteBtn);
-
-    // Drag-drop target
-    newCategory.addEventListener("dragover", e => e.preventDefault());
-    newCategory.addEventListener("drop", async e => {
-      e.preventDefault();
-      const dragged = document.querySelector(".dragging");
-      if (dragged) {
-        newCategory.appendChild(dragged);
-        const docId = dragged.getAttribute("data-id");
-        await fetch(`/move-document/${docId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ categoryId: cat.id })
-        });
-      }
-    });
-
-    // ✅ Click to filter docs
-    newCategory.addEventListener("click", () => {
-      document.querySelectorAll(".category").forEach(c => c.classList.remove("active-category"));
-      newCategory.classList.add("active-category");
-      loadDocuments(newCategory.dataset.category);
-    });
-
-    sidebar.insertBefore(newCategory, accountSection);
-  });
-}
-
-// ===== ADD NEW CATEGORY =====
-document.addEventListener("DOMContentLoaded", () => {
-  const addCategoryBtn = document.getElementById("addCategoryBtn");
-  addCategoryBtn.addEventListener("click", async () => {
-    const categoryName = prompt("Enter new category name:");
-    if (!categoryName) return;
-
-    // Flat folder (no parent). If you later support nesting, send { name, parent_id }
-    const res = await fetch("/add-category", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: categoryName })
-    });
-
-    if (!res.ok) {
-      const j = await res.json().catch(() => ({}));
-      alert(j.error || "Failed to create category");
-      return;
-    }
-
-    await loadCategories();
-  });
-
-  // initial boot
-  initResizeButtons();
-  loadDocuments("all");   // uses the new endpoint
-  loadCategories();
-
-  // make "All Documents" clickable too
-  const allCat = document.querySelector(".category[data-category='all']");
-  if (allCat) {
-    allCat.addEventListener("click", () => {
-      document.querySelectorAll(".category").forEach(c => c.classList.remove("active-category"));
-      allCat.classList.add("active-category");
-      loadDocuments("all");
-    });
-  }
-});
-
-// ===== MODAL GENERATE =====
-const modal = document.getElementById("templateSelectorModal");
-const generateBtn = document.getElementById("generateBtn");
-const modalGenerateBtn = modal.querySelector(".generate-button");
-
-generateBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
-modalGenerateBtn.addEventListener("click", () => {
-  alert("Generating summary…");
-  modal.classList.add("hidden");
-});
 </script>
-
 
 
 </body>
 </html>
-
-
-
-
-
-
-
