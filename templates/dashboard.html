@@ -532,7 +532,7 @@ $('#btnUS').onclick = () => { const s = state(); applyCollapse(s.hasLS, !s.hasUS
 function createDocumentItem(doc) {
   const div = document.createElement('div');
   div.className = 'document-item';
-  div.textContent = doc.filename;
+  div.textContent = doc.name || doc.name || 'Untitled';
   div.setAttribute("draggable", true);
   div.setAttribute("data-id", doc.id);   // ✅ Added so drag-drop works
 
@@ -659,6 +659,7 @@ modalGenerateBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
 
