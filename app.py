@@ -812,10 +812,19 @@ def get_documents_basic():
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     if category_id and category_id != "all":
-        cur.execute("SELECT id, name, file_oid FROM userdocuments WHERE user_id = %s AND category_id = %s",
-                    (user_id, category_id))
+        cur.execute("""
+            SELECT id, document AS filename, file_oid, category_id
+            FROM userdocuments
+            WHERE user_id = %s AND category_id = %s
+            ORDER BY id DESC
+        """, (user_id, category_id))
     else:
-        cur.execute("SELECT id, name, file_oid FROM userdocuments WHERE user_id = %s", (user_id,))
+        cur.execute("""
+            SELECT id, document AS filename, file_oid, category_id
+            FROM userdocuments
+            WHERE user_id = %s
+            ORDER BY id DESC
+        """, (user_id,))
     docs = cur.fetchall()
     conn.close()
     return jsonify(docs)
@@ -824,6 +833,7 @@ def get_documents_basic():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
