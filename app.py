@@ -715,7 +715,7 @@ def get_documents():
     conn.close()
     return jsonify(docs)
 
-# Get categories
+# Get categories (with parent_id support)
 @app.route("/get-categories", methods=["GET"])
 def get_categories():
     user_id = session.get("user_id")
@@ -724,30 +724,33 @@ def get_categories():
 
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY id", (user_id,))
+    cur.execute("SELECT id, name, parent_id FROM usercategories WHERE user_id = %s ORDER BY id", (user_id,))
     cats = cur.fetchall()
     conn.close()
     return jsonify(cats)
 
-# Add category
+# Add category (with optional parent_id)
 @app.route("/add-category", methods=["POST"])
 def add_category():
     user_id = session.get("user_id")
     if not user_id:
         return "Unauthorized", 403
+
     data = request.get_json()
     name = data.get("name")
+    parent_id = data.get("parent_id")  # <-- support subfolders
 
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     cur.execute(
-        "INSERT INTO usercategories (user_id, name) VALUES (%s, %s) RETURNING id, name",
-        (user_id, name)
+        "INSERT INTO usercategories (user_id, name, parent_id) VALUES (%s, %s, %s) RETURNING id, name, parent_id",
+        (user_id, name, parent_id)
     )
     new_cat = cur.fetchone()
     conn.commit()
     conn.close()
     return jsonify(new_cat)
+
 
 # Delete category
 @app.route("/delete-category/<int:cat_id>", methods=["DELETE"])
@@ -818,8 +821,10 @@ def get_documents_basic():
     return jsonify(docs)
 
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
