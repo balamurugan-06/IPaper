@@ -502,165 +502,83 @@
 </div>
 
 <script>
+  const $ = selector => document.querySelector(selector);
+  const $$ = selector => document.querySelectorAll(selector);
+  const app = $('#app');
 
-    const $ = selector => document.querySelector(selector);
-    const $$= selector => document.querySelectorAll(selector);
-    const app = $('#app');
-  
-    function initResizeButtons() {
-      $('#btnLS').textContent = '«';
-      $('#btnUS').textContent = '«';
+  function initResizeButtons() {
+    $('#btnLS').textContent = '«';
+    $('#btnUS').textContent = '«';
+  }
+
+  function state() {
+    return {
+      hasLS: !app.classList.contains('collapse-ls'),
+      hasUS: !app.classList.contains('collapse-us')
     }
-  
-    // Add these new functions for state management
-    function state() {
-      return {
-        hasLS: !app.classList.contains('collapse-ls'),
-        hasUS: !app.classList.contains('collapse-us')
+  }
+
+  function applyCollapse(ls, us) {
+    app.classList.toggle('collapse-ls', !ls);
+    app.classList.toggle('collapse-us', !us);
+    app.classList.toggle('collapse-both', !ls && !us);
+
+    const btnLS = document.getElementById('btnLS');
+    const btnUS = document.getElementById('btnUS');
+    if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
+    if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
+  }
+
+  $('#btnLS').onclick = () => {
+    const s = state();
+    applyCollapse(!s.hasLS, s.hasUS);
+  };
+
+  $('#btnUS').onclick = () => {
+    const s = state();
+    applyCollapse(s.hasLS, !s.hasUS);
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const addCategoryBtn = document.getElementById("addCategoryBtn");
+    const sidebar = document.getElementById("ls");
+
+    addCategoryBtn.addEventListener("click", function () {
+      const categoryName = prompt("Enter new category name:");
+      if (categoryName) {
+        addCategory(categoryName.trim());
       }
-    }
-  
-    function applyCollapse(ls, us) {
-      app.classList.toggle('collapse-ls', !ls);
-      app.classList.toggle('collapse-us', !us);
-      app.classList.toggle('collapse-both', !ls && !us);
-      
-      // Update button directions
-      const btnLS = document.getElementById('btnLS');
-      const btnUS = document.getElementById('btnUS');
-      if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
-      if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
-    }
-  
-    // Update the button click handlers
-    $('#btnLS').onclick = () => {
-      const s = state();
-      applyCollapse(!s.hasLS, s.hasUS);
-    };
-  
-    $('#btnUS').onclick = () => {
-      const s = state();
-      applyCollapse(s.hasLS, !s.hasUS);
-    };
-  
-    function createDocumentItem(doc) {
-      const div = document.createElement('div');
-      div.className = 'document-item';
-      div.textContent = doc.filename;
-      div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-  
-      const delBtn = document.createElement('button');
-      delBtn.className = 'document-delete-btn';
-      delBtn.textContent = '×';
-      delBtn.onclick = async (e) => {
-        e.stopPropagation();
-        if (confirm(`Delete "${doc.filename}"?`)) {
-          await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
-          loadDocuments();
-        }
-      };
-      div.appendChild(delBtn);
-      return div;
-    }
-  
-    async function loadDocuments() {
-      const res = await fetch('/get-documents');
-      const docs = await res.json();
-  
-      const container = $('#documents-container');
-      container.innerHTML = '';
-      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-    }
-  
-    document.addEventListener('DOMContentLoaded', () => {
-      initResizeButtons();
-      loadDocuments();
-      
-      // Initialize button arrow directions to match current state
-      const s = state();
-      const btnLS = document.getElementById('btnLS');
-      const btnUS = document.getElementById('btnUS');
-      if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; }
-      if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
     });
-  
-    document.addEventListener("DOMContentLoaded", function () {
-      const addCategoryBtn = document.getElementById("addCategoryBtn");
-      const sidebar = document.getElementById("ls");
-  
-      addCategoryBtn.addEventListener("click", function () {
-        const categoryName = prompt("Enter new category name:");
-        if (categoryName) {
-          // Create new category div
-          const newCategory = document.createElement("div");
-          newCategory.classList.add("category");
-          newCategory.dataset.category = categoryName.toLowerCase().replace(/\s+/g, "-");
-  
-          // Add inner title
-          const categoryTitle = document.createElement("div");
-          categoryTitle.classList.add("category-title");
-          categoryTitle.textContent = categoryName;
-  
-          newCategory.appendChild(categoryTitle);
-  
-          // Insert before the account section
-          const accountSection = sidebar.querySelector(".account-section");
-          sidebar.insertBefore(newCategory, accountSection);
-        }
-      });
-    });
-    // 文档管理功能 - Add this new section
-  document.addEventListener('DOMContentLoaded', function() {
+  });
+
+  // -------- DOCUMENT MANAGEMENT --------
+  document.addEventListener('DOMContentLoaded', function () {
     const documentsContainer = $('#documents-container');
     const currentCategoryDisplay = $('#current-category');
     const uploadForm = $('#uploadForm');
-    
-    // 文档存储结构
-    const documents = {
-      all: new Set(), // 所有文档
-      healthcare: new Set(),
-      law: new Set(),
-      engineering: new Set()
-    };
-    
-    // 分类列表
-    let categories = ['healthcare', 'law', 'engineering'];
+
+    const documents = { all: new Set() };
+    let categories = [];
     let currentCategory = 'all';
-    
-    // 初始化一些示例文档
-    ['Medical Report.pdf', 'Legal Contract.docx', 'Engineering Design.png'].forEach(file => {
-      documents.all.add(file);
-    });
-    documents.healthcare.add('Medical Report.pdf');
-    documents.law.add('Legal Contract.docx');
-    documents.engineering.add('Engineering Design.png');
-    
-    // 删除文档函数
+
+    // delete document
     function deleteDocument(fileName) {
-      if (!confirm(`Are you sure you want to delete "${fileName}"?`)) {
-        return;
-      }
-      
-      // Remove from all categories
+      if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
+
       for (const category in documents) {
-        if (documents[category].has(fileName)) {
-          documents[category].delete(fileName);
-        }
+        documents[category].delete(fileName);
       }
-      
-      // Update the display
       displayDocuments();
     }
-    
-    // 创建文档项
+
+    // create document item
     function createDocumentItem(fileName) {
       const docItem = document.createElement('div');
       docItem.className = 'document-item';
       docItem.draggable = true;
       docItem.textContent = fileName;
       docItem.dataset.fileName = fileName;
-      
-      // Create delete button
+
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'document-delete-btn';
       deleteBtn.textContent = '×';
@@ -668,68 +586,50 @@
         e.stopPropagation();
         deleteDocument(fileName);
       };
-      
+
       docItem.appendChild(deleteBtn);
-      
-      // 拖拽事件
-      docItem.addEventListener('dragstart', function(e) {
+
+      docItem.addEventListener('dragstart', function (e) {
         this.classList.add('dragging');
         e.dataTransfer.setData('text/plain', this.dataset.fileName);
         e.dataTransfer.effectAllowed = 'move';
       });
-      
-      docItem.addEventListener('dragend', function() {
+
+      docItem.addEventListener('dragend', function () {
         this.classList.remove('dragging');
       });
-      
+
       return docItem;
     }
-    
-    // 添加分类功能
-    $('#addCategoryBtn').onclick = () => {
-      const name = prompt('Enter new category name:');
-      if (name && name.trim()) {
-        addCategory(name.trim());
-      }
-    };
-    
-    // 添加新分类
+
+    // add category
     function addCategory(name) {
       const categoryId = name.toLowerCase().replace(/\s+/g, '-');
-      
-      // 检查是否已存在
+
       if (categories.includes(categoryId)) {
         alert('Category already exists!');
         return;
       }
-      
-      // 添加到分类列表
+
       categories.push(categoryId);
-      
-      // 初始化文档集合
       documents[categoryId] = new Set();
-      
-      // 重新渲染分类
       renderCategories();
     }
-    
-    // 渲染分类列表
+
+    // render categories
     function renderCategories() {
-      const categoriesContainer = $('.ls');
-      // 保留All Documents
       const existingCategories = $$('.category:not([data-category="all"])');
       existingCategories.forEach(el => el.remove());
-      
-      // 添加新的分类
+
       categories.forEach(category => {
         const categoryEl = document.createElement('div');
         categoryEl.className = 'category';
         categoryEl.dataset.category = category;
-        
+
         const titleEl = document.createElement('div');
         titleEl.className = 'category-title';
         titleEl.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-        
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-category';
         deleteBtn.dataset.category = category;
@@ -738,193 +638,118 @@
           e.stopPropagation();
           deleteCategory(category);
         };
-        
+
         categoryEl.appendChild(titleEl);
         categoryEl.appendChild(deleteBtn);
-        
-        // 插入到All Documents之后
+
         $('.category[data-category="all"]').after(categoryEl);
-        
-        // 添加点击事件
-        categoryEl.addEventListener('click', function() {
+
+        categoryEl.addEventListener('click', function () {
           setCurrentCategory(category);
         });
-        
-        // 添加拖放事件
+
         setupDropZone(categoryEl);
       });
     }
-    
-    // 设置当前分类
+
+    // set current category
     function setCurrentCategory(category) {
       currentCategory = category;
-      
-      // 更新活动状态
       $$('.category').forEach(c => c.classList.remove('active-category'));
       $(`.category[data-category="${category}"]`).classList.add('active-category');
-      
-      // 显示该分类的文档
       displayDocuments();
     }
-    
-    // 显示当前分类的文档
+
+    // display documents
     function displayDocuments() {
       documentsContainer.innerHTML = '';
       currentCategoryDisplay.textContent = `Showing: ${getCategoryName(currentCategory)}`;
-      
-      // 获取当前分类的文档，如果是"all"则显示所有文档
-      const docsToShow = currentCategory === 'all' 
-        ? Array.from(documents.all) 
+
+      const docsToShow = currentCategory === 'all'
+        ? Array.from(documents.all)
         : Array.from(documents[currentCategory] || []);
-      
+
       docsToShow.forEach(fileName => {
-        const docItem = createDocumentItem(fileName);
-        documentsContainer.appendChild(docItem);
+        documentsContainer.appendChild(createDocumentItem(fileName));
       });
     }
-    
-    // 获取分类名称
+
+    // get category name
     function getCategoryName(categoryId) {
       if (categoryId === 'all') return 'All Documents';
-      const categoryElement = $(`.category[data-category="${categoryId}"]`);
-      return categoryElement ? categoryElement.querySelector('.category-title').textContent : categoryId;
+      const el = $(`.category[data-category="${categoryId}"]`);
+      return el ? el.querySelector('.category-title').textContent : categoryId;
     }
-    
-    // 设置拖放区域
+
+    // setup drop zone (only once, clean version)
     function setupDropZone(element) {
-      element.addEventListener('dragover', function(e) {
+      element.addEventListener('dragover', function (e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
       });
-      
-      element.addEventListener('drop', function(e) {
+
+      element.addEventListener('drop', function (e) {
         e.preventDefault();
         const fileName = e.dataTransfer.getData('text/plain');
         const targetCategory = this.dataset.category;
-        
-        // 如果拖拽到"All Documents"分类，不做任何操作
+
         if (targetCategory === 'all') return;
-        
-        // 确保目标分类存在
+
         if (!documents[targetCategory]) {
           documents[targetCategory] = new Set();
         }
-        
-        // 添加到目标分类
-        documents[targetCategory].add(fileName);
-        
-        // 检查文件是否在其他分类中存在
-        let existsInOtherCategories = false;
+
+        // remove from all categories
         for (const category in documents) {
-          if (category !== 'all' && category !== targetCategory && documents[category].has(fileName)) {
-            existsInOtherCategories = true;
-            break;
-          }
+          documents[category].delete(fileName);
         }
-        
-        // 如果不存在于其他分类，则从All Documents中删除
-        if (!existsInOtherCategories) {
-          documents.all.delete(fileName);
-        }
-        
-        // 如果当前显示的是目标分类或All Documents，更新显示
+
+        // add to target category
+        documents[targetCategory].add(fileName);
+
         if (currentCategory === targetCategory || currentCategory === 'all') {
           displayDocuments();
         }
       });
     }
-    
-    // 删除分类
+
+    // delete category
     function deleteCategory(categoryId) {
       if (categoryId === 'all') return;
-      
-      if (!confirm(`Are you sure you want to delete the "${getCategoryName(categoryId)}" category?`)) {
-        return;
-      }
-      
-      // 从分类列表中移除
+      if (!confirm(`Are you sure you want to delete "${getCategoryName(categoryId)}"?`)) return;
+
       categories = categories.filter(c => c !== categoryId);
-      
-      // 从文档存储中移除
       delete documents[categoryId];
-      
-      // 如果当前显示的是被删除的分类，切换到All Documents
+
       if (currentCategory === categoryId) {
         setCurrentCategory('all');
       }
-      
-      // 重新渲染分类
       renderCategories();
     }
-    
-    // 文件上传处理
-    uploadForm.addEventListener('submit', function(e) {
+
+    // upload form
+    uploadForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      
       const files = this.querySelector('input[type="file"]').files;
       if (files.length > 0) {
         for (let i = 0; i < files.length; i++) {
-          const fileName = files[i].name;
-          documents.all.add(fileName);
+          documents.all.add(files[i].name);
         }
-        
-        // 如果是显示"All Documents"，则更新显示
-        if (currentCategory === 'all') {
-          displayDocuments();
-        }
-        
+        if (currentCategory === 'all') displayDocuments();
         alert(`${files.length} files uploaded successfully!`);
         this.reset();
-      } else {
-        alert('Please select at least one file to upload.');
       }
     });
-    
-    // 初始化All Documents点击事件
-    $('.category[data-category="all"]').addEventListener('click', function() {
-      setCurrentCategory('all');
-    });
-    
-    // 设置All Documents拖放区域
+
+    // initialize
+    $('.category[data-category="all"]').addEventListener('click', () => setCurrentCategory('all'));
     setupDropZone($('.category[data-category="all"]'));
-    
-    // 初始渲染
     renderCategories();
     setCurrentCategory('all');
+    initResizeButtons();
   });
-  // 设置拖放区域
-function setupDropZone(element) {
-    element.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-    
-    element.addEventListener('drop', function(e) {
-      e.preventDefault();
-      const fileName = e.dataTransfer.getData('text/plain');
-      const targetCategory = this.dataset.category;
-      
-      // 如果拖拽到"All Documents"分类，不做任何操作
-      if (targetCategory === 'all') return;
-      
-      // 确保目标分类存在
-      if (!documents[targetCategory]) {
-        documents[targetCategory] = new Set();
-      }
-      
-      // 添加到目标分类
-      documents[targetCategory].add(fileName);
-      
-      // 总是从All Documents中删除
-      documents.all.delete(fileName);
-      
-      // 如果当前显示的是目标分类或All Documents，更新显示
-      if (currentCategory === targetCategory || currentCategory === 'all') {
-        displayDocuments();
-      }
-    });
-  }
 </script>
 
 </body>
 </html>
+
