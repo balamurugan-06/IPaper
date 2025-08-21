@@ -556,7 +556,7 @@ function createDocumentItem(doc) {
 
 // ✅ Updated to accept categoryId
 async function loadDocuments(categoryId = "all") {
-  const res = await fetch(`/get-documents?category_id=${categoryId}`);
+  const res = await fetch(`/get-documents-basic?category_id=${categoryId}`);
   const docs = await res.json();
   const container = $('#documents-container');
   container.innerHTML = '';
@@ -659,6 +659,7 @@ modalGenerateBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
 
