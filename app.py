@@ -715,35 +715,6 @@ def get_documents():
     conn.close()
     return jsonify(docs)
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import psycopg2
-import os
-
-app = Flask(__name__)
-app.secret_key = "your-secret-key"
-
-def get_db():
-    return psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASS"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT")
-    )
-
-# Dashboard route
-@app.route("/dashboard")
-def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s", (session["user_id"],))
-    categories = cur.fetchall()
-    conn.close()
-
-    return render_template("dashboard.html", categories=categories)
 
 # Add category
 @app.route("/add_category", methods=["POST"])
@@ -768,6 +739,7 @@ def add_category():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
