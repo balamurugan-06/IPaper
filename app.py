@@ -844,7 +844,7 @@ def move_document(doc_id):
 
     conn = get_db()
     cur = conn.cursor()
-    try:
+    
         conn = get_db()
         cur = conn.cursor()
 
@@ -995,3 +995,4 @@ def dashboard_api():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
