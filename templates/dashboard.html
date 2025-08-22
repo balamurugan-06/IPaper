@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>User Dashboard — Document Upload</title>
+  <title>User Dashboard â€" Document Upload</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -30,6 +30,7 @@
     .btn.brand{background:var(--brand);color:#fff;}
     .btn.inline{width:auto;margin:0 8px 0 0;padding:8px 10px;}
     .muted{color:var(--muted);}
+    /* ç§»é™¤åˆ†å‰²çº¿çš„æ‹–æ‹½æ ·å¼ */
     .resizer{
       position:relative;
       background:transparent;
@@ -117,16 +118,11 @@
     .category.drag-over {
       border-color: var(--brand);
       background: #e3f2fd;
+      transform: scale(1.02);
     }
     .category-title {
       font-weight: bold;
       margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .category-icon {
-      font-size: 14px;
     }
     .documents-list {
       min-height: 20px;
@@ -136,12 +132,11 @@
     }
     .active-category {
       background: #e8f5e9 !important;
-      border-color: #4caf50;
     }
     .delete-category {
       position: absolute;
-      top: 4px;
-      right: 4px;
+      top: 0;
+      right: 0;
       width: 20px;
       height: 20px;
       border: none;
@@ -199,6 +194,7 @@
     .add-category-icon:hover {
       opacity: 0.9;
     }
+    /* When a sidebar is collapsed, fully hide its visuals (no shadow, no padding, no overflow). */
     .app.collapse-ls #ls,
     .app.collapse-both #ls {
       box-shadow: none !important;
@@ -207,6 +203,7 @@
       width: 0 !important;
       min-width: 0 !important;
     }
+    /* Hide the left resizer's vertical line when LS is collapsed to avoid a pale seam */
     .app.collapse-ls #bar-ls::after,
     .app.collapse-both #bar-ls::after { opacity: 0; }
     .app.collapse-us #us,
@@ -217,38 +214,22 @@
       width: 0 !important;
       min-width: 0 !important;
     }
+    /* Hide the right resizer's vertical line when US is collapsed */
     .app.collapse-us #bar-us::after,
     .app.collapse-both #bar-us::after { opacity: 0; }
+    /* Prevent the collapsed pane from capturing clicks */
     .app.collapse-ls #ls,
     .app.collapse-us #us { pointer-events: none; }
+    /* Keep the resizer buttons clickable */
     #bar-ls, #bar-us { position: relative; }
     #bar-ls .collapse-btn, #bar-us .collapse-btn { pointer-events: auto; }
+    /* Stick account section to bottom of left sidebar */
     .ls {
       display: flex;
       flex-direction: column;
     }
     .account-section {
-      margin-top: auto;
-    }
-    .categories-container {
-      flex: 1;
-      overflow-y: auto;
-    }
-    .upload-status {
-      padding: 8px;
-      border-radius: 6px;
-      margin: 8px 0;
-      font-size: 12px;
-    }
-    .upload-status.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #4caf50;
-    }
-    .upload-status.error {
-      background: #ffebee;
-      color: #c62828;
-      border: 1px solid #f44336;
+      margin-top: auto; /* push to bottom */
     }
 
     /* Template Selector Modal Styles */
@@ -392,6 +373,13 @@
     .hidden {
       display: none;
     }
+
+    /* Categories container for better organization */
+    .categories-container {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -403,51 +391,47 @@
     </div>
     <div class="categories-container">
       <div class="category active-category" data-category="all">
-        <div class="category-title">
-          <span class="category-icon">📁</span>
-          All Documents
-        </div>
+        <div class="category-title">All Documents</div>
       </div>
     </div>
     <div class="account-section">
       <div class="pane-title">Account</div>
       <button class="btn">User Feedback</button>
-      <button class="btn">Premium Plan</button>
+      <button class="btn">{{ latest_membership }}</button>
       <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
       <a class="logout" href="/logout">Logout</a>
     </div>
   </aside>
 
   <div id="bar-ls" class="resizer">
-    <button id="btnLS" class="collapse-btn">«</button>
+    <button id="btnLS" class="collapse-btn">Â«</button>
   </div>
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
-      <form id="uploadForm">
-        <input type="file" id="fileInput" name="file" required multiple />
+      <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required multiple />
         <button type="submit" class="btn brand" style="width:100%">Upload</button>
       </form>
-      <div id="uploadStatus"></div>
     </div>
     <div class="pane-title" style="margin-top:16px">Documents</div>
     <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
     <div id="documents-container" class="documents-list"></div>
   </aside>
   <div id="bar-us" class="resizer">
-    <button id="btnUS" class="collapse-btn">«</button>
+    <button id="btnUS" class="collapse-btn">Â«</button>
   </div>
   <main class="main">
     <div class="topbar">
-      <div class="muted">Welcome, John Doe</div>
-      <div class="muted">Professional</div>
+      <div class="muted">Welcome, {{ name }}</div>
+      <div class="muted">{{ profession }}</div>
       <div class="topbar-actions">
         <button id="downloadBtn" class="action-btn secondary">Download</button>
         <button id="generateBtn" class="action-btn">Generate</button>
       </div>
     </div>
-    <h1>Welcome, John Doe</h1>
-    <p class="muted">Drag and drop your documents to organize them into categories. Your organization will be saved automatically.</p>
+    <h1>Welcome, {{ name }}</h1>
+    <p class="muted"></p>
   </main>
 </div>
 
@@ -459,6 +443,7 @@
       
       <div class="sidebar-section">
         <div class="sidebar-section-title">Recently Used</div>
+        <!-- Items would go here -->
       </div>
       
       <div class="sidebar-section">
@@ -546,461 +531,362 @@
 </div>
 
 <script>
-class DocumentManager {
-  constructor() {
-    this.documents = this.loadDocuments();
-    this.categories = this.loadCategories();
-    this.currentCategory = 'all';
-    this.init();
-  }
 
-  // Load documents from memory (simulating server persistence)
-  loadDocuments() {
-    const saved = this.getFromMemory('documents');
-    return saved || {
-      all: new Set(['Sample Document.pdf', 'Example File.docx', 'Test Image.png']),
-      healthcare: new Set(),
-      law: new Set(),
-      engineering: new Set()
-    };
-  }
-
-  // Load categories from memory
-  loadCategories() {
-    const saved = this.getFromMemory('categories');
-    return saved || ['healthcare', 'law', 'engineering'];
-  }
-
-  // Save documents to memory (simulating server persistence)
-  saveDocuments() {
-    // Convert Sets to Arrays for storage
-    const documentsToSave = {};
-    for (const [category, docSet] of Object.entries(this.documents)) {
-      documentsToSave[category] = Array.from(docSet);
+    const $ = selector => document.querySelector(selector);
+    const $$= selector => document.querySelectorAll(selector);
+    const app = $('#app');
+  
+    function initResizeButtons() {
+      $('#btnLS').textContent = 'Â«';
+      $('#btnUS').textContent = 'Â«';
     }
-    this.saveToMemory('documents', documentsToSave);
-  }
-
-  // Save categories to memory
-  saveCategories() {
-    this.saveToMemory('categories', this.categories);
-  }
-
-  // Simple memory storage simulation (in production, this would be server calls)
-  saveToMemory(key, data) {
-    window.documentData = window.documentData || {};
-    window.documentData[key] = data;
-  }
-
-  getFromMemory(key) {
-    if (!window.documentData) return null;
-    const data = window.documentData[key];
-    if (!data) return null;
-    
-    // Convert arrays back to Sets for documents
-    if (key === 'documents') {
-      const converted = {};
-      for (const [category, docArray] of Object.entries(data)) {
-        converted[category] = new Set(docArray);
+  
+    // Add these new functions for state management
+    function state() {
+      return {
+        hasLS: !app.classList.contains('collapse-ls'),
+        hasUS: !app.classList.contains('collapse-us')
       }
-      return converted;
     }
-    return data;
-  }
-
-  init() {
-    this.setupEventListeners();
-    this.renderCategories();
-    this.setCurrentCategory('all');
-    this.initResizeButtons();
-  }
-
-  setupEventListeners() {
-    // Add category button
-    document.getElementById('addCategoryBtn').onclick = () => this.addCategoryPrompt();
-    
-    // Upload form
-    document.getElementById('uploadForm').onsubmit = (e) => this.handleUpload(e);
-    
-    // Collapse buttons
-    document.getElementById('btnLS').onclick = () => this.toggleSidebar('ls');
-    document.getElementById('btnUS').onclick = () => this.toggleSidebar('us');
-    
-    // Generate button
-    document.getElementById('generateBtn').onclick = () => this.showTemplateModal();
-  }
-
-  addCategoryPrompt() {
-    const name = prompt('Enter new category name:');
-    if (name && name.trim()) {
-      this.addCategory(name.trim());
+  
+    function applyCollapse(ls, us) {
+      app.classList.toggle('collapse-ls', !ls);
+      app.classList.toggle('collapse-us', !us);
+      app.classList.toggle('collapse-both', !ls && !us);
+      
+      // Update button directions
+      const btnLS = document.getElementById('btnLS');
+      const btnUS = document.getElementById('btnUS');
+      if (btnLS) { btnLS.textContent = ls ? 'Â«' : 'Â»'; }
+      if (btnUS) { btnUS.textContent = us ? 'Â«' : 'Â»'; }
     }
-  }
-
-  addCategory(name) {
-    const categoryId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
-    // Check if already exists
-    if (this.categories.includes(categoryId) || categoryId === 'all') {
-      this.showStatus('Category already exists!', 'error');
-      return;
-    }
-    
-    // Add to categories list
-    this.categories.push(categoryId);
-    
-    // Initialize document set
-    this.documents[categoryId] = new Set();
-    
-    // Save and re-render
-    this.saveCategories();
-    this.saveDocuments();
-    this.renderCategories();
-    
-    this.showStatus(`Category "${name}" created successfully!`, 'success');
-  }
-
-  renderCategories() {
-    const container = document.querySelector('.categories-container');
-    
-    // Keep the "All Documents" category
-    const allDocsCategory = container.querySelector('.category[data-category="all"]');
-    
-    // Remove existing custom categories
-    const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
-    existingCategories.forEach(el => el.remove());
-    
-    // Add custom categories
-    this.categories.forEach(categoryId => {
-      const categoryEl = this.createCategoryElement(categoryId);
-      container.appendChild(categoryEl);
-    });
-  }
-
-  createCategoryElement(categoryId) {
-    const categoryEl = document.createElement('div');
-    categoryEl.className = 'category';
-    categoryEl.dataset.category = categoryId;
-    
-    const titleEl = document.createElement('div');
-    titleEl.className = 'category-title';
-    
-    const iconEl = document.createElement('span');
-    iconEl.className = 'category-icon';
-    iconEl.textContent = '📂';
-    
-    const nameEl = document.createElement('span');
-    nameEl.textContent = this.getCategoryDisplayName(categoryId);
-    
-    titleEl.appendChild(iconEl);
-    titleEl.appendChild(nameEl);
-    
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-category';
-    deleteBtn.textContent = '×';
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.deleteCategory(categoryId);
+  
+    // Update the button click handlers
+    $('#btnLS').onclick = () => {
+      const s = state();
+      applyCollapse(!s.hasLS, s.hasUS);
     };
-    
-    categoryEl.appendChild(titleEl);
-    categoryEl.appendChild(deleteBtn);
-    
-    // Add click event
-    categoryEl.onclick = () => this.setCurrentCategory(categoryId);
-    
-    // Setup drop zone
-    this.setupDropZone(categoryEl);
-    
-    return categoryEl;
-  }
-
-  getCategoryDisplayName(categoryId) {
-    return categoryId.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  }
-
-  setupDropZone(element) {
-    element.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      element.classList.add('drag-over');
-    });
-    
-    element.addEventListener('dragleave', (e) => {
-      if (!element.contains(e.relatedTarget)) {
-        element.classList.remove('drag-over');
-      }
-    });
-    
-    element.addEventListener('drop', (e) => {
-      e.preventDefault();
-      element.classList.remove('drag-over');
+  
+    $('#btnUS').onclick = () => {
+      const s = state();
+      applyCollapse(s.hasLS, !s.hasUS);
+    };
+  
+    function createDocumentItem(doc) {
+      const div = document.createElement('div');
+      div.className = 'document-item';
+      div.textContent = doc.filename;
+      div.dataset.docId = doc.id; // Store document ID
+      div.dataset.fileName = doc.filename; // Store filename for drag operations
+      div.draggable = true; // Enable dragging
+      div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
+  
+      const delBtn = document.createElement('button');
+      delBtn.className = 'document-delete-btn';
+      delBtn.textContent = 'Ã—';
+      delBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete "${doc.filename}"?`)) {
+          await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+          loadDocuments();
+        }
+      };
       
-      const fileName = e.dataTransfer.getData('text/plain');
-      const targetCategory = element.dataset.category;
+      // Add drag event listeners
+      div.addEventListener('dragstart', function(e) {
+        this.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+          docId: this.dataset.docId,
+          fileName: this.dataset.fileName
+        }));
+        e.dataTransfer.effectAllowed = 'move';
+      });
       
-      this.moveDocumentToCategory(fileName, targetCategory);
-    });
-  }
-
-  moveDocumentToCategory(fileName, targetCategory) {
-    // Remove from current category (if not 'all')
-    if (this.currentCategory !== 'all' && this.documents[this.currentCategory]) {
-      this.documents[this.currentCategory].delete(fileName);
+      div.addEventListener('dragend', function() {
+        this.classList.remove('dragging');
+      });
+      
+      div.appendChild(delBtn);
+      return div;
     }
-    
-    // Add to target category
-    if (targetCategory === 'all') {
-      this.documents.all.add(fileName);
-      // Remove from all other categories
-      this.categories.forEach(cat => {
-        if (this.documents[cat]) {
-          this.documents[cat].delete(fileName);
+  
+    async function loadDocuments() {
+      const res = await fetch('/get-documents');
+      const docs = await res.json();
+  
+      const container = $('#documents-container');
+      container.innerHTML = '';
+      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    }
+  
+    // ENHANCED: Category management with drag & drop and persistence
+    let categories = JSON.parse(localStorage.getItem('userCategories')) || [];
+    let documentCategories = JSON.parse(localStorage.getItem('documentCategories')) || {};
+    let currentCategory = 'all';
+
+    // Save categories to localStorage
+    function saveCategories() {
+      localStorage.setItem('userCategories', JSON.stringify(categories));
+      localStorage.setItem('documentCategories', JSON.stringify(documentCategories));
+    }
+
+    // Add new category
+    function addCategory(name) {
+      const categoryId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      if (categories.find(cat => cat.id === categoryId)) {
+        alert('Category already exists!');
+        return;
+      }
+      
+      categories.push({
+        id: categoryId,
+        name: name,
+        createdAt: new Date().toISOString()
+      });
+      
+      saveCategories();
+      renderCategories();
+    }
+
+    // Delete category
+    function deleteCategory(categoryId) {
+      if (!confirm('Are you sure you want to delete this category? Documents will be moved back to "All Documents".')) {
+        return;
+      }
+      
+      // Move documents back to uncategorized
+      Object.keys(documentCategories).forEach(docId => {
+        if (documentCategories[docId] === categoryId) {
+          delete documentCategories[docId];
         }
       });
-    } else {
-      // Ensure target category exists
-      if (!this.documents[targetCategory]) {
-        this.documents[targetCategory] = new Set();
+      
+      // Remove category
+      categories = categories.filter(cat => cat.id !== categoryId);
+      
+      // If currently viewing deleted category, switch to all
+      if (currentCategory === categoryId) {
+        setCurrentCategory('all');
       }
       
-      this.documents[targetCategory].add(fileName);
-      // Remove from 'all' since it's now categorized
-      this.documents.all.delete(fileName);
+      saveCategories();
+      renderCategories();
+      loadDocuments();
     }
-    
-    this.saveDocuments();
-    this.displayDocuments();
-    
-    const categoryName = targetCategory === 'all' ? 'All Documents' : this.getCategoryDisplayName(targetCategory);
-    this.showStatus(`Moved "${fileName}" to ${categoryName}`, 'success');
-  }
 
-  deleteCategory(categoryId) {
-    if (!confirm(`Delete "${this.getCategoryDisplayName(categoryId)}" category? Documents will be moved to "All Documents".`)) {
-      return;
-    }
-    
-    // Move documents back to 'all'
-    if (this.documents[categoryId]) {
-      this.documents[categoryId].forEach(doc => {
-        this.documents.all.add(doc);
+    // Setup drop zone for category
+    function setupDropZone(categoryElement) {
+      categoryElement.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.classList.add('drag-over');
       });
-      delete this.documents[categoryId];
+      
+      categoryElement.addEventListener('dragleave', function(e) {
+        if (!this.contains(e.relatedTarget)) {
+          this.classList.remove('drag-over');
+        }
+      });
+      
+      categoryElement.addEventListener('drop', async function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        try {
+          const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+          const targetCategory = this.dataset.category;
+          
+          // Update document category in database
+          const response = await fetch('/update-document-category', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              documentId: dragData.docId,
+              category: targetCategory === 'all' ? null : targetCategory
+            })
+          });
+          
+          if (response.ok) {
+            // Update local storage
+            if (targetCategory === 'all') {
+              delete documentCategories[dragData.docId];
+            } else {
+              documentCategories[dragData.docId] = targetCategory;
+            }
+            saveCategories();
+            
+            // Refresh documents if needed
+            loadDocuments();
+            
+            console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
+          } else {
+            alert('Failed to update document category');
+          }
+        } catch (error) {
+          console.error('Error handling drop:', error);
+        }
+      });
     }
-    
-    // Remove from categories list
-    this.categories = this.categories.filter(c => c !== categoryId);
-    
-    // If currently viewing deleted category, switch to 'all'
-    if (this.currentCategory === categoryId) {
-      this.setCurrentCategory('all');
+
+    // Render categories in sidebar
+    function renderCategories() {
+      const container = $('.categories-container');
+      
+      // Keep "All Documents" category
+      const allDocsCategory = container.querySelector('.category[data-category="all"]');
+      
+      // Remove existing custom categories
+      const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
+      existingCategories.forEach(el => el.remove());
+      
+      // Add custom categories
+      categories.forEach(category => {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category';
+        categoryEl.dataset.category = category.id;
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'category-title';
+        titleEl.textContent = category.name;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-category';
+        deleteBtn.textContent = 'Ã—';
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteCategory(category.id);
+        };
+        
+        categoryEl.appendChild(titleEl);
+        categoryEl.appendChild(deleteBtn);
+        
+        // Add click event to switch category
+        categoryEl.onclick = () => setCurrentCategory(category.id);
+        
+        // Setup drop zone
+        setupDropZone(categoryEl);
+        
+        container.appendChild(categoryEl);
+      });
     }
-    
-    this.saveCategories();
-    this.saveDocuments();
-    this.renderCategories();
-    
-    this.showStatus(`Category deleted successfully`, 'success');
-  }
 
-  setCurrentCategory(category) {
-    this.currentCategory = category;
-    
-    // Update active state
-    document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
-    document.querySelector(`.category[data-category="${category}"]`).classList.add('active-category');
-    
-    this.displayDocuments();
-  }
-
-  displayDocuments() {
-    const container = document.getElementById('documents-container');
-    const currentCategoryDisplay = document.getElementById('current-category');
-    
-    container.innerHTML = '';
-    
-    const categoryName = this.currentCategory === 'all' ? 'All Documents' : this.getCategoryDisplayName(this.currentCategory);
-    currentCategoryDisplay.textContent = `Showing: ${categoryName}`;
-    
-    // Get documents for current category
-    const docsToShow = this.currentCategory === 'all' 
-      ? Array.from(this.documents.all || [])
-      : Array.from(this.documents[this.currentCategory] || []);
-    
-    docsToShow.forEach(fileName => {
-      const docItem = this.createDocumentItem(fileName);
-      container.appendChild(docItem);
-    });
-  }
-
-  createDocumentItem(fileName) {
-    const docItem = document.createElement('div');
-    docItem.className = 'document-item';
-    docItem.draggable = true;
-    docItem.textContent = fileName;
-    docItem.dataset.fileName = fileName;
-    
-    // Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'document-delete-btn';
-    deleteBtn.textContent = '×';
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.deleteDocument(fileName);
-    };
-    
-    docItem.appendChild(deleteBtn);
-    
-    // Drag events
-    docItem.addEventListener('dragstart', (e) => {
-      docItem.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', fileName);
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    
-    docItem.addEventListener('dragend', () => {
-      docItem.classList.remove('dragging');
-    });
-    
-    return docItem;
-  }
-
-  deleteDocument(fileName) {
-    if (!confirm(`Delete "${fileName}"?`)) {
-      return;
+    // Set current category and update display
+    function setCurrentCategory(categoryId) {
+      currentCategory = categoryId;
+      
+      // Update active state
+      $$('.category').forEach(c => c.classList.remove('active-category'));
+      $(`.category[data-category="${categoryId}"]`).classList.add('active-category');
+      
+      // Update current category display
+      const categoryName = categoryId === 'all' ? 'All Documents' : 
+        categories.find(cat => cat.id === categoryId)?.name || categoryId;
+      $('#current-category').textContent = `Showing: ${categoryName}`;
+      
+      // Filter and display documents
+      filterDocuments();
     }
-    
-    // Remove from all categories
-    Object.values(this.documents).forEach(docSet => {
-      if (docSet instanceof Set) {
-        docSet.delete(fileName);
+
+    // Filter documents based on current category
+    async function filterDocuments() {
+      const res = await fetch('/get-documents');
+      const docs = await res.json();
+      
+      let filteredDocs = docs;
+      
+      if (currentCategory !== 'all') {
+        filteredDocs = docs.filter(doc => documentCategories[doc.id] === currentCategory);
+      }
+      
+      const container = $('#documents-container');
+      container.innerHTML = '';
+      filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initResizeButtons();
+      loadDocuments();
+      renderCategories();
+      
+      // Setup "All Documents" category
+      const allDocsCategory = $('.category[data-category="all"]');
+      if (allDocsCategory) {
+        allDocsCategory.onclick = () => setCurrentCategory('all');
+        setupDropZone(allDocsCategory);
+      }
+      
+      // Initialize button arrow directions to match current state
+      const s = state();
+      const btnLS = document.getElementById('btnLS');
+      const btnUS = document.getElementById('btnUS');
+      if (btnLS) { btnLS.textContent = s.hasLS ? 'Â«' : 'Â»'; }
+      if (btnUS) { btnUS.textContent = s.hasUS ? 'Â«' : 'Â»'; }
+    });
+  
+    document.addEventListener("DOMContentLoaded", function () {
+      const addCategoryBtn = document.getElementById("addCategoryBtn");
+  
+      addCategoryBtn.addEventListener("click", function () {
+        const categoryName = prompt("Enter new category name:");
+        if (categoryName && categoryName.trim()) {
+          addCategory(categoryName.trim());
+        }
+      });
+    });
+
+    // Template modal functions
+    function showTemplateContent(templateType) {
+      // Hide all content
+      document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => {
+        div.classList.add('hidden');
+      });
+      
+      // Show selected content
+      const targetContent = document.getElementById(`${templateType}-content`);
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+      }
+      
+      // Update active state
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    // Generate button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const generateBtn = document.getElementById('generateBtn');
+      const templateModal = document.getElementById('templateSelectorModal');
+      const generateButton = document.querySelector('.generate-button');
+      
+      // Show template modal
+      if (generateBtn) {
+        generateBtn.onclick = () => {
+          templateModal.classList.remove('hidden');
+        };
+      }
+      
+      // Close modal when clicking outside
+      if (templateModal) {
+        templateModal.onclick = (e) => {
+          if (e.target === templateModal) {
+            templateModal.classList.add('hidden');
+          }
+        };
+      }
+      
+      // Generate button in modal
+      if (generateButton) {
+        generateButton.onclick = () => {
+          templateModal.classList.add('hidden');
+          alert('Template generation started!');
+        };
       }
     });
-    
-    this.saveDocuments();
-    this.displayDocuments();
-    this.showStatus(`"${fileName}" deleted successfully`, 'success');
-  }
-
-  handleUpload(e) {
-    e.preventDefault();
-    
-    const fileInput = document.getElementById('fileInput');
-    const files = fileInput.files;
-    
-    if (files.length === 0) {
-      this.showStatus('Please select at least one file', 'error');
-      return;
-    }
-    
-    // Simulate file upload and add to documents
-    for (let i = 0; i < files.length; i++) {
-      const fileName = files[i].name;
-      this.documents.all.add(fileName);
-    }
-    
-    this.saveDocuments();
-    
-    // If currently viewing 'all', refresh display
-    if (this.currentCategory === 'all') {
-      this.displayDocuments();
-    }
-    
-    this.showStatus(`${files.length} file(s) uploaded successfully!`, 'success');
-    fileInput.value = ''; // Reset form
-  }
-
-  showStatus(message, type = 'success') {
-    const statusDiv = document.getElementById('uploadStatus');
-    statusDiv.className = `upload-status ${type}`;
-    statusDiv.textContent = message;
-    statusDiv.style.display = 'block';
-    
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      statusDiv.style.display = 'none';
-    }, 3000);
-  }
-
-  toggleSidebar(side) {
-    const app = document.getElementById('app');
-    const isLSCollapsed = app.classList.contains('collapse-ls');
-    const isUSCollapsed = app.classList.contains('collapse-us');
-    
-    if (side === 'ls') {
-      app.classList.toggle('collapse-ls');
-      const btn = document.getElementById('btnLS');
-      btn.textContent = app.classList.contains('collapse-ls') ? '»' : '«';
-    } else {
-      app.classList.toggle('collapse-us');
-      const btn = document.getElementById('btnUS');
-      btn.textContent = app.classList.contains('collapse-us') ? '»' : '«';
-    }
-    
-    // Update collapse-both class
-    const newLSState = app.classList.contains('collapse-ls');
-    const newUSState = app.classList.contains('collapse-us');
-    app.classList.toggle('collapse-both', newLSState && newUSState);
-  }
-
-  initResizeButtons() {
-    document.getElementById('btnLS').textContent = '«';
-    document.getElementById('btnUS').textContent = '«';
-  }
-
-  showTemplateModal() {
-    const modal = document.getElementById('templateSelectorModal');
-    modal.classList.remove('hidden');
-    
-    // Close modal when clicking outside
-    modal.onclick = (e) => {
-      if (e.target === modal) {
-        modal.classList.add('hidden');
-      }
-    };
-  }
-}
-
-// Template modal functions (keeping original functionality)
-function showTemplateContent(templateType) {
-  // Hide all content
-  document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => {
-    div.classList.add('hidden');
-  });
-  
-  // Show selected content
-  const targetContent = document.getElementById(`${templateType}-content`);
-  if (targetContent) {
-    targetContent.classList.remove('hidden');
-  }
-  
-  // Update active state
-  document.querySelectorAll('.sidebar-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  event.target.classList.add('active');
-}
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-  window.documentManager = new DocumentManager();
-  
-  // Setup "All Documents" category click handler and drop zone
-  const allDocsCategory = document.querySelector('.category[data-category="all"]');
-  if (allDocsCategory) {
-    allDocsCategory.onclick = () => window.documentManager.setCurrentCategory('all');
-    window.documentManager.setupDropZone(allDocsCategory);
-  }
-  
-  // Close template modal on generate button click
-  document.querySelector('.generate-button').onclick = () => {
-    document.getElementById('templateSelectorModal').classList.add('hidden');
-    window.documentManager.showStatus('Template generation started!', 'success');
-  };
-});
 
 </script>
 
