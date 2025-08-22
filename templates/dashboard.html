@@ -855,4 +855,154 @@ class DocumentManager {
     docItem.appendChild(deleteBtn);
     
     // Drag events
-    docItem.addEventListener('dragstart',
+    docItem.addEventListener('dragstart', (e) => {
+      docItem.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', fileName);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    docItem.addEventListener('dragend', () => {
+      docItem.classList.remove('dragging');
+    });
+    
+    return docItem;
+  }
+
+  deleteDocument(fileName) {
+    if (!confirm(`Delete "${fileName}"?`)) {
+      return;
+    }
+    
+    // Remove from all categories
+    Object.values(this.documents).forEach(docSet => {
+      if (docSet instanceof Set) {
+        docSet.delete(fileName);
+      }
+    });
+    
+    this.saveDocuments();
+    this.displayDocuments();
+    this.showStatus(`"${fileName}" deleted successfully`, 'success');
+  }
+
+  handleUpload(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('fileInput');
+    const files = fileInput.files;
+    
+    if (files.length === 0) {
+      this.showStatus('Please select at least one file', 'error');
+      return;
+    }
+    
+    // Simulate file upload and add to documents
+    for (let i = 0; i < files.length; i++) {
+      const fileName = files[i].name;
+      this.documents.all.add(fileName);
+    }
+    
+    this.saveDocuments();
+    
+    // If currently viewing 'all', refresh display
+    if (this.currentCategory === 'all') {
+      this.displayDocuments();
+    }
+    
+    this.showStatus(`${files.length} file(s) uploaded successfully!`, 'success');
+    fileInput.value = ''; // Reset form
+  }
+
+  showStatus(message, type = 'success') {
+    const statusDiv = document.getElementById('uploadStatus');
+    statusDiv.className = `upload-status ${type}`;
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      statusDiv.style.display = 'none';
+    }, 3000);
+  }
+
+  toggleSidebar(side) {
+    const app = document.getElementById('app');
+    const isLSCollapsed = app.classList.contains('collapse-ls');
+    const isUSCollapsed = app.classList.contains('collapse-us');
+    
+    if (side === 'ls') {
+      app.classList.toggle('collapse-ls');
+      const btn = document.getElementById('btnLS');
+      btn.textContent = app.classList.contains('collapse-ls') ? '»' : '«';
+    } else {
+      app.classList.toggle('collapse-us');
+      const btn = document.getElementById('btnUS');
+      btn.textContent = app.classList.contains('collapse-us') ? '»' : '«';
+    }
+    
+    // Update collapse-both class
+    const newLSState = app.classList.contains('collapse-ls');
+    const newUSState = app.classList.contains('collapse-us');
+    app.classList.toggle('collapse-both', newLSState && newUSState);
+  }
+
+  initResizeButtons() {
+    document.getElementById('btnLS').textContent = '«';
+    document.getElementById('btnUS').textContent = '«';
+  }
+
+  showTemplateModal() {
+    const modal = document.getElementById('templateSelectorModal');
+    modal.classList.remove('hidden');
+    
+    // Close modal when clicking outside
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    };
+  }
+}
+
+// Template modal functions (keeping original functionality)
+function showTemplateContent(templateType) {
+  // Hide all content
+  document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => {
+    div.classList.add('hidden');
+  });
+  
+  // Show selected content
+  const targetContent = document.getElementById(`${templateType}-content`);
+  if (targetContent) {
+    targetContent.classList.remove('hidden');
+  }
+  
+  // Update active state
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  event.target.classList.add('active');
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+  window.documentManager = new DocumentManager();
+  
+  // Setup "All Documents" category click handler and drop zone
+  const allDocsCategory = document.querySelector('.category[data-category="all"]');
+  if (allDocsCategory) {
+    allDocsCategory.onclick = () => window.documentManager.setCurrentCategory('all');
+    window.documentManager.setupDropZone(allDocsCategory);
+  }
+  
+  // Close template modal on generate button click
+  document.querySelector('.generate-button').onclick = () => {
+    document.getElementById('templateSelectorModal').classList.add('hidden');
+    window.documentManager.showStatus('Template generation started!', 'success');
+  };
+});
+
+</script>
+
+</body>
+</html>
