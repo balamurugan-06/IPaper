@@ -353,6 +353,9 @@
     .hidden {
       display: none;
     }
+    .sidebar { width: 250px; float: left; padding: 15px; border-right: 1px solid #ccc; }
+    .category { padding: 8px; margin: 5px 0; background: #f4f4f4; border-radius: 5px; cursor: pointer; }
+    .add-category-icon { background: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -361,6 +364,12 @@
   <aside id="ls" class="sidebar ls">
     <div class="pane-title">
       Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
+    </div>
+    <div id="categoryList">
+      <!-- Categories loaded from Flask -->
+      {% for category in categories %}
+        <div class="category" data-id="{{ category[0] }}">{{ category[1] }}</div>
+      {% endfor %}
     </div>
     <div class="category active-category" data-category="all">
       <div class="category-title">All Documents</div>
@@ -924,7 +933,31 @@ function setupDropZone(element) {
       }
     });
   }
+
+  document.getElementById("addCategoryBtn").addEventListener("click", function() {
+      const categoryName = prompt("Enter new category:");
+      if (categoryName) {
+        fetch("/add_category", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryName })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (!data.error) {
+            const div = document.createElement("div");
+            div.className = "category";
+            div.dataset.id = data.id;
+            div.textContent = data.name;
+            document.getElementById("categoryList").appendChild(div);
+          } else {
+            alert("Error: " + data.error);
+          }
+        });
+      }
+    });
 </script>
 
 </body>
 </html>
+
