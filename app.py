@@ -30,7 +30,7 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+    
 def get_db_connection():
     return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 
@@ -46,7 +46,7 @@ def index():
 
         images = [item for item in media_items if item[0] == 'image']
         videos = [item for item in media_items if item[0] == 'video']
-
+        
         return render_template('index.html', images=images, videos=videos)
     except Exception as e:
         return f"Error loading media: {e}"
@@ -131,7 +131,7 @@ def login():
             session['user_name'] = user[1]
             session['user_id'] = user[0] 
             session['profession'] = user[6]
-
+            
             return redirect('/dashboard')
 
 
@@ -224,12 +224,12 @@ def upload_document():
         user_id, email, profession = user
 
         # Create large object (LOB)
-        lo = conn.lobject(0, 'wb')
+        lo_oid = conn.lobject(0, 'wb').oid  # create new large object
+        lo = conn.lobject(lo_oid, 'wb')
         lo.write(file_data)
-        lo_oid = lo.oid
         lo.close()
 
-        # Store filename in "document"
+        # Store OID in the table
         cur.execute("""
             INSERT INTO userdocuments (user_id, name, email, profession, file_oid, document)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -240,7 +240,6 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
-
 
 
 
@@ -427,7 +426,7 @@ def select_plan():
         return "No plan selected", 400
 
     profession = session.get('profession', '')
-
+    
     # Block Ultra from downgrading
     if profession == 'Ultra' and plan == 'Pro':
         flash("As a Ultra, you cannot subscribe to the Pro plan.", "error")
@@ -537,7 +536,7 @@ def payment_process():
         hashed_card_number = bcrypt.hashpw(card_number.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         hashed_card_expiry = bcrypt.hashpw(card_expiry.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         hashed_card_cvv = bcrypt.hashpw(card_cvv.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
+        
         cur.execute("""
             INSERT INTO CardDetails (user_id, first_name, last_name, card_number, card_expiry, card_cvv)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -598,7 +597,7 @@ def pay():
     conn.close()
 
     session['membership'] = membership_plan
-
+    
     return redirect('/dashboard')
 
 @app.context_processor
@@ -716,283 +715,37 @@ def get_documents():
     conn.close()
     return jsonify(docs)
 
-# Get categories (with parent_id support)
-# Get categories for current user
-@app.route("/get-categories", methods=["GET"])
-def get_categories():
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify([])
 
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT id, name, parent_id FROM usercategories WHERE user_id = %s ORDER BY id", (user_id,))
-    cats = cur.fetchall()
-    conn.close()
-    return jsonify(cats)
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY id", (user_id,))
-        cats = cur.fetchall()
-        cur.close()
-        conn.close()
-        return jsonify([dict(cat) for cat in cats])
-    except Exception as e:
-        print(f"Error getting categories: {e}")
-        return jsonify([])
-
-# Add category (with optional parent_id)
-# Add new category
-@app.route("/add-category", methods=["POST"])
-def add_category():
-    user_id = session.get("user_id")
-    if not user_id:
-        return "Unauthorized", 403
-
-        return jsonify({"error": "Unauthorized"}), 403
-        
-    data = request.get_json()
-    name = data.get("name")
-    parent_id = data.get("parent_id")  # <-- support subfolders
-
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute(
-        "INSERT INTO usercategories (user_id, name, parent_id) VALUES (%s, %s, %s) RETURNING id, name, parent_id",
-        (user_id, name, parent_id)
-    )
-    new_cat = cur.fetchone()
-    conn.commit()
-    conn.close()
-    return jsonify(new_cat)
-    name = data.get("name", "").strip()
-    
-    if not name:
-        return jsonify({"error": "Category name is required"}), 400
-
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute(
-            "INSERT INTO usercategories (user_id, name) VALUES (%s, %s) RETURNING id, name",
-            (user_id, name)
-        )
-        new_cat = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        return jsonify(dict(new_cat))
-    except Exception as e:
-        print(f"Error adding category: {e}")
-        return jsonify({"error": "Failed to add category"}), 500
-
-# Delete category
-@app.route("/delete-category/<int:cat_id>", methods=["DELETE"])
-def delete_category(cat_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        return "Unauthorized", 403
-        return jsonify({"error": "Unauthorized"}), 403
-
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM usercategories WHERE id = %s AND user_id = %s RETURNING id", (cat_id, user_id))
-    deleted = cur.fetchone()
-    conn.commit()
-    conn.close()
-    if deleted:
-        return jsonify({"status": "deleted"})
-    else:
-        return jsonify({"error": "not found"}), 404
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        
-        # First, move all documents in this category back to "All Documents" (category_id = NULL)
-        cur.execute("UPDATE userdocuments SET category_id = NULL WHERE category_id = %s AND user_id = %s", 
-                   (cat_id, user_id))
-        
-        # Then delete the category
-        cur.execute("DELETE FROM usercategories WHERE id = %s AND user_id = %s RETURNING id", (cat_id, user_id))
-        deleted = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        
-        if deleted:
-            return jsonify({"status": "deleted"})
-        else:
-            return jsonify({"error": "Category not found"}), 404
-    except Exception as e:
-        print(f"Error deleting category: {e}")
-        return jsonify({"error": "Failed to delete category"}), 500
-
-# Move document into category
-# Move document to category (drag and drop)
-@app.route("/move-document/<int:doc_id>", methods=["POST"])
-def move_document(doc_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        return "Unauthorized", 403
-        return jsonify({"error": "Unauthorized"}), 403
-        
-    data = request.get_json()
-    category_id = data.get("categoryId")
-    
-    # category_id can be None (for "All Documents") or a valid category ID
-
-    conn = get_db()
-    cur = conn.cursor()
-    
-        conn = get_db()
-        cur = conn.cursor()
-
-    # Ensure category belongs to user
-    if category_id:
-        cur.execute("SELECT 1 FROM usercategories WHERE id = %s AND user_id = %s", (category_id, user_id))
-        if not cur.fetchone():
-            conn.close()
-            return "Invalid category", 400
-        # If category_id is provided, ensure it belongs to the user
-        if category_id:
-            cur.execute("SELECT 1 FROM usercategories WHERE id = %s AND user_id = %s", (category_id, user_id))
-            if not cur.fetchone():
-                cur.close()
-                conn.close()
-                return jsonify({"error": "Invalid category"}), 400
-
-    cur.execute(
-        "UPDATE userdocuments SET category_id = %s WHERE id = %s AND user_id = %s RETURNING id",
-        (category_id, doc_id, user_id)
-    )
-    updated = cur.fetchone()
-    conn.commit()
-    conn.close()
-    if updated:
-        return jsonify({"status": "ok"})
-    else:
-        return jsonify({"error": "not found"}), 404
-        # Update the document's category
-        cur.execute(
-            "UPDATE userdocuments SET category_id = %s WHERE id = %s AND user_id = %s RETURNING id",
-            (category_id, doc_id, user_id)
-        )
-        updated = cur.fetchone()
-        conn.commit()
-        cur.close()
-        conn.close()
-        
-        if updated:
-            return jsonify({"status": "ok"})
-        else:
-            return jsonify({"error": "Document not found or unauthorized"}), 404
-    except Exception as e:
-        print(f"Error moving document: {e}")
-        return jsonify({"error": "Failed to move document"}), 500
-
-@app.route("/get-documents-basic", methods=["GET"])
-def get_documents_basic():
-# Get documents (optionally filtered by category)
-@app.route("/get-documents", methods=["GET"])
-def get_documents():
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify([])
-
-    category_id = request.args.get("category_id")
-    category_id = request.args.get("category_id")  # optional query param
-
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    if category_id and category_id != "all":
-        cur.execute("SELECT id, document AS filename, file_oid FROM userdocuments WHERE user_id = %s AND category_id = %s",
-                    (user_id, category_id))
-    else:
-        cur.execute("SELECT id, document AS filename, file_oid FROM userdocuments WHERE user_id = %s", (user_id,))
-    docs = cur.fetchall()
-    conn.close()
-    return jsonify(docs)
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        if category_id and category_id != "all":
-            # Get documents for specific category
-            cur.execute("""
-                SELECT id, document as name, file_oid, category_id 
-                FROM userdocuments 
-                WHERE user_id = %s AND category_id = %s AND document IS NOT NULL
-                ORDER BY id DESC
-            """, (user_id, category_id))
-        elif category_id == "all":
-            # Get all documents
-            cur.execute("""
-                SELECT id, document as name, file_oid, category_id 
-                FROM userdocuments 
-                WHERE user_id = %s AND document IS NOT NULL
-                ORDER BY id DESC
-            """, (user_id,))
-        else:
-            # Get documents without category (category_id IS NULL)
-            cur.execute("""
-                SELECT id, document as name, file_oid, category_id 
-                FROM userdocuments 
-                WHERE user_id = %s AND category_id IS NULL AND document IS NOT NULL
-                ORDER BY id DESC
-            """, (user_id,))
-            
-        docs = cur.fetchall()
-        cur.close()
-        conn.close()
-        return jsonify([dict(doc) for doc in docs])
-    except Exception as e:
-        print(f"Error getting documents: {e}")
-        return jsonify([])
-
-# Enhanced dashboard route to work with categories
-@app.route('/dashboard-api')
-def dashboard_api():
-    """API endpoint for getting dashboard data including categories and documents"""
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Not authenticated"}), 401
-    
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Get categories
-        cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY name", (user_id,))
-        categories = [dict(cat) for cat in cur.fetchall()]
-        
-        # Get all documents with category info
-        cur.execute("""
-            SELECT 
-                d.id, 
-                d.document as name, 
-                d.file_oid, 
-                d.category_id,
-                c.name as category_name
-            FROM userdocuments d
-            LEFT JOIN usercategories c ON d.category_id = c.id
-            WHERE d.user_id = %s AND d.document IS NOT NULL
-            ORDER BY d.id DESC
-        """, (user_id,))
-        documents = [dict(doc) for doc in cur.fetchall()]
-        
-        cur.close()
-        conn.close()
-        
-        return jsonify({
-            "categories": categories,
-            "documents": documents
-        })
-    except Exception as e:
-        print(f"Error getting dashboard data: {e}")
-        return jsonify({"error": "Failed to load data"}), 500
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
