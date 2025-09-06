@@ -735,45 +735,44 @@ def add_category():
 
     return jsonify({"success": True, "id": category_id, "name": category_name})
 
-@app.route('/update-document-category', methods=['POST'])
+
+@app.route("/update-document-category", methods=["POST"])
 def update_document_category():
-    if 'user_id' not in session:
+    if "user_id" not in session:
         return jsonify({"success": False, "error": "Not logged in"}), 401
 
-    data = request.get_json()
-    document_id = data.get("documentId")
-    category = data.get("category")  # can be None if "All Documents"
-
-    if not document_id:
-        return jsonify({"success": False, "error": "Missing documentId"}), 400
-
     try:
+        data = request.get_json()
+        document_id = data.get("documentId")
+        category = data.get("category")  # can be None
+
+        if not document_id:
+            return jsonify({"success": False, "error": "Missing documentId"}), 400
+
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Ensure user owns the document
-        cur.execute("SELECT user_id FROM userdocuments WHERE id = %s", (document_id,))
-        owner = cur.fetchone()
-        if not owner or owner[0] != session["user_id"]:
-            cur.close()
-            conn.close()
-            return jsonify({"success": False, "error": "Unauthorized"}), 403
+        # Update document's category
+        cur.execute("""
+            UPDATE userdocuments
+            SET category = %s
+            WHERE id = %s AND user_id = %s
+        """, (category, document_id, session["user_id"]))
 
-        # Update category (make sure you have a 'category' column in userdocuments)
-        cur.execute("UPDATE userdocuments SET category = %s WHERE id = %s", (category, document_id))
         conn.commit()
         cur.close()
         conn.close()
 
-        return jsonify({"success": True}), 200
-
+        return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
