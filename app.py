@@ -767,11 +767,48 @@ def update_document_category():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/feedback', methods=['GET', 'POST'])
+def feedback():
+    if 'user_name' not in session:
+        return redirect('/login')
 
+    if request.method == 'POST':
+        name = request.form.get("name")
+        profession = request.form.get("profession")
+        feedback_type = request.form.get("feedback_type")
+        feedback_text = request.form.get("feedback_text")
+        rating = request.form.get("rating")
+
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            cur.execute("SELECT id FROM users WHERE name = %s", (session['user_name'],))
+            user = cur.fetchone()
+            user_id = user[0] if user else None
+
+            cur.execute("""
+                INSERT INTO feedback (user_id, user_name, profession, feedback_type, feedback_text, rating)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, name, profession, feedback_type, feedback_text, rating))
+
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            flash("✅ Thank you for your feedback!", "success")
+            return redirect('/dashboard')
+
+        except Exception as e:
+            flash(f"Error saving feedback: {e}", "error")
+            return render_template("feedback.html")
+
+    return render_template("feedback.html")
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
