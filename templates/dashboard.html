@@ -536,8 +536,8 @@
     const app = $('#app');
   
     function initResizeButtons() {
-      $('#btnLS').textContent = 'Â«';
-      $('#btnUS').textContent = 'Â«';
+      $('#btnLS').textContent = '«';
+      $('#btnUS').textContent = '«';
     }
   
     // Add these new functions for state management
@@ -556,8 +556,8 @@
       // Update button directions
       const btnLS = document.getElementById('btnLS');
       const btnUS = document.getElementById('btnUS');
-      if (btnLS) { btnLS.textContent = ls ? 'Â«' : 'Â»'; }
-      if (btnUS) { btnUS.textContent = us ? 'Â«' : 'Â»'; }
+      if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
+      if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
     }
   
     // Update the button click handlers
@@ -891,6 +891,7 @@
 
 </body>
 </html>
+
 
 
 
