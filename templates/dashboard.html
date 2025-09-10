@@ -809,19 +809,20 @@
 
     // Filter documents based on current category
     async function filterDocuments() {
-      const res = await fetch('/get-documents');
-      const docs = await res.json();
-      
-      let filteredDocs = docs;
-      
-      if (currentCategory !== 'all') {
-        filteredDocs = docs.filter(doc => documentCategories[doc.id] === currentCategory);
-      }
-      
-      const container = $('#documents-container');
-      container.innerHTML = '';
-      filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-    }
+  const res = await fetch('/get-documents');
+  const docs = await res.json();
+
+  let filteredDocs = docs;
+
+  if (currentCategory !== 'all') {
+    filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
+  }
+
+  const container = $('#documents-container');
+  container.innerHTML = '';
+  filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+}
+
 
     document.addEventListener('DOMContentLoaded', () => {
       initResizeButtons();
@@ -922,6 +923,7 @@
 
 </body>
 </html>
+
 
 
 
