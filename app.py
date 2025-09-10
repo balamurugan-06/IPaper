@@ -708,8 +708,9 @@ def get_documents():
         return jsonify([])
 
     user_id = user[0]
-    cur.execute("SELECT id, document FROM userdocuments WHERE user_id = %s", (user_id,))
-    docs = [{"id": row[0], "filename": row[1]} for row in cur.fetchall()]
+    cur.execute("SELECT id, document, category FROM userdocuments WHERE user_id = %s", (user_id,))
+    docs = [{"id": row[0], "filename": row[1], "category": row[2]} for row in cur.fetchall()]
+
 
     cur.close()
     conn.close()
@@ -839,6 +840,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
