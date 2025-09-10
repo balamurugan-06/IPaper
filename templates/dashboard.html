@@ -637,49 +637,53 @@
     }
 
     // Add new category
-    function addCategory(name) {
-      const categoryId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      
-      if (categories.find(cat => cat.id === categoryId)) {
-        alert('Category already exists!');
-        return;
-      }
-      
-      categories.push({
-        id: categoryId,
-        name: name,
-        createdAt: new Date().toISOString()
-      });
-      
-      saveCategories();
+    async function addCategory(name) {
+  if (!name || !name.trim()) {
+    alert("Category name cannot be empty.");
+    return;
+  }
+  try {
+    const res = await fetch("/add_category", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim() })
+    });
+    const result = await res.json();
+    if (result.success) {
+      // append to client-side list and rerender
+      categories.unshift({ id: result.id, name: result.name });
       renderCategories();
+    } else {
+      alert("Failed to add category: " + (result.error || "Unknown error"));
     }
+  } catch (err) {
+    console.error("Error adding category:", err);
+    alert("Error adding category. See console.");
+  }
+}
+
 
     // Delete category
-    function deleteCategory(categoryId) {
-      if (!confirm('Are you sure you want to delete this category? Documents will be moved back to "All Documents".')) {
-        return;
-      }
-      
-      // Move documents back to uncategorized
-      Object.keys(documentCategories).forEach(docId => {
-        if (documentCategories[docId] === categoryId) {
-          delete documentCategories[docId];
-        }
-      });
-      
-      // Remove category
-      categories = categories.filter(cat => cat.id !== categoryId);
-      
-      // If currently viewing deleted category, switch to all
-      if (currentCategory === categoryId) {
-        setCurrentCategory('all');
-      }
-      
-      saveCategories();
+    async function deleteCategory(categoryId) {
+  if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
+  try {
+    const res = await fetch(`/delete_category/${categoryId}`, { method: "DELETE" });
+    const result = await res.json();
+    if (result.success) {
+      categories = categories.filter(cat => String(cat.id) !== String(categoryId));
+      // If we were viewing that category, switch to 'all'
+      if (currentCategory === String(categoryId)) setCurrentCategory('all');
       renderCategories();
-      loadDocuments();
+      loadDocuments(); // refresh documents
+    } else {
+      alert("Failed to delete category: " + (result.error || "Unknown error"));
     }
+  } catch (err) {
+    console.error("Error deleting category:", err);
+    alert("Error deleting category. See console.");
+  }
+}
+
 
     // Setup drop zone for category
     function setupDropZone(categoryElement) {
@@ -898,6 +902,7 @@
 
 </body>
 </html>
+
 
 
 
