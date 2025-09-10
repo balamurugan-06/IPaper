@@ -726,7 +726,7 @@ def add_category():
     data = request.get_json()
     category_name = data.get("name")
 
-    conn = get_db()
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("INSERT INTO usercategories (user_id, name) VALUES (%s, %s) RETURNING id",
                 (session["user_id"], category_name))
@@ -775,7 +775,7 @@ def get_categories():
     if "user_id" not in session:
         return jsonify([])
 
-    conn = get_db()
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY id DESC", (session["user_id"],))
     categories = [{"id": row[0], "name": row[1]} for row in cur.fetchall()]
@@ -788,7 +788,7 @@ def delete_category(category_id):
     if "user_id" not in session:
         return jsonify({"success": False, "error": "Not logged in"}), 401
     try:
-        conn = get_db()
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("DELETE FROM usercategories WHERE id = %s AND user_id = %s", (category_id, session["user_id"]))
         conn.commit()
@@ -840,6 +840,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
