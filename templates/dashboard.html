@@ -826,8 +826,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initResizeButtons();
-      loadDocuments();
-      renderCategories();
+      loadCategories();       // load categories from server
+      loadDocuments();        // load documents (documents include category field)
+
       
       // Setup "All Documents" category
       const allDocsCategory = $('.category[data-category="all"]');
@@ -923,6 +924,7 @@
 
 </body>
 </html>
+
 
 
 
