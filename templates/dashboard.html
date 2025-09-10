@@ -426,9 +426,14 @@
       <div class="muted">Welcome, {{ name }}</div>
       <div class="muted">{{ profession }}</div>
       <div class="topbar-actions">
-        <button id="downloadBtn" class="action-btn secondary">Download</button>
-        <button id="generateBtn" class="action-btn">Generate</button>
-      </div>
+  <button id="downloadBtn" class="action-btn secondary">Download</button>
+  {% if latest_membership != "Free" %}
+    <button id="generateBtn" class="action-btn">Generate</button>
+  {% else %}
+    <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
+  {% endif %}
+</div>
+
     </div>
     <h1>Welcome, {{ name }}</h1>
     <p class="muted"></p>
@@ -891,6 +896,7 @@
 
 </body>
 </html>
+
 
 
 
