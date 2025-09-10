@@ -708,8 +708,13 @@ def get_documents():
         return jsonify([])
 
     user_id = user[0]
-    cur.execute("SELECT id, document, category FROM userdocuments WHERE user_id = %s", (user_id,))
-    docs = [{"id": row[0], "filename": row[1], "category": row[2]} for row in cur.fetchall()]
+    cur.execute("SELECT id, document, category FROM userdocuments WHERE user_id = %s AND document IS NOT NULL", (user_id,))
+    docs = [
+    {"id": row[0], "filename": row[1], "category": row[2]}
+    for row in cur.fetchall()
+    if row[1]  # ensure filename not None or empty
+    ]
+
 
 
     cur.close()
@@ -840,6 +845,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
