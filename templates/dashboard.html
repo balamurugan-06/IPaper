@@ -624,10 +624,12 @@
     }
   
     // ENHANCED: Category management with drag & drop and persistence
-    let categories = JSON.parse(localStorage.getItem('userCategories')) || [];
-    let documentCategories = JSON.parse(localStorage.getItem('documentCategories')) || {};
+    const userId = "{{ session.get('user_id', '') }}";
+    let categories = [];
+    let documentCategories = {};    // optional in-memory mapping (we rely on server)
     let currentCategory = 'all';
 
+  
     // Save categories to localStorage
     function saveCategories() {
       localStorage.setItem('userCategories', JSON.stringify(categories));
@@ -896,6 +898,7 @@
 
 </body>
 </html>
+
 
 
 
