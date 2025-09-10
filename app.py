@@ -736,6 +736,7 @@ def add_category():
     return jsonify({"success": True, "id": category_id, "name": category_name})
 
 
+
 @app.route("/update-document-category", methods=["POST"])
 def update_document_category():
     if "user_id" not in session:
@@ -766,6 +767,36 @@ def update_document_category():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/get_categories", methods=["GET"])
+def get_categories():
+    if "user_id" not in session:
+        return jsonify([])
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name FROM usercategories WHERE user_id = %s ORDER BY id DESC", (session["user_id"],))
+    categories = [{"id": row[0], "name": row[1]} for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return jsonify(categories)
+
+@app.route("/delete_category/<int:category_id>", methods=["DELETE"])
+def delete_category(category_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM usercategories WHERE id = %s AND user_id = %s", (category_id, session["user_id"]))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
@@ -808,6 +839,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
