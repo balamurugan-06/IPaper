@@ -743,45 +743,52 @@
 
     // Render categories in sidebar
     function renderCategories() {
-      const container = $('.categories-container');
-      
-      // Keep "All Documents" category
-      const allDocsCategory = container.querySelector('.category[data-category="all"]');
-      
-      // Remove existing custom categories
-      const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
-      existingCategories.forEach(el => el.remove());
-      
-      // Add custom categories
-      categories.forEach(category => {
-        const categoryEl = document.createElement('div');
-        categoryEl.className = 'category';
-        categoryEl.dataset.category = category.id;
-        
-        const titleEl = document.createElement('div');
-        titleEl.className = 'category-title';
-        titleEl.textContent = category.name;
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-category';
-        deleteBtn.textContent = '🗑';
-        deleteBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteCategory(category.id);
-        };
-        
-        categoryEl.appendChild(titleEl);
-        categoryEl.appendChild(deleteBtn);
-        
-        // Add click event to switch category
-        categoryEl.onclick = () => setCurrentCategory(category.id);
-        
-        // Setup drop zone
-        setupDropZone(categoryEl);
-        
-        container.appendChild(categoryEl);
-      });
-    }
+  const container = document.querySelector('.categories-container');
+
+  // Keep "All Documents" category (already in DOM) — remove any other custom categories first
+  const allDocsCategory = container.querySelector('.category[data-category="all"]');
+
+  const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
+  existingCategories.forEach(el => el.remove());
+
+  // Add categories from server
+  categories.forEach(category => {
+    const categoryEl = document.createElement('div');
+    categoryEl.className = 'category';
+    categoryEl.dataset.category = String(category.id);
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'category-title';
+    titleEl.textContent = category.name;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-category';
+    deleteBtn.textContent = '🗑';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteCategory(category.id);
+    };
+
+    categoryEl.appendChild(titleEl);
+    categoryEl.appendChild(deleteBtn);
+
+    // click to switch
+    categoryEl.onclick = () => setCurrentCategory(String(category.id));
+
+    // make it a dropzone
+    setupDropZone(categoryEl);
+
+    container.appendChild(categoryEl);
+  });
+
+  // ensure the active category class exists
+  const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
+  if (activeEl) {
+    container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
+    activeEl.classList.add('active-category');
+  }
+}
+
 
     // Set current category and update display
     function setCurrentCategory(categoryId) {
@@ -898,10 +905,24 @@
       }
     });
 
+  async function loadCategories() {
+  try {
+    const res = await fetch("/get_categories");
+    if (!res.ok) throw new Error("Failed to load categories");
+    categories = await res.json();
+    renderCategories();
+  } catch (err) {
+    console.error("Error loading categories:", err);
+    categories = []; // fallback
+    renderCategories();
+  }
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
