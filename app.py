@@ -428,8 +428,8 @@ def select_plan():
     profession = session.get('profession', '')
     
     # Block Ultra from downgrading
-    if profession == 'Ultra' and plan == 'Pro':
-        flash("As a Ultra, you cannot subscribe to the Pro plan.", "error")
+    if profession == 'Professional Plus' and plan == 'Professional':
+        flash("As a Ultra, you cannot subscribe to the Professional plan.", "error")
         return redirect('/membership')
 
     session['selected_plan'] = plan
@@ -503,7 +503,7 @@ def payment_process():
         user_id, email, profession = user
 
         # Only allow valid plan values
-        if selected_plan not in ['Pro', 'Ultra']:
+        if selected_plan not in ['Professional', 'Professional Plus']:
             return redirect('/membership')
 
         # Check for existing membership
@@ -845,6 +845,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
