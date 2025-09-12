@@ -180,7 +180,7 @@
         function showCardForm(plan) {
             document.getElementById('selected_plan').value = plan;
             document.getElementById('total-amount').textContent =
-                plan === 'Pro' ? 'Total: $9.99/month' : 'Total: $19.99/month';
+                plan === 'Professional' ? 'Total: $9.99/month' : 'Total: $19.99/month';
             document.getElementById('popup-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -207,23 +207,23 @@
         </div>
 
         <div class="plan-card">
-            <div class="plan-title">Pro User $9.99/month</div>
+            <div class="plan-title">Professional $9.99/month</div>
             <div class="plan-features">
                 <p>Access to advanced features</p>
                 <p>Full document generation</p>
                 <p>Priority support</p>
             </div>
-            <button class="btn" onclick="showCardForm('Pro')">Select Plan</button>
+            <button class="btn" onclick="showCardForm('Professional')">Select Plan</button>
         </div>
 
         <div class="plan-card">
-            <div class="plan-title">Ultra User $19.99/month</div>
+            <div class="plan-title">Professional Plus $19.99/month</div>
             <div class="plan-features">
                 <p>Premium access with all features</p>
                 <p>Unlimited document generation</p>
                 <p>24/7 dedicated support</p>
             </div>
-            <button class="btn" onclick="showCardForm('Ultra')">Select Plan</button>
+            <button class="btn" onclick="showCardForm('Professional Plus')">Select Plan</button>
         </div>
     </div>
 
@@ -279,6 +279,7 @@
 </div>
 </body>
 </html>
+
 
 
 
