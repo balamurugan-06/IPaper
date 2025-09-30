@@ -83,7 +83,7 @@ def register():
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT * FROM "Users" WHERE email = %s", (email,))
+            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
             if cur.fetchone():
                 flash("Email already exists.", 'error')
                 cur.close()
@@ -92,7 +92,7 @@ def register():
 
             hashed_password = generate_password_hash(password)
             cur.execute("""
-            INSERT INTO "Users" (name, email, passwordhash, gender, age, profession, membership)
+            INSERT INTO users (name, email, passwordhash, gender, age, profession, membership)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (name, email, hashed_password, gender, age, profession, 'Free'))
 
@@ -120,7 +120,7 @@ def login():
             cur = conn.cursor()
             cur.execute("""
                 SELECT "UserID", "Name", "Email", "PasswordHash", "Profession", "Membership"
-                FROM "Users"
+                FROM users
                 WHERE "Email" = %s
             """, (email,))
             user = cur.fetchone()
@@ -854,6 +854,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
