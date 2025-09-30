@@ -119,7 +119,7 @@ def login():
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("""
-                SELECT "UserID", "Name", "Email", "PasswordHash", "Profession", "Membership"
+                SELECT userid, name, email, passwordhash, profession, membership
                 FROM users
                 WHERE "Email" = %s
             """, (email,))
@@ -854,6 +854,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
