@@ -91,8 +91,11 @@ def register():
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
-            cur.execute("INSERT INTO users (name, email, password, gender, age, profession) VALUES (%s, %s, %s, %s, %s, %s)",
-                        (name, email, hashed_password, gender, age, profession))
+            cur.execute("""
+            INSERT INTO Users (Name, Email, PasswordHash, Gender, Age, Profession, Membership)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (name, email, hashed_password, gender, age, profession, 'Free'))
+
             conn.commit()
             cur.close()
             conn.close()
@@ -845,6 +848,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
