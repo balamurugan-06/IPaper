@@ -121,7 +121,7 @@ def login():
             cur.execute("""
                 SELECT userid, name, email, passwordhash, profession, membership
                 FROM users
-                WHERE "Email" = %s
+                WHERE email = %s
             """, (email,))
             user = cur.fetchone()
             cur.close()
@@ -854,6 +854,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
