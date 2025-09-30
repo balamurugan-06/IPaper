@@ -92,7 +92,7 @@ def register():
 
             hashed_password = generate_password_hash(password)
             cur.execute("""
-            INSERT INTO users (Name, Email, PasswordHash, Gender, Age, Profession, Membership)
+            INSERT INTO users (name, email, passwordhash, gender, age, profession, membership)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (name, email, hashed_password, gender, age, profession, 'Free'))
 
@@ -118,7 +118,7 @@ def login():
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT UserID, Name, Email, PasswordHash, Profession, Membership FROM users WHERE Email = %s", (email,))
+            cur.execute("SELECT userid, name, email, passwordhash, profession, membership FROM users WHERE email = %s", (email,))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -849,6 +849,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
