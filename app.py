@@ -112,13 +112,17 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form['email'].strip()
         password = request.form['password']
 
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT userid, name, email, passwordhash, profession, membership FROM users WHERE email = %s", (email,))
+            cur.execute("""
+                SELECT "UserID", "Name", "Email", "PasswordHash", "Profession", "Membership"
+                FROM "Users"
+                WHERE "Email" = %s
+            """, (email,))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -127,23 +131,24 @@ def login():
                 flash("Email is not registered.", 'error')
                 return render_template('login.html')
 
-            if not check_password_hash(user[3], password):
+            stored_hash = user[3]
+            if not check_password_hash(stored_hash, password):
                 flash("Type in the correct password.", 'error')
                 return render_template('login.html')
 
-            session['user_id'] = user[0]  
-            session['user_name'] = user[1]  
-            session['profession'] = user[4]  
-            session['membership'] = user[5]
-            
-            return redirect('/dashboard')
+            session['user_id'] = user[0]
+            session['user_name'] = user[1]
+            session['profession'] = user[4]
+            session['membership'] = user[5] or 'Free'
 
+            return redirect('/dashboard')
 
         except Exception as e:
             flash("Login failed: " + str(e), 'error')
             return render_template('login.html')
 
     return render_template('login.html')
+
 
 @app.route('/home')
 def home():
@@ -849,6 +854,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
