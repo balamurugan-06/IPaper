@@ -118,7 +118,7 @@ def login():
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+            cur.execute("SELECT UserID, Name, Email, PasswordHash, Profession, Membership FROM users WHERE Email = %s", (email,))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -131,9 +131,10 @@ def login():
                 flash("Type in the correct password.", 'error')
                 return render_template('login.html')
 
-            session['user_name'] = user[1]
-            session['user_id'] = user[0] 
-            session['profession'] = user[6]
+            session['user_id'] = user[0]  
+            session['user_name'] = user[1]  
+            session['profession'] = user[4]  
+            session['membership'] = user[5]
             
             return redirect('/dashboard')
 
@@ -848,6 +849,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
