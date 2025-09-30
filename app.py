@@ -92,7 +92,7 @@ def register():
 
             hashed_password = generate_password_hash(password)
             cur.execute("""
-            INSERT INTO Users (Name, Email, PasswordHash, Gender, Age, Profession, Membership)
+            INSERT INTO users (Name, Email, PasswordHash, Gender, Age, Profession, Membership)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (name, email, hashed_password, gender, age, profession, 'Free'))
 
@@ -848,6 +848,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
