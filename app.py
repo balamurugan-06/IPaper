@@ -172,7 +172,7 @@ def dashboard():
         cur = conn.cursor()
 
         # Get user ID and profession
-        cur.execute("SELECT id, profession FROM users WHERE name = %s", (name,))
+        cur.execute("SELECT userid, profession, membership FROM users WHERE name = %s", (name,))
         user = cur.fetchone()
         if not user:
             flash("User not found")
@@ -854,6 +854,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
