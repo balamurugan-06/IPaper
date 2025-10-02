@@ -406,7 +406,7 @@ def delete_user(user_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        cur.execute("DELETE FROM users WHERE userid = %s", (user_id,))
         conn.commit()
         cur.close()
         conn.close()
@@ -884,6 +884,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
