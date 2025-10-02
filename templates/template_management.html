@@ -175,7 +175,7 @@
         {% for template in templates %}
 <div class="template-item">
     <div class="template-title">{{ template[1] }}</div>
-    <div class="template-prompt-preview">{{ template[2] }}</div>
+    <div class="template-prompt-preview">{{ template[3] }}</div>
     <div class="template-options">
         <button class="option-btn edit-btn" data-template-id="{{ template[0] }}">Edit</button>
         <form method="POST" action="/delete_template/{{ template[0] }}" style="display: inline;">
@@ -276,4 +276,5 @@
     </script>
 </body>
 </html>
+
 
