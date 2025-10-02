@@ -410,6 +410,10 @@
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
       <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
+        <label for="folderSelect">Choose folder (optional):</label>
+    <select id="folderSelect" name="folder_id">
+      <option value="">-- All Documents --</option>
+    </select>
         <input type="file" name="file" required multiple />
         <button type="submit" class="btn brand" style="width:100%">Upload</button>
       </form>
@@ -913,6 +917,16 @@
     if (!res.ok) throw new Error("Failed to load categories");
     categories = await res.json();
     renderCategories();
+    const folderSelect = document.getElementById('folderSelect');
+      if (folderSelect) {
+        folderSelect.innerHTML = '<option value="">-- All Documents --</option>';
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = String(cat.id);
+          opt.textContent = cat.name;
+          folderSelect.appendChild(opt);
+        });
+      }
   } catch (err) {
     console.error("Error loading categories:", err);
     categories = []; // fallback
@@ -924,6 +938,7 @@
 
 </body>
 </html>
+
 
 
 
