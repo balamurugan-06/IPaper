@@ -662,8 +662,7 @@ def manage_templates():
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            SELECT summarytemplateid, templatename, category, promptinstructions, createdby
-            FROM uploadsummarytemplates
+            SELECT * FROM uploadsummarytemplates
             ORDER BY summarytemplateid DESC
         """)
         templates = cur.fetchall()
@@ -885,6 +884,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
