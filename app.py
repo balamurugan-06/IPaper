@@ -389,7 +389,7 @@ def admin_users():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, name, email, gender, age, profession FROM users")
+        cur.execute("SELECT userid, name, email, gender, age, profession FROM users")
         users = cur.fetchall()
         cur.close()
         conn.close()
@@ -884,6 +884,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
