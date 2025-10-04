@@ -15,6 +15,7 @@ import re
 from flask import url_for
 import uuid
 from datetime import datetime, timedelta
+import traceback
 
 
 
@@ -460,6 +461,7 @@ def payment_success():
 
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
+    print("DEBUG: Payment process started")
     if 'user_id' not in session:
         flash("Please login to continue", "error")
         return redirect('/login')
@@ -482,6 +484,7 @@ def payment_process():
 
     # Parse expiry
     try:
+        
         mm, yy = card_expiry.split('/')
         exp_month = int(mm)
         exp_year = int(yy) if len(yy) == 4 else 2000 + int(yy)
@@ -492,10 +495,11 @@ def payment_process():
     user_id = session['user_id']
 
     try:
+        print("DEBUG: Connecting to database...")
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Find plan in DB
+        print(f"DEBUG: Fetching plan for {selected_plan}")
         cur.execute("SELECT planid, pricecents, currency FROM plans WHERE name = %s", (selected_plan,))
         plan = cur.fetchone()
         if not plan:
@@ -503,7 +507,7 @@ def payment_process():
             return redirect('/membership')
         plan_id, price_cents, currency = plan
 
-        # Create subscription
+        print("DEBUG: Inserting subscription...")
         cur.execute("""
             INSERT INTO subscriptions (userid, planid, status, currentperiodstart, currentperiodend)
             VALUES (%s, %s, %s, NOW(), NOW() + interval '1 month')
@@ -512,7 +516,7 @@ def payment_process():
         subscription_id = cur.fetchone()[0]
 
         # Save payment method (just last4 + token)
-        import uuid
+        print("DEBUG: Inserting payment method...")
         provider_id = str(uuid.uuid4())
         last4 = card_number[-4:]
         cur.execute("""
@@ -522,13 +526,13 @@ def payment_process():
         """, (user_id, 'card', 'card', last4, exp_month, exp_year, provider_id))
         paymentmethod_id = cur.fetchone()[0]
 
-        # Insert payment record
+        print("DEBUG: Inserting payment record...")
         cur.execute("""
             INSERT INTO payments (userid, subscriptionid, paymentmethodid, amountcents, currency, status, membershipsnapshot)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (user_id, subscription_id, paymentmethod_id, price_cents, currency, 'success', selected_plan))
 
-        # Update user membership for quick check
+        print("DEBUG: Updating user membership...")
         cur.execute("UPDATE users SET membership = %s WHERE userid = %s", (selected_plan, user_id))
 
         conn.commit()
@@ -541,6 +545,7 @@ def payment_process():
         return redirect(url_for('payment_success'))
 
     except Exception as e:
+        traceback.print_exc()
         print("Payment Error:", e)
         try:
             conn.rollback()
@@ -866,6 +871,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
