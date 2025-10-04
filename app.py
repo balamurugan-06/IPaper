@@ -461,7 +461,7 @@ def payment_success():
 
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
-    print("DEBUG: Payment process started")
+    print("DEBUG: Payment process started")  # 🟢 Step 1: start trace
     if 'user_id' not in session:
         flash("Please login to continue", "error")
         return redirect('/login')
@@ -484,7 +484,6 @@ def payment_process():
 
     # Parse expiry
     try:
-        
         mm, yy = card_expiry.split('/')
         exp_month = int(mm)
         exp_year = int(yy) if len(yy) == 4 else 2000 + int(yy)
@@ -502,6 +501,7 @@ def payment_process():
         print(f"DEBUG: Fetching plan for {selected_plan}")
         cur.execute("SELECT planid, pricecents, currency FROM plans WHERE name = %s", (selected_plan,))
         plan = cur.fetchone()
+        print("DEBUG: Plan result:", plan)
         if not plan:
             flash("Plan not found", "error")
             return redirect('/membership')
@@ -515,8 +515,8 @@ def payment_process():
         """, (user_id, plan_id, 'active'))
         subscription_id = cur.fetchone()[0]
 
-        # Save payment method (just last4 + token)
         print("DEBUG: Inserting payment method...")
+        import uuid
         provider_id = str(uuid.uuid4())
         last4 = card_number[-4:]
         cur.execute("""
@@ -539,20 +539,21 @@ def payment_process():
         cur.close()
         conn.close()
 
-         print("DEBUG: Payment successful, redirecting...")
+        print("DEBUG: Payment successful, redirecting...")
         session['last_payment_plan'] = selected_plan
-
         return redirect(url_for('payment_success'))
 
     except Exception as e:
+        import traceback
         traceback.print_exc()
         print("Payment Error:", e)
         try:
             conn.rollback()
-        except:
-            pass
+        except Exception as rollback_error:
+            print("Rollback failed:", rollback_error)
         flash("Payment failed: " + str(e), "error")
         return redirect('/membership')
+
 
 
 @app.route('/payment')
@@ -871,6 +872,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
