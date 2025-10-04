@@ -450,6 +450,41 @@ def select_plan():
     session['selected_plan_id'] = int(plan_id)
     return redirect('/payment')
 
+@app.route('/payment_success', methods=['POST'])
+def payment_success():
+    if 'user_name' not in session:
+        return redirect('/login')
+
+    selected_plan = session.get('selected_plan')
+    name = session.get('user_name')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Get user ID
+        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
+        user_data = cur.fetchone()
+
+        if not user_data:
+            return "User not found"
+
+        user_id, email, profession = user_data
+
+        # Insert membership (no file upload)
+        cur.execute("""
+            INSERT INTO userdocuments (user_id, name, email, profession, membership)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, name, email, profession, selected_plan))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        session['membership'] = selected_plan
+
+        return redirect('/dashboard')
+    except Exception as e:
+        return f"Error during payment: {e}"
 
 
 @app.route('/payment')
@@ -768,6 +803,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
