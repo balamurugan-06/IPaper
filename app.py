@@ -539,7 +539,7 @@ def payment_process():
         cur.close()
         conn.close()
 
-        # Store plan in session so we can show it on success page
+         print("DEBUG: Payment successful, redirecting...")
         session['last_payment_plan'] = selected_plan
 
         return redirect(url_for('payment_success'))
@@ -871,6 +871,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
