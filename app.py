@@ -450,41 +450,104 @@ def select_plan():
     session['selected_plan_id'] = int(plan_id)
     return redirect('/payment')
 
-@app.route('/payment_success', methods=['POST'])
+@app.route('/payment_success')
 def payment_success():
-    if 'user_name' not in session:
+    if 'last_payment_plan' not in session:
+        return redirect('/dashboard')
+    selected_plan = session.pop('last_payment_plan')  # clear after use
+    return render_template('payment_success.html', selected_plan=selected_plan)
+
+
+@app.route('/payment_process', methods=['POST'])
+def payment_process():
+    if 'user_id' not in session:
+        flash("Please login to continue", "error")
         return redirect('/login')
 
-    selected_plan = session.get('selected_plan')
-    name = session.get('user_name')
+    selected_plan = request.form.get('selected_plan')
+    if not selected_plan:
+        flash("No plan selected", "error")
+        return redirect('/membership')
+
+    # Card details
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    card_number = (request.form.get('card_number') or '').replace(' ', '').strip()
+    card_expiry = request.form.get('card_expiry', '').strip()
+    card_cvv = request.form.get('card_cvv', '').strip()
+
+    if not all([first_name, last_name, card_number, card_expiry, card_cvv]):
+        flash("All fields are required", "error")
+        return redirect('/membership')
+
+    # Parse expiry
+    try:
+        mm, yy = card_expiry.split('/')
+        exp_month = int(mm)
+        exp_year = int(yy) if len(yy) == 4 else 2000 + int(yy)
+    except Exception:
+        flash("Invalid expiry format (use MM/YY)", "error")
+        return redirect('/membership')
+
+    user_id = session['user_id']
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Get user ID
-        cur.execute("SELECT id, email, profession FROM users WHERE name = %s", (name,))
-        user_data = cur.fetchone()
+        # Find plan in DB
+        cur.execute("SELECT planid, pricecents, currency FROM plans WHERE name = %s", (selected_plan,))
+        plan = cur.fetchone()
+        if not plan:
+            flash("Plan not found", "error")
+            return redirect('/membership')
+        plan_id, price_cents, currency = plan
 
-        if not user_data:
-            return "User not found"
-
-        user_id, email, profession = user_data
-
-        # Insert membership (no file upload)
+        # Create subscription
         cur.execute("""
-            INSERT INTO userdocuments (user_id, name, email, profession, membership)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, name, email, profession, selected_plan))
+            INSERT INTO subscriptions (userid, planid, status, currentperiodstart, currentperiodend)
+            VALUES (%s, %s, %s, NOW(), NOW() + interval '1 month')
+            RETURNING subscriptionid
+        """, (user_id, plan_id, 'active'))
+        subscription_id = cur.fetchone()[0]
+
+        # Save payment method (just last4 + token)
+        import uuid
+        provider_id = str(uuid.uuid4())
+        last4 = card_number[-4:]
+        cur.execute("""
+            INSERT INTO paymentmethods (userid, provider, brand, last4, expmonth, expyear, providerpaymentmethodid)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING paymentmethodid
+        """, (user_id, 'card', 'card', last4, exp_month, exp_year, provider_id))
+        paymentmethod_id = cur.fetchone()[0]
+
+        # Insert payment record
+        cur.execute("""
+            INSERT INTO payments (userid, subscriptionid, paymentmethodid, amountcents, currency, status, membershipsnapshot)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, subscription_id, paymentmethod_id, price_cents, currency, 'success', selected_plan))
+
+        # Update user membership for quick check
+        cur.execute("UPDATE users SET membership = %s WHERE userid = %s", (selected_plan, user_id))
 
         conn.commit()
         cur.close()
         conn.close()
-        session['membership'] = selected_plan
 
-        return redirect('/dashboard')
+        # Store plan in session so we can show it on success page
+        session['last_payment_plan'] = selected_plan
+
+        return redirect(url_for('payment_success'))
+
     except Exception as e:
-        return f"Error during payment: {e}"
+        print("Payment Error:", e)
+        try:
+            conn.rollback()
+        except:
+            pass
+        flash("Payment failed: " + str(e), "error")
+        return redirect('/membership')
 
 
 @app.route('/payment')
@@ -803,6 +866,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
