@@ -461,7 +461,6 @@ def payment_success():
 
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
-    print("DEBUG: Payment process started")  # 🟢 Step 1: start trace
     if 'user_id' not in session:
         flash("Please login to continue", "error")
         return redirect('/login')
@@ -491,66 +490,40 @@ def payment_process():
         flash("Invalid expiry format (use MM/YY)", "error")
         return redirect('/membership')
 
+    # Set prices based on plan
+    if selected_plan == 'Professional':
+        amount = 9.99
+    elif selected_plan == 'Professional Plus':
+        amount = 19.99
+    else:
+        amount = 0.00
+
     user_id = session['user_id']
 
     try:
-        print("DEBUG: Connecting to database...")
         conn = get_db_connection()
         cur = conn.cursor()
 
-        print(f"DEBUG: Fetching plan for {selected_plan}")
-        cur.execute("SELECT planid, pricecents, currency FROM plans WHERE name = %s", (selected_plan,))
-        plan = cur.fetchone()
-        print("DEBUG: Plan result:", plan)
-        if not plan:
-            flash("Plan not found", "error")
-            return redirect('/membership')
-        plan_id, price_cents, currency = plan
-
-        print("DEBUG: Inserting subscription...")
-        cur.execute("""
-            INSERT INTO subscriptions (userid, planid, status, currentperiodstart, currentperiodend)
-            VALUES (%s, %s, %s, NOW(), NOW() + interval '1 month')
-            RETURNING subscriptionid
-        """, (user_id, plan_id, 'active'))
-        subscription_id = cur.fetchone()[0]
-
-        print("DEBUG: Inserting payment method...")
-        import uuid
-        provider_id = str(uuid.uuid4())
         last4 = card_number[-4:]
-        cur.execute("""
-            INSERT INTO paymentmethods (userid, provider, brand, last4, expmonth, expyear, providerpaymentmethodid)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING paymentmethodid
-        """, (user_id, 'card', 'card', last4, exp_month, exp_year, provider_id))
-        paymentmethod_id = cur.fetchone()[0]
 
-        print("DEBUG: Inserting payment record...")
         cur.execute("""
-            INSERT INTO payments (userid, subscriptionid, paymentmethodid, amountcents, currency, status, membershipsnapshot)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (user_id, subscription_id, paymentmethod_id, price_cents, currency, 'success', selected_plan))
+            INSERT INTO Payments (userid, planname, amount, currency, cardlast4, expmonth, expyear, status)
+            VALUES (%s, %s, %s, 'USD', %s, %s, %s, 'success')
+        """, (user_id, selected_plan, amount, last4, exp_month, exp_year))
 
-        print("DEBUG: Updating user membership...")
-        cur.execute("UPDATE users SET membership = %s WHERE userid = %s", (selected_plan, user_id))
+        # update membership in users table
+        cur.execute("UPDATE Users SET Membership = %s WHERE UserID = %s", (selected_plan, user_id))
 
         conn.commit()
         cur.close()
         conn.close()
 
-        print("DEBUG: Payment successful, redirecting...")
         session['last_payment_plan'] = selected_plan
+        flash("Payment successful!", "success")
         return redirect(url_for('payment_success'))
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         print("Payment Error:", e)
-        try:
-            conn.rollback()
-        except Exception as rollback_error:
-            print("Rollback failed:", rollback_error)
         flash("Payment failed: " + str(e), "error")
         return redirect('/membership')
 
@@ -872,6 +845,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
