@@ -461,6 +461,7 @@ def payment_success():
 
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
+    # --- 1️⃣ Basic login and form validation ---
     if 'user_id' not in session:
         flash("Please login to continue", "error")
         return redirect('/login')
@@ -470,7 +471,6 @@ def payment_process():
         flash("No plan selected", "error")
         return redirect('/membership')
 
-    # Card details
     first_name = request.form.get('first_name', '').strip()
     last_name = request.form.get('last_name', '').strip()
     card_number = (request.form.get('card_number') or '').replace(' ', '').strip()
@@ -481,7 +481,7 @@ def payment_process():
         flash("All fields are required", "error")
         return redirect('/membership')
 
-    # Parse expiry
+    # --- 2️⃣ Parse expiry date ---
     try:
         mm, yy = card_expiry.split('/')
         exp_month = int(mm)
@@ -490,7 +490,7 @@ def payment_process():
         flash("Invalid expiry format (use MM/YY)", "error")
         return redirect('/membership')
 
-    # Set prices based on plan
+    # --- 3️⃣ Determine price based on plan ---
     if selected_plan == 'Professional':
         amount = 9.99
     elif selected_plan == 'Professional Plus':
@@ -499,33 +499,45 @@ def payment_process():
         amount = 0.00
 
     user_id = session['user_id']
+    last4 = card_number[-4:]
 
+    # --- 4️⃣ Store payment and update membership ---
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        last4 = card_number[-4:]
-
+        # Calculate plan duration: Start today, end 30 days later
         cur.execute("""
-            INSERT INTO Payments (userid, planname, amount, currency, cardlast4, expmonth, expyear, status)
-            VALUES (%s, %s, %s, 'USD', %s, %s, %s, 'success')
+            INSERT INTO Payments (
+                userid, planname, amount, currency, cardlast4,
+                expmonth, expyear, status, startdate, enddate
+            )
+            VALUES (%s, %s, %s, 'USD', %s, %s, %s, 'success', NOW(), NOW() + interval '30 days')
         """, (user_id, selected_plan, amount, last4, exp_month, exp_year))
 
-        # update membership in users table
+        # Update user’s membership immediately
         cur.execute("UPDATE Users SET Membership = %s WHERE UserID = %s", (selected_plan, user_id))
 
         conn.commit()
         cur.close()
         conn.close()
 
+        # --- 5️⃣ Store in session for success page ---
         session['last_payment_plan'] = selected_plan
         flash("Payment successful!", "success")
         return redirect(url_for('payment_success'))
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print("Payment Error:", e)
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         flash("Payment failed: " + str(e), "error")
         return redirect('/membership')
+
 
 
 
@@ -845,6 +857,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
