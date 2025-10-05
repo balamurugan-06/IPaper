@@ -383,7 +383,7 @@ def admin_login():
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT adminid, username, password FROM admindatabase WHERE username = %s", (username,))
+            cur.execute("SELECT adminid, username, passwordhash FROM admindatabase WHERE username = %s", (username,))
             row = cur.fetchone()
             cur.close()
             conn.close()
@@ -886,6 +886,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
