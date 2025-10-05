@@ -487,36 +487,38 @@ def payment_success():
 
 @app.route('/payment_process', methods=['POST'])
 def payment_process():
-    # --- 1️⃣ Basic login and form validation ---
+    # Ensure user is logged in
     if 'user_id' not in session:
-        flash("Please login to continue", "error")
+        flash("Please log in to continue.", "error")
         return redirect('/login')
 
     selected_plan = request.form.get('selected_plan')
     if not selected_plan:
-        flash("No plan selected", "error")
+        flash("Please select a plan.", "error")
         return redirect('/membership')
 
+    # Collect form data
     first_name = request.form.get('first_name', '').strip()
     last_name = request.form.get('last_name', '').strip()
-    card_number = (request.form.get('card_number') or '').replace(' ', '').strip()
+    card_number = request.form.get('card_number', '').replace(' ', '').strip()
     card_expiry = request.form.get('card_expiry', '').strip()
     card_cvv = request.form.get('card_cvv', '').strip()
 
+    # Basic validation
     if not all([first_name, last_name, card_number, card_expiry, card_cvv]):
-        flash("All fields are required", "error")
+        flash("All payment fields are required.", "error")
         return redirect('/membership')
 
-    # --- 2️⃣ Parse expiry date ---
+    # Parse expiry (MM/YY)
     try:
         mm, yy = card_expiry.split('/')
         exp_month = int(mm)
         exp_year = int(yy) if len(yy) == 4 else 2000 + int(yy)
     except Exception:
-        flash("Invalid expiry format (use MM/YY)", "error")
+        flash("Invalid expiry date format. Use MM/YY.", "error")
         return redirect('/membership')
 
-    # --- 3️⃣ Determine price based on plan ---
+    # Determine plan pricing
     if selected_plan == 'Professional':
         amount = 9.99
     elif selected_plan == 'Professional Plus':
@@ -524,45 +526,42 @@ def payment_process():
     else:
         amount = 0.00
 
-    user_id = session['user_id']
-    last4 = card_number[-4:]
+    # Hash sensitive details
+    hashed_card_number = generate_password_hash(card_number)
+    hashed_expiry = generate_password_hash(card_expiry)
+    hashed_cvv = generate_password_hash(card_cvv)
 
-    # --- 4️⃣ Store payment and update membership ---
+    user_id = session['user_id']
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Calculate plan duration: Start today, end 30 days later
+        # Insert payment record
         cur.execute("""
-            INSERT INTO Payments (
-                userid, planname, amount, currency, cardlast4,
-                expmonth, expyear, status, startdate, enddate
-            )
+            INSERT INTO Payments (userid, planname, amount, currency, cardnumber, cardexpiry, cardcvv, status, startdate, enddate)
             VALUES (%s, %s, %s, 'USD', %s, %s, %s, 'success', NOW(), NOW() + interval '30 days')
-        """, (user_id, selected_plan, amount, last4, exp_month, exp_year))
+        """, (
+            user_id, selected_plan, amount,
+            hashed_card_number, hashed_expiry, hashed_cvv
+        ))
 
-        # Update user’s membership immediately
-        cur.execute("UPDATE Users SET Membership = %s WHERE UserID = %s", (selected_plan, user_id))
+        # Update user's membership
+        cur.execute("UPDATE Users SET membership = %s WHERE userid = %s", (selected_plan, user_id))
 
         conn.commit()
         cur.close()
         conn.close()
 
-        # --- 5️⃣ Store in session for success page ---
         session['last_payment_plan'] = selected_plan
         flash("Payment successful!", "success")
         return redirect(url_for('payment_success'))
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         print("Payment Error:", e)
-        try:
-            conn.rollback()
-        except Exception:
-            pass
-        flash("Payment failed: " + str(e), "error")
+        flash(f"Payment failed: {str(e)}", "error")
         return redirect('/membership')
+
 
 
 
@@ -883,6 +882,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
