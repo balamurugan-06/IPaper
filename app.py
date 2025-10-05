@@ -168,10 +168,30 @@ def dashboard():
         return redirect('/login')
 
     user_id = session['user_id']
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # load user files
+
+        # --- 🔹 Auto-reset membership if expired ---
+        cur.execute("""
+            SELECT enddate 
+            FROM payments
+            WHERE userid = %s
+            ORDER BY enddate DESC
+            LIMIT 1
+        """, (user_id,))
+        row = cur.fetchone()
+
+        if row and row[0]:
+            from datetime import datetime
+            if row[0] < datetime.now():
+                # Expired — reset to Free plan
+                cur.execute("UPDATE users SET membership = 'Free' WHERE userid = %s", (user_id,))
+                conn.commit()
+                session['membership'] = 'Free'
+
+        # --- 🔹 Load user files ---
         cur.execute("""
             SELECT f.fileid, f.filename, f.folderid, fo.foldername
             FROM files f
@@ -180,9 +200,12 @@ def dashboard():
             ORDER BY f.fileid DESC
         """, (user_id,))
         files = cur.fetchall()
-        documents = [{"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3]} for r in files]
+        documents = [
+            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3]}
+            for r in files
+        ]
 
-        # fetch membership from users (or subscriptions if you prefer)
+        # --- 🔹 Fetch user membership (after possible reset) ---
         cur.execute("SELECT membership FROM users WHERE userid = %s", (user_id,))
         row = cur.fetchone()
         membership = row[0] if row and row[0] else 'Free'
@@ -191,11 +214,14 @@ def dashboard():
         cur.close()
         conn.close()
 
-        return render_template('dashboard.html',
-                               name=session.get('user_name'),
-                               profession=session.get('profession'),
-                               documents=documents,
-                               latest_membership=membership)
+        return render_template(
+            'dashboard.html',
+            name=session.get('user_name'),
+            profession=session.get('profession'),
+            documents=documents,
+            latest_membership=membership
+        )
+
     except Exception as e:
         return f"Dashboard error: {e}"
 
@@ -857,6 +883,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
