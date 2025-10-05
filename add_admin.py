@@ -18,12 +18,13 @@ hashed_password = generate_password_hash(raw_password)
 conn = psycopg2.connect(DATABASE_URL, sslmode="require")
 cur = conn.cursor()
 cur.execute("""
-    INSERT INTO AdminDatabase (Username, Password)
+    INSERT INTO admindatabase (username, password)
     VALUES (%s, %s)
-    ON CONFLICT (Username) DO UPDATE SET Password = EXCLUDED.Password;
+    ON CONFLICT (username) DO UPDATE SET Password = EXCLUDED.Password;
 """, (username, hashed_password))
 conn.commit()
 cur.close()
 conn.close()
 
 print(f"✅ Admin '{username}' added successfully.")
+
