@@ -379,26 +379,36 @@ def admin_login():
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            
-            cur.execute("SELECT adminid, username, passwordhash FROM admindatabase WHERE username = %s", (username,))
+
+            # Always lowercase the table name for Postgres
+            cur.execute("""
+                SELECT adminid, username, passwordhash
+                FROM admindatabase
+                WHERE username = %s
+            """, (username,))
             row = cur.fetchone()
             cur.close()
             conn.close()
 
             if row:
                 adminid, uname, pw_hash = row
-                
-                if check_password_hash(pw_hash, password):
+
+                # Debugging: print hash type
+                print("DEBUG: pw_hash =", pw_hash)
+
+                if pw_hash and check_password_hash(pw_hash, password):
                     session['admin_logged_in'] = True
                     session['admin_id'] = adminid
+                    session['admin_username'] = uname
                     flash("Welcome, Admin!", "success")
                     return redirect('/admin')
                 else:
-                    flash("Incorrect password.", "error")
+                    flash("❌ Incorrect password.", "error")
             else:
-                flash("Admin not found.", "error")
+                flash("⚠️ Admin not found.", "error")
 
         except Exception as e:
+            print("ERROR:", e)
             flash(f"Admin login failed: {e}", "error")
 
     return render_template('admin_login.html')
@@ -900,6 +910,7 @@ def create_admin_once():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
