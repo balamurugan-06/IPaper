@@ -376,38 +376,33 @@ def admin_login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
-        if not username or not password:
-            flash("Please enter both username and password.", "error")
-            return render_template('admin_login.html')
-
         try:
             conn = get_db_connection()
             cur = conn.cursor()
+            
             cur.execute("SELECT adminid, username, passwordhash FROM admindatabase WHERE username = %s", (username,))
             row = cur.fetchone()
             cur.close()
             conn.close()
 
             if row:
-                admin_id, db_username, db_password_hash = row
-                if check_password_hash(db_password_hash, password):
+                adminid, uname, pw_hash = row
+                
+                if check_password_hash(pw_hash, password):
                     session['admin_logged_in'] = True
-                    session['admin_id'] = admin_id
-                    session['admin_username'] = db_username
-                    flash("Admin login successful.", "success")
+                    session['admin_id'] = adminid
+                    flash("Welcome, Admin!", "success")
                     return redirect('/admin')
                 else:
                     flash("Incorrect password.", "error")
             else:
-                flash("Admin username not found.", "error")
+                flash("Admin not found.", "error")
 
         except Exception as e:
-            flash(f"Database error: {e}", "error")
+            flash(f"Admin login failed: {e}", "error")
 
-        return render_template('admin_login.html')
-
-    # GET request
     return render_template('admin_login.html')
+
     
 
 @app.route('/admin')
@@ -886,6 +881,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
