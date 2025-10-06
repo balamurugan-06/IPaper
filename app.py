@@ -879,8 +879,28 @@ def feedback():
     return render_template('feedback.html')
 
 
+@app.route('/create-admin-once')
+def create_admin_once():
+    from werkzeug.security import generate_password_hash
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        pw_hash = generate_password_hash("Admin@123")  # your desired password
+        cur.execute(
+            "INSERT INTO admindatabase (username, passwordhash) VALUES (%s, %s)",
+            ("admin", pw_hash)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return "✅ Admin created successfully! Delete this route now for security."
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
