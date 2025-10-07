@@ -372,30 +372,26 @@ def forgot_password():
 
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
+    if session.get('admin_logged_in'):
+        return redirect('/admin')
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
+        conn = cur = None
 
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-
-            # Always lowercase the table name for Postgres
             cur.execute("""
                 SELECT adminid, username, passwordhash
                 FROM admindatabase
                 WHERE username = %s
             """, (username,))
             row = cur.fetchone()
-            cur.close()
-            conn.close()
 
             if row:
                 adminid, uname, pw_hash = row
-
-                # Debugging: print hash type
-                print("DEBUG: pw_hash =", pw_hash)
-
                 if pw_hash and check_password_hash(pw_hash, password):
                     session['admin_logged_in'] = True
                     session['admin_id'] = adminid
@@ -410,8 +406,14 @@ def admin_login():
         except Exception as e:
             print("ERROR:", e)
             flash(f"Admin login failed: {e}", "error")
+        finally:
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
 
     return render_template('admin_login.html')
+
 
     
 
@@ -910,6 +912,7 @@ def create_admin_once():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
