@@ -891,41 +891,12 @@ def feedback():
     return render_template('feedback.html')
 
 
-@app.route('/admin-register', methods=['GET', 'POST'])
-def admin_register():
-    from werkzeug.security import generate_password_hash
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-
-        if not username or not password:
-            flash("Please fill all fields.", "error")
-            return render_template('admin_register.html')
-
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            pw_hash = generate_password_hash(password)
-            cur.execute("""
-                INSERT INTO admindatabase (username, passwordhash)
-                VALUES (%s, %s)
-                ON CONFLICT (username) DO NOTHING
-            """, (username, pw_hash))
-            conn.commit()
-            cur.close()
-            conn.close()
-            flash("✅ Admin registered successfully!", "success")
-            return redirect('/admin-login')
-        except Exception as e:
-            flash(f"❌ Error: {str(e)}", "error")
-            return render_template('admin_register.html')
-
-    return render_template('admin_register.html')
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
