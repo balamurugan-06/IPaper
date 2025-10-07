@@ -372,9 +372,7 @@ def forgot_password():
 
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
-    if session.get('admin_logged_in'):
-        return redirect('/admin')
-
+    
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
@@ -896,6 +894,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
