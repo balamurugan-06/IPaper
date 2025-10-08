@@ -59,7 +59,7 @@ def index():
         ORDER BY CreatedAt DESC
         LIMIT 5
         """)
-feedbacks = cur.fetchall()
+        feedbacks = cur.fetchall()
 
         
         return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
@@ -904,6 +904,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
