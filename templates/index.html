@@ -586,6 +586,80 @@
         gap: 35px;
       }
     }
+
+    /* ======= Feedback Section ======= */
+.feedback-section {
+  background: #f8f9fc;
+  padding: 100px 50px;
+  text-align: center;
+}
+
+.feedback-title {
+  font-size: 42px;
+  font-weight: 800;
+  color: #1a1f3a;
+  margin-bottom: 60px;
+}
+
+.feedback-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+.feedback-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  width: 320px;
+  padding: 30px 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid #1a73e8;
+}
+
+.feedback-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.feedback-stars {
+  margin-bottom: 15px;
+}
+
+.star {
+  color: #ffc107; /* gold stars */
+  font-size: 24px;
+  margin: 0 2px;
+}
+
+.star.empty {
+  color: #ddd;
+}
+
+.feedback-comment {
+  color: #4a4a4a;
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.feedback-name {
+  font-size: 18px;
+  color: #1a1f3a;
+  margin-bottom: 5px;
+}
+
+.feedback-profession {
+  color: #777;
+  font-size: 14px;
+}
+@media (max-width: 768px) {
+  .feedback-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
   </style>
 </head>
 <body>
@@ -663,29 +737,28 @@
   </section>
 
   <!-- Feedback Section -->
-  <section class="feedback-section">
-    <h2>What Our Users Say</h2>
-    <p class="feedback-subtitle">Real feedback from researchers and academics</p>
-    
-    <div class="feedback-grid">
-      {% for feedback in feedbacks %}
-      <div class="feedback-card">
-        <div class="feedback-header">
-          <div class="feedback-avatar">{{ feedback[1][0]|upper }}</div>
-          <div class="feedback-info">
-            <h4>{{ feedback[1] }}</h4>
-            <div class="feedback-rating">
-              {% for i in range(feedback[2]) %}★{% endfor %}
-              {% for i in range(5 - feedback[2]) %}☆{% endfor %}
-            </div>
-          </div>
-        </div>
-        <p class="feedback-text">{{ feedback[3] }}</p>
-        <p class="feedback-date">{{ feedback[4] }}</p>
+  <!-- Feedback Section -->
+<section class="feedback-section">
+  <h2 class="feedback-title">User Review</h2>
+  <div class="feedback-container">
+    {% for feedback in feedbacks %}
+    <div class="feedback-card">
+      <div class="feedback-stars">
+        {% for i in range(feedback[2]) %}
+          <span class="star">★</span>
+        {% endfor %}
+        {% for i in range(5 - feedback[2]) %}
+          <span class="star empty">★</span>
+        {% endfor %}
       </div>
-      {% endfor %}
+      <p class="feedback-comment"><i>{{ feedback[3] }}</i></p>
+      <p class="feedback-name"><strong>{{ feedback[0] }}</strong></p>
+      <p class="feedback-profession">{{ feedback[1] }}</p>
     </div>
-  </section>
+    {% endfor %}
+  </div>
+</section>
+
 
   <script>
     // Image Slider
@@ -729,4 +802,5 @@
 
 </body>
 </html>
+
 
