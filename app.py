@@ -54,7 +54,7 @@ def index():
         cur.execute("""
         SELECT name, profession, rating, comment, createdat
         FROM userfeedback
-        WHERE rating >= 4
+        WHERE rating >= 3
         ORDER BY CreatedAt DESC
         LIMIT 3
         """)
@@ -905,6 +905,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
