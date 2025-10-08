@@ -952,6 +952,33 @@
       dot.classList.add('slider-dot');
       if (index === 0) dot.classList.add('active');
       dot.addEventListener('click', () => goToSlide(index));
-      navContainer.
+      navContainer.appendChild(dot);
+    });
 
+    const dots = document.querySelectorAll('.slider-dot');
+
+    function updateDots() {
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    function goToSlide(index) {
+      currentIndex = index;
+      slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+      updateDots();
+    }
+
+    function autoSlide() {
+      if (slides.length > 0) {
+        currentIndex = (currentIndex + 1) % slides.length;
+        goToSlide(currentIndex);
+      }
+    }
+
+    setInterval(autoSlide, 5000);
+  </script>
+
+</body>
+</html>
 
