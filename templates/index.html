@@ -586,19 +586,19 @@
         gap: 35px;
       }
     }
-
-    /* ======= Feedback Section ======= */
+/* ======= User Review Section ======= */
 .feedback-section {
-  background: #f8f9fc;
+  background: linear-gradient(to bottom, #f4f7ff, #eef3ff);
   padding: 100px 50px;
   text-align: center;
 }
 
 .feedback-title {
-  font-size: 42px;
+  font-size: 40px;
   font-weight: 800;
-  color: #1a1f3a;
+  color: #1b1f3b;
   margin-bottom: 60px;
+  letter-spacing: 0.5px;
 }
 
 .feedback-container {
@@ -610,56 +610,61 @@
 
 .feedback-card {
   background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  border-top: 6px solid #1a73e8; /* blue highlight */
   width: 320px;
-  padding: 30px 25px;
+  padding: 35px 25px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-left: 4px solid #1a73e8;
 }
 
 .feedback-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
 }
 
 .feedback-stars {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .star {
-  color: #ffc107; /* gold stars */
-  font-size: 24px;
-  margin: 0 2px;
+  color: #ffb400; /* bright gold */
+  font-size: 22px;
+  margin: 0 1px;
 }
 
 .star.empty {
-  color: #ddd;
+  color: #d8d8d8;
 }
 
 .feedback-comment {
-  color: #4a4a4a;
+  color: #2c2c2c;
   font-size: 16px;
-  margin-bottom: 20px;
   line-height: 1.6;
+  margin-bottom: 25px;
+  min-height: 60px;
 }
 
 .feedback-name {
   font-size: 18px;
   color: #1a1f3a;
-  margin-bottom: 5px;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .feedback-profession {
-  color: #777;
+  color: #5f6368;
   font-size: 14px;
 }
+
+/* Responsive */
 @media (max-width: 768px) {
   .feedback-container {
     flex-direction: column;
     align-items: center;
   }
 }
+
   </style>
 </head>
 <body>
@@ -737,8 +742,7 @@
   </section>
 
   <!-- Feedback Section -->
-  <!-- Feedback Section -->
-<section class="feedback-section">
+  <section class="feedback-section">
   <h2 class="feedback-title">User Review</h2>
   <div class="feedback-container">
     {% for feedback in feedbacks %}
@@ -758,6 +762,7 @@
     {% endfor %}
   </div>
 </section>
+
 
 
   <script>
@@ -802,5 +807,6 @@
 
 </body>
 </html>
+
 
 
