@@ -77,6 +77,12 @@
       flex-direction: column;
     }
     
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+    
     label {
       font-weight: 600;
       margin-bottom: 8px;
@@ -89,9 +95,9 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 16px;
-      margin-bottom: 20px;
       transition: all 0.2s ease;
       background-color: #f8fbff;
+      width: 100%;
     }
     
     input:focus, select:focus {
@@ -102,13 +108,12 @@
     
     .password-wrapper {
       position: relative;
-      margin-bottom: 20px;
+      width: 100%;
     }
     
     .password-wrapper input {
-      width: 100%;
-      margin-bottom: 0;
       padding-right: 50px;
+      margin-bottom: 0;
     }
     
     .toggle-password {
@@ -132,6 +137,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       margin-top: 10px;
+      width: 100%;
     }
     
     button:hover {
@@ -153,11 +159,6 @@
     
     p a:hover {
       text-decoration: underline;
-    }
-    
-    /* Form field grouping for better visual structure */
-    .form-group {
-      margin-bottom: 24px;
     }
     
     /* Responsive adjustments */
@@ -184,34 +185,34 @@
     {% endwith %}
     <form action="/register" method="POST">
       <div class="form-group">
-        <label>Name</label>
-        <input type="text" name="name" required>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
       </div>
 
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" name="email" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
       </div>
 
       <div class="form-group">
-        <label>Password</label>
+        <label for="registerPassword">Password</label>
         <div class="password-wrapper">
-          <input type="password" name="password" id="registerPassword" required>
+          <input type="password" id="registerPassword" name="password" required>
           <span class="toggle-password" onclick="toggleVisibility('registerPassword', this)">👁️</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Confirm Password</label>
+        <label for="confirmPassword">Confirm Password</label>
         <div class="password-wrapper">
-          <input type="password" name="confirmPassword" id="confirmPassword" required>
+          <input type="password" id="confirmPassword" name="confirmPassword" required>
           <span class="toggle-password" onclick="toggleVisibility('confirmPassword', this)">👁️</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Gender</label>
-        <select name="gender" required>
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
           <option value="">Select Gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
@@ -221,13 +222,13 @@
       </div>
 
       <div class="form-group">
-        <label>Age</label>
-        <input type="number" name="age" min="1" max="120" required>
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" min="1" max="120" required>
       </div>
 
       <div class="form-group">
-        <label>Profession</label>
-        <input type="text" name="profession" required>
+        <label for="profession">Profession</label>
+        <input type="text" id="profession" name="profession" required>
       </div>
 
       <button type="submit">Register</button>
