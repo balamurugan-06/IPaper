@@ -46,8 +46,7 @@ def index():
         cur = conn.cursor()
         cur.execute("SELECT type, path, caption FROM media")
         media_items = cur.fetchall()
-        cur.close()
-        conn.close()
+        
 
         images = [item for item in media_items if item[0] == 'image']
         videos = [item for item in media_items if item[0] == 'video']
@@ -60,6 +59,8 @@ def index():
         LIMIT 5
         """)
         feedbacks = cur.fetchall()
+        cur.close()
+        conn.close()
 
         
         return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
@@ -904,6 +905,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
