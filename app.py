@@ -51,8 +51,18 @@ def index():
 
         images = [item for item in media_items if item[0] == 'image']
         videos = [item for item in media_items if item[0] == 'video']
+
+        cur.execute("""
+        SELECT name, profession, rating, comment, createdat
+        FROM userfeedback
+        WHERE rating >= 4
+        ORDER BY CreatedAt DESC
+        LIMIT 5
+        """)
+feedbacks = cur.fetchall()
+
         
-        return render_template('index.html', images=images, videos=videos)
+        return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
     except Exception as e:
         return f"Error loading media: {e}"
 
@@ -894,6 +904,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
