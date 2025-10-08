@@ -174,7 +174,10 @@
       <label for="loginPassword">Password</label>
       <div class="password-wrapper">
         <input type="password" name="password" id="loginPassword" required>
-        <span class="toggle-password" onclick="toggleVisibility('loginPassword', this)"></span>
+        <svg class="toggle-password" onclick="toggleVisibility('registerPassword', this)" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.458 12C2.732 7.943 6.523 5 12 5c5.477 0 9.268 2.943 10.542 7-1.274 4.057-5.065 7-10.542 7-5.477 0-9.268-2.943-10.542-7z" />
+      <circle cx="12" cy="12" r="3" stroke-width="2" stroke="currentColor" fill="none"/>
+    </svg>
       </div>
       
       <div class="forgot-password">
@@ -187,4 +190,19 @@
   </div>
   
 </body>
+  <script>
+  function toggleVisibility(inputId, icon) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+
+    // Switch SVG path to "eye-slash"
+    icon.innerHTML = isPassword
+      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.477 0-9.268-2.943-10.542-7a12.317 12.317 0 013.29-5.228M9.88 9.88a3 3 0 104.24 4.24M6.1 6.1l11.8 11.8" />`
+      : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.458 12C2.732 7.943 6.523 5 12 5c5.477 0 9.268 2.943 10.542 7-1.274 4.057-5.065 7-10.542 7-5.477 0-9.268-2.943-10.542-7z" />
+         <circle cx="12" cy="12" r="3" stroke-width="2" stroke="currentColor" fill="none"/>`;
+  }
+</script>
+
 </html>
+
