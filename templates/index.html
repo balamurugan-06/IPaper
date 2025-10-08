@@ -184,6 +184,7 @@
       letter-spacing: 1px;
     }
 
+
     @keyframes slideInLeft {
       from {
         opacity: 0;
@@ -795,8 +796,6 @@
       {% for image in images %}
       <div class="slide">
         <img src="{{ image[1] }}" alt="Slide Image">
-        <img src="{{ image[2] }}" alt="Slide Image">
-        <img src="{{ image[3] }}" alt="Slide Image">
         <div class="slide-overlay">
           <div class="slide-content">
             <h1>Welcome to IPaper</h1>
@@ -954,4 +953,5 @@
       if (index === 0) dot.classList.add('active');
       dot.addEventListener('click', () => goToSlide(index));
       navContainer.
+
 
