@@ -56,7 +56,7 @@ def index():
         FROM userfeedback
         WHERE rating >= 4
         ORDER BY CreatedAt DESC
-        LIMIT 5
+        LIMIT 3
         """)
         feedbacks = cur.fetchall()
         cur.close()
@@ -905,6 +905,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
