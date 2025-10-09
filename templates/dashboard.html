@@ -1215,7 +1215,65 @@
         renderCategories();
       }
     }
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const categoriesContainer = document.querySelector(".categories-container");
+  const documentsContainer = document.getElementById("documents-container");
+  const currentCategoryLabel = document.getElementById("current-category");
+
+  // Example: documents grouped by category
+  // (Replace this with data fetched from your backend if needed)
+  const documentsData = {
+    all: [
+      { name: "report1.pdf", category: "Reports" },
+      { name: "invoice1.docx", category: "Invoices" },
+      { name: "summary.txt", category: "Notes" }
+    ],
+    Reports: [{ name: "report1.pdf" }],
+    Invoices: [{ name: "invoice1.docx" }],
+    Notes: [{ name: "summary.txt" }]
+  };
+
+  // When user clicks a category
+  categoriesContainer.addEventListener("click", function (e) {
+    const category = e.target.closest(".category");
+    if (!category) return;
+
+    // Update active state
+    document.querySelectorAll(".category").forEach(cat => cat.classList.remove("active-category"));
+    category.classList.add("active-category");
+
+    const categoryName = category.dataset.category;
+    showDocuments(categoryName);
+  });
+
+  // Function to show docs for selected category
+  function showDocuments(categoryName) {
+    const docs = categoryName === "all" ? documentsData.all : documentsData[categoryName] || [];
+    documentsContainer.innerHTML = "";
+
+    if (docs.length === 0) {
+      documentsContainer.innerHTML = `<div class="muted">No documents found in this category.</div>`;
+    } else {
+      docs.forEach(doc => {
+        const item = document.createElement("div");
+        item.classList.add("document-item");
+        item.textContent = doc.name;
+        documentsContainer.appendChild(item);
+      });
+    }
+
+    currentCategoryLabel.textContent = `Showing: ${categoryName === "all" ? "All Documents" : categoryName}`;
+  }
+
+  // Initial load
+  showDocuments("all");
+});
+
 </script>
 
 </body>
 </html>
+
