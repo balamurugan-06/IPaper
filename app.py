@@ -499,10 +499,44 @@ def select_plan():
 
 @app.route('/payment_success')
 def payment_success():
-    if 'last_payment_plan' not in session:
+    if 'last_payment_plan' not in session or 'user_id' not in session:
         return redirect('/dashboard')
-    selected_plan = session.pop('last_payment_plan')  # clear after use
-    return render_template('payment_success.html', selected_plan=selected_plan)
+
+    selected_plan = session.pop('last_payment_plan')
+    user_id = session['user_id']
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT amount, startdate, enddate
+            FROM payments
+            WHERE userid = %s AND planname = %s
+            ORDER BY paymentid DESC
+            LIMIT 1
+        """, (user_id, selected_plan))
+        payment = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if payment:
+            amount, start_date, end_date = payment
+            amount_display = f"${amount}/month"
+            next_renewal = end_date.strftime("%d/%m/%Y")
+        else:
+            amount_display = "$0"
+            next_renewal = "N/A"
+
+        return render_template(
+            'payment_success.html',
+            selected_plan=selected_plan,
+            amount=amount_display,
+            next_renewal=next_renewal
+        )
+
+    except Exception as e:
+        print("Error loading payment success:", e)
+        return redirect('/dashboard')
 
 
 @app.route('/payment_process', methods=['POST'])
@@ -905,6 +939,7 @@ def feedback():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
