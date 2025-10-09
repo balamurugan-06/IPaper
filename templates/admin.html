@@ -1,113 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <title>User Dashboard - Modern Minimal UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    .button-container {
+    :root {
+      --bg: #f7f8fa;
+      --card-bg: #ffffff;
+      --text-main: #1f1f1f;
+      --text-muted: #666;
+      --accent-blue: #007bff;
+      --accent-red: #e63946;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
       display: flex;
-      justify-content: center;
-      margin: 50px 0;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 40px 0 40px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px;
       gap: 30px;
     }
 
-    .admin-button {
-  padding: 15px 25px;
-  border: 1px solid #444;
-  background-color: #444; /* Dark gray background */
-  color: white;           /* White text (always visible) */
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-align: center;
-  display: inline-block;
-}
-    .admin-button:hover {
-  background-color: #666; /* Slightly lighter on hover */
-  color: white;           /* Keep text white */
-}
-    .hidden {
-      display: none;
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1000px;
     }
 
-    table {
-      margin: 30px auto;
-      width: 90%;
-      border-collapse: collapse;
-      background: #222;
-      color: white;
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: 0.2s;
     }
 
-    th, td {
-      border: 1px solid white;
-      padding: 10px;
-      text-align: center;
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
     }
 
-    th {
-      background-color: #333;
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 8px;
+      color: var(--text-main);
     }
 
-    .flash {
-      color: green;
-      text-align: center;
-      margin: 10px 0;
+    .card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin: 0 0 16px;
     }
 
-    a {
-      color: red;
+    .card a {
+      color: var(--accent-blue);
+      font-weight: 600;
       text-decoration: none;
+      font-size: 14px;
     }
 
+    .card a:hover {
+      text-decoration: underline;
+    }
 
+    .bottom-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 10px 18px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn.blue { background: var(--accent-blue); }
+    .btn.green { background: #2a9d8f; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   </style>
 </head>
 <body>
+  <header>
+    <div>
+      <h1>Welcome, {{ name }}</h1>
+      <p>Quick actions to keep your documents organized and updated.</p>
+    </div>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Log out</button>
+  </header>
 
-  <h1 style="text-align: center;">Welcome Admin</h1>
+  <main>
+    <div class="card-grid">
+      <div class="card">
+        <h2>Manage User Account</h2>
+        <p>Search users, change roles, reset passwords, and manage access levels.</p>
+        <a href="/admin/users">Open →</a>
+      </div>
 
-  <div class="button-container">
-     <a href="/admin/users"><button class="admin-button">Manage User Account</button></a>
-    <a href="/admin/templates"><button class="admin-button">Upload Summary Template</button></a>
+      <div class="card">
+        <h2>Upload Summary Template</h2>
+        <p>Add new templates or update existing ones. Tag by category for easy access.</p>
+        <a href="/admin/templates">Open →</a>
+      </div>
+    </div>
 
-  </div>
-
-  <div id="userTable" class="hidden">
-    <h2 style="text-align:center;">User Records</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endwith %}
-
-    <table>
-      <tr>
-        <th>Name</th><th>Email</th><th>Gender</th><th>Age</th><th>Profession</th><th>Action</th>
-      </tr>
-      {% for user in users %}
-        <tr>
-          <td>{{ user[1] }}</td>
-          <td>{{ user[2] }}</td>
-          <td>{{ user[3] }}</td>
-          <td>{{ user[4] }}</td>
-          <td>{{ user[5] }}</td>
-          <td><a href="/admin/delete/{{ user[0] }}" onclick="return confirm('Delete this user?')">🗑</a></td>
-        </tr>
-      {% endfor %}
-    </table>
-  </div>
-
-  <script>
-    function showUserTable() {
-      document.getElementById('userTable').classList.remove('hidden');
-    }
-  </script>
-
+    
+  </main>
 </body>
 </html>
-
-
-
-
