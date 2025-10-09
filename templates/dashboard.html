@@ -949,12 +949,8 @@
     }
   
     async function loadDocuments() {
-      const res = await fetch('/get-documents');
-      const docs = await res.json();
-  
-      const container = $('#documents-container');
-      container.innerHTML = '';
-      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+      // Instead of loading all documents here, use filterDocuments to respect current category
+      filterDocuments();
     }
   
     const userId = "{{ session.get('user_id', '') }}";
@@ -1117,12 +1113,22 @@
       let filteredDocs = docs;
 
       if (currentCategory !== 'all') {
-        filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
+        // Filter documents that match the current category
+        // Handle both string and number comparisons, and null/undefined categories
+        filteredDocs = docs.filter(doc => {
+          const docCategory = doc.category ? String(doc.category) : null;
+          return docCategory === String(currentCategory);
+        });
       }
 
       const container = $('#documents-container');
       container.innerHTML = '';
-      filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+      
+      if (filteredDocs.length === 0) {
+        container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--muted); font-size: 13px;">No documents in this category</div>';
+      } else {
+        filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
