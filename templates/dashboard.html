@@ -42,9 +42,11 @@
     .btn:hover{background:#e2e8f0;transform: translateY(-1px);box-shadow: var(--shadow-sm);}    
     .btn.brand{background: var(--gradient);color:#fff;font-weight: 600;border: none;}    
     .muted{color:var(--muted);font-size: 13px;}
+
     .resizer{position:relative;background:transparent;width:var(--bar-w);cursor: col-resize;}
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
-    .resizer:hover::after{background: var(--brand);}    
+    .resizer:hover::after{background: var(--brand);}
+
     .topbar{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
     .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:20px;transition: all 0.3s ease;}    
     input[type="file"]{width:100%;margin:12px 0;padding: 10px;border: 1px solid var(--border);border-radius: 8px;background: white;font-size: 13px;cursor: pointer;}    
@@ -68,7 +70,401 @@
     .template-selector-container {width: 75%;height: 75%;max-width: 900px;max-height: 650px;background: white;border-radius: 16px;display: flex;position: relative;box-shadow: var(--shadow-lg);overflow: hidden;}    
     .hidden {display: none;}    
     .categories-container {flex: 1;overflow-y: auto;margin-bottom: 16px;}    
-    .main h1 {font-size: 32px;font-weight: 700;color: var(--text);margin-bottom: 8px;background: var(--gradient);-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text;}    
+    .main h1 {font-size: 32px;font-weight: 700;color: var(--text);margin-bottom: 8px;background: var(--gradient);-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text;} 
+    
+    /* 折叠功能样式 */
+    .app.collapse-ls #ls,
+    .app.collapse-both #ls {
+      box-shadow: none !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      width: 0 !important;
+      min-width: 0 !important;
+    }
+    .app.collapse-ls #bar-ls::after,
+    .app.collapse-both #bar-ls::after { opacity: 0; }
+    .app.collapse-us #us,
+    .app.collapse-both #us {
+      box-shadow: none !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      width: 0 !important;
+      min-width: 0 !important;
+    }
+    .app.collapse-us #bar-us::after,
+    .app.collapse-both #bar-us::after { opacity: 0; }
+    .app.collapse-ls #ls,
+    .app.collapse-us #us { pointer-events: none; }
+    #bar-ls, #bar-us { position: relative; }
+    #bar-ls .collapse-btn, #bar-us .collapse-btn { pointer-events: auto; }
+    
+    .collapse-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      width: 18px;
+      height: 24px;
+      border: none;
+      border-radius: 4px;
+      background: #b3d9ff;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+      color: var(--brand);
+    }
+    .collapse-btn:hover { background: #99ccff; }
+    
+    .ls {
+      display: flex;
+      flex-direction: column;
+    }
+    .account-section {
+      margin-top: auto;
+    }
+
+    /* Template Selector Modal Styles */
+    .template-selector-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1001;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .template-selector-container {
+      width: 70%;
+      height: 70%;
+      max-width: 800px;
+      max-height: 600px;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .template-selector-modal .sidebar {
+      width: 200px;
+      background-color: #f0f4f8;
+      border-right: 1px solid #d6eaf8;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .template-selector-modal .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .template-selector-modal .sidebar-section {
+      margin-bottom: 20px;
+    }
+
+    .template-selector-modal .sidebar-section-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .template-selector-modal .sidebar-item {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .template-selector-modal .sidebar-item:hover {
+      background-color: #e8f4f8;
+    }
+
+    .template-selector-modal .sidebar-item.active {
+      background-color: #d6eaf8;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .template-selector-modal .arrow-icon {
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 4px solid var(--muted);
+      margin-left: 8px;
+    }
+
+    .template-selector-modal .content-area {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .template-selector-modal .content-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-content: flex-start;
+    }
+
+    .template-selector-modal .content-box {
+      width: 240px;
+      border: 1px solid #d6eaf8;
+      border-radius: 6px;
+      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      background: #f8fbff;
+      transition: all 0.2s ease;
+    }
+
+    .template-selector-modal .content-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .template-selector-modal .content-box-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .template-selector-modal .content-box-description {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .template-selector-modal .content-box-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #999;
+    }
+
+    .template-selector-modal .generate-button {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background-color: var(--brand);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .template-selector-modal .generate-button:hover {
+      background-color: #1a4a7a;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Categories container for better organization */
+    .categories-container {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    
+    /* NEW STYLES - Enhanced UI to match the image */
+    .main h1 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 24px;
+    }
+    
+    .main-content {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-top: 20px;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    
+    .document-preview {
+      background: #f8fbff;
+      border: 1px solid #d6eaf8;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .document-preview h2 {
+      color: var(--accent);
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 1px solid #d6eaf8;
+      padding-bottom: 8px;
+    }
+    
+    .document-preview h3 {
+      color: var(--brand);
+      margin-top: 15px;
+      font-size: 16px;
+    }
+    
+    .document-preview ul {
+      padding-left: 20px;
+    }
+    
+    .document-preview li {
+      margin-bottom: 5px;
+    }
+    
+    .document-preview strong {
+      color: var(--accent);
+    }
+    
+    /* Enhanced sidebar styling */
+    .ls .pane-title {
+      font-size: 16px;
+      color: var(--brand);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+    
+    .account-section .pane-title {
+      font-size: 16px;
+      color: var(--brand);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+    
+    /* Enhanced button styling */
+    .btn {
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+    
+    .btn:before {
+      content: "•";
+      margin-right: 8px;
+      color: var(--brand);
+    }
+    
+    .btn.brand:before {
+      color: white;
+    }
+    
+    /* Enhanced category styling */
+    .category {
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #d6eaf8;
+      background: #f8fbff;
+    }
+    
+    .category-title {
+      font-size: 14px;
+      color: var(--accent);
+    }
+    
+    .active-category {
+      background: #e8f5e8 !important;
+      border-left: 4px solid var(--success);
+    }
+    
+    /* Enhanced topbar styling */
+    .topbar {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .topbar .muted {
+      font-weight: 500;
+    }
+    
+    /* Enhanced upload card */
+    .upload-card {
+      background: #f8fbff;
+      border: 2px dashed #b3d9ff;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    /* Document list styling */
+    .documents-list {
+      background: white;
+      border-radius: 6px;
+      padding: 8px;
+      border: 1px solid #e8f4f8;
+    }
+    
+    /* Document item styling */
+    .document-item {
+      background: white;
+      border: 1px solid #e8f4f8;
+      border-radius: 6px;
+      padding: 10px 30px 10px 12px;
+      margin: 6px 0;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    
+    .document-item:hover {
+      background: #f0f8ff;
+      border-color: #b3d9ff;
+    }
+    
+    /* Welcome message styling */
+    .welcome-message {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    
+    .profession-badge {
+      display: inline-block;
+      background: var(--light-bg);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 10px;
+    }   
   </style>
 </head>
 <body>
@@ -154,9 +550,10 @@
 
 <script>
   const $ = selector => document.querySelector(selector);
-  const $$= selector => document.querySelectorAll(selector);
+  const $$ = selector => document.querySelectorAll(selector);
   const app = $('#app');
 
+  // 折叠功能
   function initResizeButtons() {
     const bLS = document.getElementById('btnLS');
     const bUS = document.getElementById('btnUS');
@@ -165,27 +562,38 @@
   }
 
   function state() {
-    return { hasLS: !app.classList.contains('collapse-ls'), hasUS: !app.classList.contains('collapse-us') }
+    return { 
+      hasLS: !app.classList.contains('collapse-ls'), 
+      hasUS: !app.classList.contains('collapse-us') 
+    }
   }
 
   function applyCollapse(ls, us) {
     app.classList.toggle('collapse-ls', !ls);
     app.classList.toggle('collapse-us', !us);
     app.classList.toggle('collapse-both', !ls && !us);
+    
     const btnLS = document.getElementById('btnLS');
     const btnUS = document.getElementById('btnUS');
     if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
     if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
   }
 
-  document.getElementById('btnLS').onclick = () => { const s = state(); applyCollapse(!s.hasLS, s.hasUS); };
-  document.getElementById('btnUS').onclick = () => { const s = state(); applyCollapse(s.hasLS, !s.hasUS); };
+  document.getElementById('btnLS').onclick = () => { 
+    const s = state(); 
+    applyCollapse(!s.hasLS, s.hasUS); 
+  };
+
+  document.getElementById('btnUS').onclick = () => { 
+    const s = state(); 
+    applyCollapse(s.hasLS, !s.hasUS); 
+  };
 
   function createDocumentItem(doc) {
     const div = document.createElement('div');
     div.className = 'document-item';
     div.textContent = doc.filename || doc.name || 'untitled';
-    div.dataset.docId = doc.id; // Store document ID
+    div.dataset.docId = doc.id;
     div.dataset.fileName = doc.filename || doc.name || 'untitled';
     div.draggable = true;
 
@@ -208,7 +616,9 @@
       e.dataTransfer.effectAllowed = 'move';
     });
 
-    div.addEventListener('dragend', function() { this.classList.remove('dragging'); });
+    div.addEventListener('dragend', function() { 
+      this.classList.remove('dragging'); 
+    });
 
     div.appendChild(delBtn);
     return div;
@@ -233,9 +643,9 @@
     }
   }
 
-  // Category management
+  // Category management - 保持所有数据库连接不变
   let categories = [];
-  let documentCategories = {}; // optional local map
+  let documentCategories = {};
   let currentCategory = 'all';
 
   async function loadCategories() {
@@ -258,11 +668,22 @@
   async function addCategory(name) {
     if (!name || !name.trim()) { alert('Category name cannot be empty.'); return; }
     try {
-      const res = await fetch('/add_category', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.trim() }) });
+      const res = await fetch('/add_category', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ name: name.trim() }) 
+      });
       const result = await res.json();
-      if (result.success) { categories.unshift({ id: result.id, name: result.name }); renderCategories(); }
-      else alert('Failed to add category: ' + (result.error || 'Unknown error'));
-    } catch (err) { console.error('Error adding category:', err); alert('Error adding category. See console.'); }
+      if (result.success) { 
+        categories.unshift({ id: result.id, name: result.name }); 
+        renderCategories(); 
+      } else {
+        alert('Failed to add category: ' + (result.error || 'Unknown error'));
+      }
+    } catch (err) { 
+      console.error('Error adding category:', err); 
+      alert('Error adding category. See console.'); 
+    }
   }
 
   async function deleteCategory(categoryId) {
@@ -278,25 +699,52 @@
       } else {
         alert('Failed to delete category: ' + (result.error || 'Unknown error'));
       }
-    } catch (err) { console.error('Error deleting category:', err); alert('Error deleting category. See console.'); }
+    } catch (err) { 
+      console.error('Error deleting category:', err); 
+      alert('Error deleting category. See console.'); 
+    }
   }
 
   function setupDropZone(categoryElement) {
-    categoryElement.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; this.classList.add('drag-over'); });
-    categoryElement.addEventListener('dragleave', function(e) { if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over'); });
+    categoryElement.addEventListener('dragover', function(e) { 
+      e.preventDefault(); 
+      e.dataTransfer.dropEffect = 'move'; 
+      this.classList.add('drag-over'); 
+    });
+    
+    categoryElement.addEventListener('dragleave', function(e) { 
+      if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over'); 
+    });
+    
     categoryElement.addEventListener('drop', async function(e) {
-      e.preventDefault(); this.classList.remove('drag-over');
+      e.preventDefault(); 
+      this.classList.remove('drag-over');
       try {
         const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
         const targetCategory = this.dataset.category;
-        const response = await fetch('/update-document-category', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ documentId: dragData.docId, category: targetCategory === 'all' ? null : targetCategory }) });
+        const response = await fetch('/update-document-category', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            documentId: dragData.docId, 
+            category: targetCategory === 'all' ? null : targetCategory 
+          }) 
+        });
         if (response.ok) {
-          if (targetCategory === 'all') delete documentCategories[dragData.docId]; else documentCategories[dragData.docId] = targetCategory;
+          if (targetCategory === 'all') {
+            delete documentCategories[dragData.docId];
+          } else {
+            documentCategories[dragData.docId] = targetCategory;
+          }
           saveCategories();
           loadDocuments();
           console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
-        } else alert('Failed to update document category');
-      } catch (err) { console.error('Error handling drop:', err); }
+        } else {
+          alert('Failed to update document category');
+        }
+      } catch (err) { 
+        console.error('Error handling drop:', err); 
+      }
     });
   }
 
@@ -304,15 +752,36 @@
     const container = document.querySelector('.categories-container');
     const existing = container.querySelectorAll('.category:not([data-category="all"])');
     existing.forEach(el => el.remove());
+    
     categories.forEach(category => {
-      const categoryEl = document.createElement('div'); categoryEl.className = 'category'; categoryEl.dataset.category = String(category.id);
-      const titleEl = document.createElement('div'); titleEl.className = 'category-title'; titleEl.textContent = category.name;
-      const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-category'; deleteBtn.textContent = '🗑'; deleteBtn.onclick = (e) => { e.stopPropagation(); deleteCategory(category.id); };
-      categoryEl.appendChild(titleEl); categoryEl.appendChild(deleteBtn); categoryEl.onclick = () => setCurrentCategory(String(category.id)); setupDropZone(categoryEl);
+      const categoryEl = document.createElement('div'); 
+      categoryEl.className = 'category'; 
+      categoryEl.dataset.category = String(category.id);
+      
+      const titleEl = document.createElement('div'); 
+      titleEl.className = 'category-title'; 
+      titleEl.textContent = category.name;
+      
+      const deleteBtn = document.createElement('button'); 
+      deleteBtn.className = 'delete-category'; 
+      deleteBtn.textContent = '🗑'; 
+      deleteBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        deleteCategory(category.id); 
+      };
+      
+      categoryEl.appendChild(titleEl); 
+      categoryEl.appendChild(deleteBtn); 
+      categoryEl.onclick = () => setCurrentCategory(String(category.id)); 
+      setupDropZone(categoryEl);
       container.appendChild(categoryEl);
     });
+    
     const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
-    if (activeEl) { container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category')); activeEl.classList.add('active-category'); }
+    if (activeEl) { 
+      container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category')); 
+      activeEl.classList.add('active-category'); 
+    }
   }
 
   function setCurrentCategory(categoryId) {
@@ -331,11 +800,21 @@
       if (!res.ok) throw new Error('Failed to fetch documents');
       const docs = await res.json();
       let filteredDocs = docs;
-      if (currentCategory !== 'all') filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
-      const container = $('#documents-container'); container.innerHTML = '';
-      if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
-      else filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-    } catch (err) { console.error('Error filtering documents:', err); const container = $('#documents-container'); container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>'; }
+      if (currentCategory !== 'all') {
+        filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
+      }
+      const container = $('#documents-container'); 
+      container.innerHTML = '';
+      if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
+        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
+      } else {
+        filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+      }
+    } catch (err) { 
+      console.error('Error filtering documents:', err); 
+      const container = $('#documents-container');
+      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>';
+    }
   }
 
   // Template modal helpers
@@ -347,18 +826,45 @@
     if (event && event.target) event.target.classList.add('active');
   }
 
+  // 初始化 - 保持所有现有功能
   document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons(); loadCategories(); loadDocuments();
+    initResizeButtons(); 
+    loadCategories(); 
+    loadDocuments();
+    
     const allDocsCategory = document.querySelector('.category[data-category="all"]');
-    if (allDocsCategory) { allDocsCategory.onclick = () => setCurrentCategory('all'); setupDropZone(allDocsCategory); }
-    const s = state(); const btnLS = document.getElementById('btnLS'); const btnUS = document.getElementById('btnUS'); if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; } if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
-    const addCategoryBtn = document.getElementById('addCategoryBtn'); if (addCategoryBtn) addCategoryBtn.addEventListener('click', () => { const categoryName = prompt('Enter new category name:'); if (categoryName && categoryName.trim()) addCategory(categoryName.trim()); });
+    if (allDocsCategory) { 
+      allDocsCategory.onclick = () => setCurrentCategory('all'); 
+      setupDropZone(allDocsCategory); 
+    }
+    
+    const s = state(); 
+    const btnLS = document.getElementById('btnLS'); 
+    const btnUS = document.getElementById('btnUS'); 
+    if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; } 
+    if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
+    
+    const addCategoryBtn = document.getElementById('addCategoryBtn'); 
+    if (addCategoryBtn) {
+      addCategoryBtn.addEventListener('click', () => { 
+        const categoryName = prompt('Enter new category name:'); 
+        if (categoryName && categoryName.trim()) addCategory(categoryName.trim()); 
+      });
+    }
 
     // Template modal logic
-    const generateBtn = document.getElementById('generateBtn'); const templateModal = document.getElementById('templateSelectorModal'); const generateButton = document.querySelector('.generate-button');
+    const generateBtn = document.getElementById('generateBtn'); 
+    const templateModal = document.getElementById('templateSelectorModal'); 
+    const generateButton = document.querySelector('.generate-button');
+    
     if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
-    if (templateModal) templateModal.onclick = (e) => { if (e.target === templateModal) templateModal.classList.add('hidden'); };
-    if (generateButton) generateButton.onclick = () => { templateModal.classList.add('hidden'); alert('Template generation started!'); };
+    if (templateModal) templateModal.onclick = (e) => { 
+      if (e.target === templateModal) templateModal.classList.add('hidden'); 
+    };
+    if (generateButton) generateButton.onclick = () => { 
+      templateModal.classList.add('hidden'); 
+      alert('Template generation started!'); 
+    };
   });
 </script>
 </body>
