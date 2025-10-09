@@ -5,205 +5,448 @@
   <title>User Dashboard Document Upload</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     :root{
-      --ls-min:140px; --ls-max:360px; --ls-w:220px;
-      --us-min:160px; --us-max:420px; --us-w:260px;
+      --ls-min:140px; --ls-max:360px; --ls-w:260px;
+      --us-min:160px; --us-max:420px; --us-w:320px;
       --bar-w:6px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08),0 6px 20px rgba(0,0,0,.06);
-      --bg:#f8f9fa; --card:#fff; --text:#2c3e50; --muted:#7f8c8d; --brand:#2c5aa0;
-      --accent:#1a5276; --light-bg:#e8f4f8; --border:#d6eaf8;
-      --success:#28a745; --warning:#ffc107; --danger:#dc3545;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+      --bg:#f8fafc; 
+      --card:#ffffff; 
+      --text:#1e293b; 
+      --muted:#64748b; 
+      --brand:#3b82f6;
+      --brand-dark:#2563eb;
+      --success:#10b981;
+      --danger:#ef4444;
+      --border:#e2e8f0;
+      --hover:#f1f5f9;
+      --accent:#8b5cf6;
+      --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial;color:var(--text);background:var(--bg);}
-    .app{height:100vh;display:grid;
+    
+    *{box-sizing:border-box; margin:0; padding:0;}
+    
+    html,body{height:100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;}
+    
+    body{
+      color:var(--text);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .app{
+      height:100vh;
+      display:grid;
       grid-template-columns:var(--ls-w) var(--bar-w) var(--us-w) var(--bar-w) 1fr;
-      transition:grid-template-columns .2s ease;}
+      transition:grid-template-columns .3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
     .collapse-ls{grid-template-columns:0 var(--bar-w) var(--us-w) var(--bar-w) 1fr;}
     .collapse-us{grid-template-columns:var(--ls-w) var(--bar-w) 0 var(--bar-w) 1fr;}
     .collapse-both{grid-template-columns:0 0 0 0 1fr;}
-    .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;}
-    .ls{padding:14px;position:relative;overflow-y:visible;background:var(--light-bg);}
-    .us{padding:16px;position:relative;overflow:auto;background:var(--light-bg);}
-    .main{background:transparent;padding:24px;overflow:auto;}
-    .pane-title{font-size:14px;font-weight:600;color:var(--accent);margin:2px 0 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px;}
-    .btn{border:0;border-radius:8px;padding:10px 12px;font-weight:600;cursor:pointer;
-         background:#e8f4f8;color:#2c5aa0;width:100%;text-align:left;margin-bottom:8px;transition:all 0.2s ease;}
-    .btn:hover{background:#d6eaf8;transform:translateY(-1px);}
-    .btn.brand{background:var(--brand);color:#fff;}
-    .btn.inline{width:auto;margin:0 8px 0 0;padding:8px 10px;}
-    .muted{color:var(--muted);}
-    /* 移除分割线的拖拽样式 */
+    
+    .sidebar{
+      background:var(--card);
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      backdrop-filter: blur(10px);
+    }
+    
+    .ls{
+      padding:24px 20px;
+      position:relative;
+      overflow-y:visible;
+      border-right: 1px solid var(--border);
+    }
+    
+    .us{
+      padding:24px 20px;
+      position:relative;
+      overflow:auto;
+      border-right: 1px solid var(--border);
+    }
+    
+    .main{
+      background:transparent;
+      padding:32px;
+      overflow:auto;
+    }
+    
+    .pane-title{
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:.08em;
+      color:var(--muted);
+      text-transform:uppercase;
+      margin:0 0 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    
+    .btn{
+      border:0;
+      border-radius:8px;
+      padding:12px 16px;
+      font-weight:500;
+      cursor:pointer;
+      background:var(--hover);
+      color:var(--text);
+      width:100%;
+      text-align:left;
+      margin-bottom:8px;
+      transition: all 0.2s ease;
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+    
+    .btn:hover{
+      background:#e2e8f0;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn.brand{
+      background: var(--gradient);
+      color:#fff;
+      font-weight: 600;
+      border: none;
+    }
+    
+    .btn.brand:hover{
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    .btn.inline{
+      width:auto;
+      margin:0 8px 0 0;
+      padding:10px 14px;
+    }
+    
+    .muted{
+      color:var(--muted);
+      font-size: 13px;
+    }
+    
     .resizer{
       position:relative;
       background:transparent;
       width:var(--bar-w);
+      cursor: col-resize;
     }
+    
     .resizer::after{
       content:"";
       position:absolute;
       top:0;
       bottom:0;
       left:calc(50% - 1px);
-      width:2px;
-      background:#d6eaf8;
+      width:1px;
+      background:var(--border);
+      transition: background 0.2s ease;
     }
-    .topbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px;background:var(--card);border-bottom:1px solid #eee;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
-    .upload-card{background:#f8fbff;border:1px dashed #b3d9ff;border-radius:12px;padding:14px;}
-    input[type="file"]{width:100%;margin:10px 0;padding:8px;border:1px solid var(--border);border-radius:6px;background:#fff;}
-    .logout{display:block;margin-top:12px;color:var(--muted);text-decoration:none;font-weight:500;}
+    
+    .resizer:hover::after{
+      background: var(--brand);
+    }
+    
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:5;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:20px 24px;
+      background:rgba(255,255,255,0.9);
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .upload-card{
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border:2px dashed var(--border);
+      border-radius:12px;
+      padding:20px;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-card:hover{
+      border-color: var(--brand);
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    }
+    
+    input[type="file"]{
+      width:100%;
+      margin:12px 0;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    
+    input[type="file"]::file-selector-button{
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-right: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="file"]::file-selector-button:hover{
+      background: var(--brand-dark);
+    }
+    
+    .logout{
+      display:block;
+      margin-top:16px;
+      color:var(--danger);
+      text-decoration:none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    
+    .logout:hover{
+      background: #fee2e2;
+    }
+    
     .collapse-btn {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 10;
-      width: 18px;
-      height: 24px;
-      border: none;
-      border-radius: 4px;
-      background: #b3d9ff;
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1;
-      color: var(--brand);
-    }
-    .collapse-btn:hover { background: #99ccff; }
-    .document-item {
-      position: relative;
-      padding: 8px 24px 8px 8px;
-      margin: 4px 0;
-      background: #e8f4f8;
+      width: 24px;
+      height: 32px;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      cursor: grab;
-      border: 1px solid #b3d9ff;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
     }
-    .document-item:hover {
-      background: #d6eaf8;
-      transform: translateY(-1px);
+    
+    .collapse-btn:hover { 
+      background: var(--brand); 
+      color: white;
+      border-color: var(--brand);
     }
+    
+    .document-item {
+      position: relative;
+      padding: 12px 32px 12px 16px;
+      margin: 6px 0;
+      background: white;
+      border-radius: 8px;
+      cursor: grab;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .document-item:hover {
+      background: var(--hover);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--brand);
+    }
+    
     .document-item.dragging {
       opacity: 0.5;
-      transform: rotate(2deg);
+      transform: rotate(2deg) scale(0.95);
     }
+    
     .document-delete-btn {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 8px;
+      width: 20px;
+      height: 20px;
       border: none;
-      background: #ffebee;
-      border-radius: 50%;
+      background: #fee2e2;
+      border-radius: 6px;
       cursor: pointer;
-      color: #c62828;
-      font-size: 10px;
+      color: var(--danger);
+      font-size: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0;
+      transition: all 0.2s ease;
     }
+    
     .document-delete-btn:hover {
-      background: #ffcdd2;
+      background: var(--danger);
+      color: white;
     }
+    
     .category {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       position: relative;
-      padding: 8px;
-      border-radius: 8px;
+      padding: 14px 16px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
-      border: 2px dashed transparent;
-      background: #e8f4f8;
+      border: 2px solid transparent;
+      background: var(--hover);
     }
+    
     .category:hover {
-      background: #d6eaf8;
+      background: #e2e8f0;
+      transform: translateX(4px);
     }
+    
     .category.drag-over {
       border-color: var(--brand);
-      background: #cfe2f3;
+      background: #dbeafe;
       transform: scale(1.02);
+      box-shadow: var(--shadow);
     }
+    
     .category-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--text);
     }
+    
     .documents-list {
       min-height: 20px;
-      padding: 4px;
-      border-radius: 6px;
-      background: #f8fbff;
+      padding: 8px;
+      border-radius: 8px;
+      background: var(--hover);
     }
+    
     .active-category {
-      background: #d5e8d4 !important;
-      border-left: 4px solid #4caf50;
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+      border-color: var(--brand) !important;
+      box-shadow: var(--shadow-sm);
     }
+    
+    .active-category .category-title {
+      color: var(--brand-dark);
+    }
+    
     .delete-category {
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 20px;
-      height: 20px;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
       border: none;
-      background: #ffebee;
-      border-radius: 4px;
+      background: #fee2e2;
+      border-radius: 6px;
       cursor: pointer;
-      color: #c62828;
-      font-size: 12px;
+      color: var(--danger);
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: all 0.2s ease;
     }
+    
     .category:hover .delete-category {
       opacity: 1;
     }
+    
     .delete-category:hover {
-      background: #ffcdd2;
+      background: var(--danger);
+      color: white;
     }
+    
     .action-btn {
       background: var(--brand);
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
+      border-radius: 8px;
+      padding: 10px 20px;
       cursor: pointer;
       font-weight: 600;
       margin-left: 8px;
       transition: all 0.2s ease;
+      font-size: 13px;
+      box-shadow: var(--shadow-sm);
     }
+    
     .action-btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
+      background: var(--brand-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
+    
     .action-btn.secondary {
-      background: #4caf50;
+      background: var(--success);
     }
+    
+    .action-btn.secondary:hover {
+      background: #059669;
+    }
+    
+    .action-btn:disabled {
+      background: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    
+    .action-btn:disabled:hover {
+      transform: none;
+      box-shadow: var(--shadow-sm);
+    }
+    
     .topbar-actions {
       margin-left: auto;
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
+    
     .add-category-icon {
       background: var(--brand);
       color: white;
       border: none;
-      border-radius: 4px;
-      width: 20px;
-      height: 20px;
+      border-radius: 6px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
     }
+    
     .add-category-icon:hover {
-      opacity: 0.9;
+      background: var(--brand-dark);
+      transform: rotate(90deg);
     }
-    /* When a sidebar is collapsed, fully hide its visuals (no shadow, no padding, no overflow). */
+    
     .app.collapse-ls #ls,
     .app.collapse-both #ls {
       box-shadow: none !important;
@@ -212,9 +455,10 @@
       width: 0 !important;
       min-width: 0 !important;
     }
-    /* Hide the left resizer's vertical line when LS is collapsed to avoid a pale seam */
+    
     .app.collapse-ls #bar-ls::after,
     .app.collapse-both #bar-ls::after { opacity: 0; }
+    
     .app.collapse-us #us,
     .app.collapse-both #us {
       box-shadow: none !important;
@@ -223,364 +467,255 @@
       width: 0 !important;
       min-width: 0 !important;
     }
-    /* Hide the right resizer's vertical line when US is collapsed */
+    
     .app.collapse-us #bar-us::after,
     .app.collapse-both #bar-us::after { opacity: 0; }
-    /* Prevent the collapsed pane from capturing clicks */
+    
     .app.collapse-ls #ls,
     .app.collapse-us #us { pointer-events: none; }
-    /* Keep the resizer buttons clickable */
+    
     #bar-ls, #bar-us { position: relative; }
     #bar-ls .collapse-btn, #bar-us .collapse-btn { pointer-events: auto; }
-    /* Stick account section to bottom of left sidebar */
+    
     .ls {
       display: flex;
       flex-direction: column;
     }
+    
     .account-section {
-      margin-top: auto; /* push to bottom */
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
     }
 
-    /* Template Selector Modal Styles */
     .template-selector-modal {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       z-index: 1001;
       display: flex;
       justify-content: center;
       align-items: center;
+      backdrop-filter: blur(4px);
     }
 
     .template-selector-container {
-      width: 70%;
-      height: 70%;
-      max-width: 800px;
-      max-height: 600px;
+      width: 75%;
+      height: 75%;
+      max-width: 900px;
+      max-height: 650px;
       background: white;
-      border-radius: 8px;
+      border-radius: 16px;
       display: flex;
       position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
     }
 
     .template-selector-modal .sidebar {
-      width: 200px;
-      background-color: #f0f4f8;
-      border-right: 1px solid #d6eaf8;
-      padding: 15px;
+      width: 220px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
       overflow-y: auto;
     }
 
     .template-selector-modal .sidebar-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      color: var(--accent);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
     }
 
     .template-selector-modal .sidebar-section {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .template-selector-modal .sidebar-section-title {
-      font-size: 13px;
+      font-size: 11px;
       color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: bold;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .template-selector-modal .sidebar-item {
-      padding: 6px 8px;
-      border-radius: 4px;
+      padding: 10px 12px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
       margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: all 0.2s ease;
+      font-weight: 500;
     }
 
     .template-selector-modal .sidebar-item:hover {
-      background-color: #e8f4f8;
+      background: white;
+      box-shadow: var(--shadow-sm);
+      transform: translateX(4px);
     }
 
     .template-selector-modal .sidebar-item.active {
-      background-color: #d6eaf8;
-      font-weight: bold;
-      color: var(--accent);
+      background: var(--brand);
+      color: white;
+      font-weight: 600;
     }
 
     .template-selector-modal .arrow-icon {
       width: 0;
       height: 0;
-      border-top: 4px solid transparent;
-      border-bottom: 4px solid transparent;
-      border-left: 4px solid var(--muted);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 5px solid currentColor;
       margin-left: 8px;
     }
 
     .template-selector-modal .content-area {
       flex: 1;
-      padding: 15px;
+      padding: 24px;
       overflow-y: auto;
       position: relative;
+      background: white;
     }
 
     .template-selector-modal .content-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
       align-content: flex-start;
+      padding-bottom: 80px;
     }
 
     .template-selector-modal .content-box {
-      width: 240px;
-      border: 1px solid #d6eaf8;
-      border-radius: 6px;
-      padding: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      background: #f8fbff;
-      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      background: white;
     }
 
     .template-selector-modal .content-box:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: var(--brand);
     }
 
     .template-selector-modal .content-box-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: var(--text);
     }
 
     .template-selector-modal .content-box-description {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      line-height: 1.5;
     }
 
     .template-selector-modal .content-box-footer {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #999;
+      color: var(--muted);
+      font-weight: 500;
     }
 
     .template-selector-modal .generate-button {
       position: absolute;
-      bottom: 15px;
-      right: 15px;
-      background-color: var(--brand);
+      bottom: 24px;
+      right: 24px;
+      background: var(--gradient);
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 12px 28px;
+      border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: var(--shadow);
       transition: all 0.2s ease;
     }
 
     .template-selector-modal .generate-button:hover {
-      background-color: #1a4a7a;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
     .hidden {
       display: none;
     }
 
-    /* Categories container for better organization */
     .categories-container {
       flex: 1;
       overflow-y: auto;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
     }
     
-    /* NEW STYLES - Enhanced UI to match the image */
+    .categories-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .categories-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .categories-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+    
+    .categories-container::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+    
     .main h1 {
-      color: var(--accent);
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 24px;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
-    .main-content {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      margin-top: 20px;
-    }
-    
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-    }
-    
-    .document-preview {
-      background: #f8fbff;
-      border: 1px solid #d6eaf8;
-      border-radius: 6px;
-      padding: 15px;
-      margin-top: 15px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    
-    .document-preview h2 {
-      color: var(--accent);
-      margin-top: 0;
-      font-size: 20px;
-      border-bottom: 1px solid #d6eaf8;
-      padding-bottom: 8px;
-    }
-    
-    .document-preview h3 {
-      color: var(--brand);
-      margin-top: 15px;
+    .welcome-subtitle {
       font-size: 16px;
-    }
-    
-    .document-preview ul {
-      padding-left: 20px;
-    }
-    
-    .document-preview li {
-      margin-bottom: 5px;
-    }
-    
-    .document-preview strong {
-      color: var(--accent);
-    }
-    
-    /* Enhanced sidebar styling */
-    .ls .pane-title {
-      font-size: 16px;
-      color: var(--brand);
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 10px;
-    }
-    
-    .account-section .pane-title {
-      font-size: 16px;
-      color: var(--brand);
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 10px;
-    }
-    
-    /* Enhanced button styling */
-    .btn {
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-    }
-    
-    .btn:before {
-      content: "•";
-      margin-right: 8px;
-      color: var(--brand);
-    }
-    
-    .btn.brand:before {
-      color: white;
-    }
-    
-    /* Enhanced category styling */
-    .category {
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #d6eaf8;
-      background: #f8fbff;
-    }
-    
-    .category-title {
-      font-size: 14px;
-      color: var(--accent);
-    }
-    
-    .active-category {
-      background: #e8f5e8 !important;
-      border-left: 4px solid var(--success);
-    }
-    
-    /* Enhanced topbar styling */
-    .topbar {
-      background: white;
-      border-radius: 8px;
-      padding: 12px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      color: var(--muted);
+      margin-bottom: 32px;
     }
     
     .topbar .muted {
-      font-weight: 500;
-    }
-    
-    /* Enhanced upload card */
-    .upload-card {
-      background: #f8fbff;
-      border: 2px dashed #b3d9ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--hover);
       border-radius: 8px;
-      padding: 16px;
-    }
-    
-    /* Document list styling */
-    .documents-list {
-      background: white;
-      border-radius: 6px;
-      padding: 8px;
-      border: 1px solid #e8f4f8;
-    }
-    
-    /* Document item styling */
-    .document-item {
-      background: white;
-      border: 1px solid #e8f4f8;
-      border-radius: 6px;
-      padding: 10px 30px 10px 12px;
-      margin: 6px 0;
-      transition: all 0.2s ease;
-      font-size: 14px;
-    }
-    
-    .document-item:hover {
-      background: #f0f8ff;
-      border-color: #b3d9ff;
-    }
-    
-    /* Welcome message styling */
-    .welcome-message {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 5px;
-    }
-    
-    .profession-badge {
-      display: inline-block;
-      background: var(--light-bg);
-      color: var(--accent);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
       font-weight: 500;
-      margin-left: 10px;
+    }
+    
+    .topbar .muted::before {
+      content: "👤";
+      font-size: 16px;
+    }
+    
+    #current-category {
+      padding: 8px 12px;
+      background: var(--hover);
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -589,45 +724,47 @@
   
   <aside id="ls" class="sidebar ls">
     <div class="pane-title">
-      ALL DOCUMENT
-      <button id="addCategoryBtn" class="add-category-icon">+</button>
+      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
     </div>
     <div class="categories-container">
       <div class="category active-category" data-category="all">
         <div class="category-title">All Documents</div>
       </div>
-     
+    </div>
     <div class="account-section">
       <div class="pane-title">Account</div>
       <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
       <button class="btn">{{ latest_membership }}</button>
       <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
-      <a class="logout" href="/logout">Log Out</a>
+      <a class="logout" href="/logout">Logout</a>
     </div>
   </aside>
 
   <div id="bar-ls" class="resizer">
     <button id="btnLS" class="collapse-btn">«</button>
   </div>
+  
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
     <div class="upload-card">
       <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required multiple />
-        <button type="submit" class="btn brand" style="width:100%">Upload</button>
+        <button type="submit" class="btn brand" style="width:100%">Upload Files</button>
       </form>
     </div>
-    <div class="pane-title" style="margin-top:16px">Documents</div>
-    <div id="current-category" class="muted" style="margin-bottom:6px">Showing: All Documents</div>
+    <div class="pane-title" style="margin-top:24px">Documents</div>
+    <div id="current-category" class="muted" style="margin-bottom:12px">Showing: All Documents</div>
     <div id="documents-container" class="documents-list"></div>
   </aside>
+  
   <div id="bar-us" class="resizer">
     <button id="btnUS" class="collapse-btn">«</button>
   </div>
+  
   <main class="main">
     <div class="topbar">
-      <div class="welcome-message">Welcome, {{ name }}</div>
-      <div class="profession-badge">{{ profession }}</div>
+      <div class="muted">{{ name }}</div>
+      <div class="muted">{{ profession }}</div>
       <div class="topbar-actions">
         <button id="downloadBtn" class="action-btn secondary">Download</button>
         {% if latest_membership != "Free" %}
@@ -637,71 +774,18 @@
         {% endif %}
       </div>
     </div>
-    
-    <div class="main-content">
-      <h1>PCP Project 1</h1>
-      
-      <div class="document-preview">
-        <h2>Narrative Record of the PCP Project Briefing – 7th July</h2>
-        
-        <p>The existing construction with the first four years has been a vision for our future acquisitions. Our mission is prosperous. With our key defects, an exciting experience at the university. Plans installed within our newly and formerly new business partners include "Skin Solutions" (sunshine), full-time company and special service delivery team during the year, including programs starting to "Bills up" into, but all along with "Mix now was underway" and eventually ending the acquisition in the transition metal portfolio market position on the Project Capitaine Project (FCP).</p>
-        
-        <h3>Setting the Stage: Purpose and Expectation</h3>
-        
-        <p>From critical to customer objectives, to gain its cleanest image for FCP projects, each stage continues to continue, and results consistent with the anticipated level of development, social growth project details, which we take into account, including successors in process management and process. We recognise that planned initiatives can be coming forward as part of the planning, "for future, challenging," and are able to provide further information.</p>
-        
-        <p>We plan a dedicated business for project and guide assignments, highlighting the transformation potential of the PCP. "This second of knowledge puts this goal from the project, to incorporate core solutions they've done in other branches, from the competition industry. So if you are confident that if you have the knowledge of the tool," the record was encouraging, and there might indicate that this project is a unique opportunity for growth and product learning.</p>
-        
-        <h3>Individual and Group Accountability</h3>
-        
-        <p>From additional third-years of prior work, continuously and opportunistically taking place together with client needs in Argentina & Honduras. The final position is written to highly, accorded to a written fit group, whether one or Gamma, or two or two groups included in the report, where the person is named "I am"; what is clear for the FCP, every group member must understand the entire product, and will then assigned suit, "When I am the customers", when you come for the number one, written text, from the title group, individual written text?</p>
-        
-        <p><strong>Evaluation:</strong> Each subject must be able to explain and identify the main product, and will then respond.</p>
-        
-        <p><strong>Admission:</strong></p>
-        <ul>
-          <li><strong>Key Data and Attendance</strong></li>
-          <li>From Actualities to Auditors to the project</li>
-          <li>The July Project funding facility</li>
-          <li>Total Equipment: Special Stock Accounts</li>
-          <li>Total Equipment: Board of Directors</li>
-          <li>Job Retirement: First Assurance Fee</li>
-          <li>Allocation: The Employee of Admissions "Assessment due on a re-association. So even though you want a suitable way to say you didn't have up for the assessment, you don't plan, likely use things on that."</li>
-        </ul>
-        
-        <p><strong>Admission:</strong> All students must attend these dates and ensure their availability.</p>
-        
-        <h3>Originality and Process Over Product</h3>
-        
-        <p>There are not many advantages in determining how, why, who should be required to facilitate your resolution. This will undoubtedly contribute to all contributing time and timely. But for some tasks with signs, need to be prepared. This means that you go to the project. As the museum is provided, you just be prepared soon!" The focus here exists. The outstanding academic beauty that the world will achieve towards.</p>
-        
-        <h3>Group Formation and Real-World Dynamics</h3>
-        
-        <p>Including all the activities of great excellence. These aspects of our life currently have stopped expanding beyond the rolling spot schedule and exhibition conditions. To the end, each takes you give them plans that working with the people known by the team, giving them a true generation of time, also for those outstanding projects developed.</p>
-        
-        <p><strong>Assessment Criteria:</strong> Ability to reach a higher level of confidence and complete a successful approach for the period.</p>
-        
-        <h3>Supervisor's Role and Client Simulation</h3>
-        
-        <p>From consultants to supervisors with an employee to a client, providing resources to the facilities, "You Avancate and Be a client... It was my own seven local of requirements in a general guideline that from three years start free that have been proven to be important your product." This resulted in client relationships in relation to fellow communications and hospitality.</p>
-        
-        <h3>Technical Support and Self-Malance</h3>
-        
-        <p>Additional content would go here...</p>
-      </div>
-    </div>
+    <h1>Welcome back, {{ name }}</h1>
+    <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
   </main>
 </div>
 
-<!-- Template Selector Modal -->
 <div id="templateSelectorModal" class="template-selector-modal hidden">
   <div class="template-selector-container">
     <div class="sidebar">
-      <div class="sidebar-title">Select Summary Template</div>
+      <div class="sidebar-title">Select Template</div>
       
       <div class="sidebar-section">
         <div class="sidebar-section-title">Recently Used</div>
-        <!-- Items would go here -->
       </div>
       
       <div class="sidebar-section">
@@ -737,7 +821,7 @@
       <div id="meeting-content" class="hidden">
         <div class="content-container">
           <div class="content-box">
-            <div class="content-box-title">Meeting Summary Template</div>
+            <div class="content-box-title">Meeting Summary</div>
             <div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div>
             <div class="content-box-footer">
               <span>Last used: 2 days ago</span>
@@ -764,6 +848,7 @@
           </div>
         </div>
       </div>
+      
       <div id="call-content" class="hidden">
         <div class="content-container">
           <div class="content-box">
@@ -798,7 +883,6 @@
       $('#btnUS').textContent = '«';
     }
   
-    // Add these new functions for state management
     function state() {
       return {
         hasLS: !app.classList.contains('collapse-ls'),
@@ -811,14 +895,12 @@
       app.classList.toggle('collapse-us', !us);
       app.classList.toggle('collapse-both', !ls && !us);
       
-      // Update button directions
       const btnLS = document.getElementById('btnLS');
       const btnUS = document.getElementById('btnUS');
       if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
       if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
     }
   
-    // Update the button click handlers
     $('#btnLS').onclick = () => {
       const s = state();
       applyCollapse(!s.hasLS, s.hasUS);
@@ -833,9 +915,9 @@
       const div = document.createElement('div');
       div.className = 'document-item';
       div.textContent = doc.filename;
-      div.dataset.docId = doc.id; // Store document ID
-      div.dataset.fileName = doc.filename; // Store filename for drag operations
-      div.draggable = true; // Enable dragging
+      div.dataset.docId = doc.id;
+      div.dataset.fileName = doc.filename;
+      div.draggable = true;
       div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
   
       const delBtn = document.createElement('button');
@@ -849,7 +931,6 @@
         }
       };
       
-      // Add drag event listeners
       div.addEventListener('dragstart', function(e) {
         this.classList.add('dragging');
         e.dataTransfer.setData('text/plain', JSON.stringify({
@@ -876,69 +957,59 @@
       docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
     }
   
-    // ENHANCED: Category management with drag & drop and persistence
     const userId = "{{ session.get('user_id', '') }}";
     let categories = [];
-    let documentCategories = {};    // optional in-memory mapping (we rely on server)
+    let documentCategories = {};
     let currentCategory = 'all';
 
-  
-    // Save categories to localStorage
     function saveCategories() {
       localStorage.setItem('userCategories', JSON.stringify(categories));
       localStorage.setItem('documentCategories', JSON.stringify(documentCategories));
     }
 
-    // Add new category
     async function addCategory(name) {
-  if (!name || !name.trim()) {
-    alert("Category name cannot be empty.");
-    return;
-  }
-  try {
-    const res = await fetch("/add_category", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim() })
-    });
-    const result = await res.json();
-    if (result.success) {
-      // append to client-side list and rerender
-      categories.unshift({ id: result.id, name: result.name });
-      renderCategories();
-    } else {
-      alert("Failed to add category: " + (result.error || "Unknown error"));
+      if (!name || !name.trim()) {
+        alert("Category name cannot be empty.");
+        return;
+      }
+      try {
+        const res = await fetch("/add_category", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name.trim() })
+        });
+        const result = await res.json();
+        if (result.success) {
+          categories.unshift({ id: result.id, name: result.name });
+          renderCategories();
+        } else {
+          alert("Failed to add category: " + (result.error || "Unknown error"));
+        }
+      } catch (err) {
+        console.error("Error adding category:", err);
+        alert("Error adding category. See console.");
+      }
     }
-  } catch (err) {
-    console.error("Error adding category:", err);
-    alert("Error adding category. See console.");
-  }
-}
 
-
-    // Delete category
     async function deleteCategory(categoryId) {
-  if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
-  try {
-    const res = await fetch(`/delete_category/${categoryId}`, { method: "DELETE" });
-    const result = await res.json();
-    if (result.success) {
-      categories = categories.filter(cat => String(cat.id) !== String(categoryId));
-      // If we were viewing that category, switch to 'all'
-      if (currentCategory === String(categoryId)) setCurrentCategory('all');
-      renderCategories();
-      loadDocuments(); // refresh documents
-    } else {
-      alert("Failed to delete category: " + (result.error || "Unknown error"));
+      if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
+      try {
+        const res = await fetch(`/delete_category/${categoryId}`, { method: "DELETE" });
+        const result = await res.json();
+        if (result.success) {
+          categories = categories.filter(cat => String(cat.id) !== String(categoryId));
+          if (currentCategory === String(categoryId)) setCurrentCategory('all');
+          renderCategories();
+          loadDocuments();
+        } else {
+          alert("Failed to delete category: " + (result.error || "Unknown error"));
+        }
+      } catch (err) {
+        console.error("Error deleting category:", err);
+        alert("Error deleting category. See console.");
+      }
     }
-  } catch (err) {
-    console.error("Error deleting category:", err);
-    alert("Error deleting category. See console.");
-  }
-}
 
-
-    // Setup drop zone for category
     function setupDropZone(categoryElement) {
       categoryElement.addEventListener('dragover', function(e) {
         e.preventDefault();
@@ -960,7 +1031,6 @@
           const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
           const targetCategory = this.dataset.category;
           
-          // Update document category in database
           const response = await fetch('/update-document-category', {
             method: 'POST',
             headers: {
@@ -973,17 +1043,13 @@
           });
           
           if (response.ok) {
-            // Update local storage
             if (targetCategory === 'all') {
               delete documentCategories[dragData.docId];
             } else {
               documentCategories[dragData.docId] = targetCategory;
             }
             saveCategories();
-            
-            // Refresh documents if needed
             loadDocuments();
-            
             console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
           } else {
             alert('Failed to update document category');
@@ -994,103 +1060,82 @@
       });
     }
 
-    // Render categories in sidebar
     function renderCategories() {
-  const container = document.querySelector('.categories-container');
+      const container = document.querySelector('.categories-container');
+      const allDocsCategory = container.querySelector('.category[data-category="all"]');
+      const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
+      existingCategories.forEach(el => el.remove());
 
-  // Keep "All Documents" category (already in DOM) — remove any other custom categories first
-  const allDocsCategory = container.querySelector('.category[data-category="all"]');
+      categories.forEach(category => {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category';
+        categoryEl.dataset.category = String(category.id);
 
-  const existingCategories = container.querySelectorAll('.category:not([data-category="all"])');
-  existingCategories.forEach(el => el.remove());
+        const titleEl = document.createElement('div');
+        titleEl.className = 'category-title';
+        titleEl.textContent = category.name;
 
-  // Add categories from server
-  categories.forEach(category => {
-    const categoryEl = document.createElement('div');
-    categoryEl.className = 'category';
-    categoryEl.dataset.category = String(category.id);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-category';
+        deleteBtn.textContent = '🗑';
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteCategory(category.id);
+        };
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'category-title';
-    titleEl.textContent = category.name;
+        categoryEl.appendChild(titleEl);
+        categoryEl.appendChild(deleteBtn);
+        categoryEl.onclick = () => setCurrentCategory(String(category.id));
+        setupDropZone(categoryEl);
+        container.appendChild(categoryEl);
+      });
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-category';
-    deleteBtn.textContent = '🗑';
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      deleteCategory(category.id);
-    };
+      const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
+      if (activeEl) {
+        container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
+        activeEl.classList.add('active-category');
+      }
+    }
 
-    categoryEl.appendChild(titleEl);
-    categoryEl.appendChild(deleteBtn);
-
-    // click to switch
-    categoryEl.onclick = () => setCurrentCategory(String(category.id));
-
-    // make it a dropzone
-    setupDropZone(categoryEl);
-
-    container.appendChild(categoryEl);
-  });
-
-  // ensure the active category class exists
-  const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
-  if (activeEl) {
-    container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
-    activeEl.classList.add('active-category');
-  }
-}
-
-
-    // Set current category and update display
     function setCurrentCategory(categoryId) {
       currentCategory = categoryId;
       
-      // Update active state
-      $$('.category').forEach(c => c.classList.remove('active-category'));
+      $('.category').forEach(c => c.classList.remove('active-category'));
       $(`.category[data-category="${categoryId}"]`).classList.add('active-category');
       
-      // Update current category display
       const categoryName = categoryId === 'all' ? 'All Documents' : 
         categories.find(cat => cat.id === categoryId)?.name || categoryId;
       $('#current-category').textContent = `Showing: ${categoryName}`;
       
-      // Filter and display documents
       filterDocuments();
     }
 
-    // Filter documents based on current category
     async function filterDocuments() {
-  const res = await fetch('/get-documents');
-  const docs = await res.json();
+      const res = await fetch('/get-documents');
+      const docs = await res.json();
 
-  let filteredDocs = docs;
+      let filteredDocs = docs;
 
-  if (currentCategory !== 'all') {
-    filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
-  }
+      if (currentCategory !== 'all') {
+        filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
+      }
 
-  const container = $('#documents-container');
-  container.innerHTML = '';
-  filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-}
-
+      const container = $('#documents-container');
+      container.innerHTML = '';
+      filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       initResizeButtons();
-      loadCategories();       // load categories from server
-      loadDocuments();        // load documents (documents include category field)
+      loadCategories();
+      loadDocuments();
 
-      
-      // Setup "All Documents" category
       const allDocsCategory = $('.category[data-category="all"]');
       if (allDocsCategory) {
         allDocsCategory.onclick = () => setCurrentCategory('all');
         setupDropZone(allDocsCategory);
       }
       
-      // Initialize button arrow directions to match current state
       const s = state();
       const btnLS = document.getElementById('btnLS');
       const btnUS = document.getElementById('btnUS');
@@ -1102,79 +1147,69 @@
       const addCategoryBtn = document.getElementById("addCategoryBtn");
   
       addCategoryBtn.addEventListener("click", function () {
-        const name = prompt("Enter new category name:");
-        if (name) {
-          addCategory(name);
+        const categoryName = prompt("Enter new category name:");
+        if (categoryName && categoryName.trim()) {
+          addCategory(categoryName.trim());
         }
       });
     });
-  
-    // Load categories from server
+
+    function showTemplateContent(templateType) {
+      document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => {
+        div.classList.add('hidden');
+      });
+      
+      const targetContent = document.getElementById(`${templateType}-content`);
+      if (targetContent) {
+        targetContent.classList.remove('hidden');
+      }
+      
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const generateBtn = document.getElementById('generateBtn');
+      const templateModal = document.getElementById('templateSelectorModal');
+      const generateButton = document.querySelector('.generate-button');
+      
+      if (generateBtn) {
+        generateBtn.onclick = () => {
+          templateModal.classList.remove('hidden');
+        };
+      }
+      
+      if (templateModal) {
+        templateModal.onclick = (e) => {
+          if (e.target === templateModal) {
+            templateModal.classList.add('hidden');
+          }
+        };
+      }
+      
+      if (generateButton) {
+        generateButton.onclick = () => {
+          templateModal.classList.add('hidden');
+          alert('Template generation started!');
+        };
+      }
+    });
+
     async function loadCategories() {
       try {
         const res = await fetch("/get_categories");
-        const result = await res.json();
-        if (result.success) {
-          categories = result.categories;
-          renderCategories();
-        } else {
-          console.error("Failed to load categories:", result.error);
-        }
+        if (!res.ok) throw new Error("Failed to load categories");
+        categories = await res.json();
+        renderCategories();
       } catch (err) {
         console.error("Error loading categories:", err);
-      }
-    }
-  
-    // Initialize categories on page load
-    document.addEventListener('DOMContentLoaded', loadCategories);
-
-    // Template selector modal functionality
-    const generateBtn = document.getElementById('generateBtn');
-    const templateSelectorModal = document.getElementById('templateSelectorModal');
-    const generateNowBtn = templateSelectorModal.querySelector('.generate-button');
-    
-    if (generateBtn && !generateBtn.disabled) {
-      generateBtn.addEventListener('click', function() {
-        templateSelectorModal.classList.remove('hidden');
-        showTemplateContent('meeting'); // Show default content
-      });
-    }
-    
-    // Close modal when clicking outside
-    templateSelectorModal.addEventListener('click', function(e) {
-      if (e.target === templateSelectorModal) {
-        templateSelectorModal.classList.add('hidden');
-      }
-    });
-    
-    generateNowBtn.addEventListener('click', function() {
-      alert('Generating document...');
-      templateSelectorModal.classList.add('hidden');
-    });
-    
-    function showTemplateContent(templateType) {
-      // Hide all content areas
-      const contentAreas = document.querySelectorAll('.content-area > div');
-      contentAreas.forEach(area => area.classList.add('hidden'));
-      
-      // Show selected content
-      const selectedContent = document.getElementById(`${templateType}-content`);
-      if (selectedContent) {
-        selectedContent.classList.remove('hidden');
-      }
-      
-      // Update active state in sidebar
-      const sidebarItems = document.querySelectorAll('.sidebar-item');
-      sidebarItems.forEach(item => item.classList.remove('active'));
-      
-      const activeItem = Array.from(sidebarItems).find(item => 
-        item.textContent.trim().toLowerCase().includes(templateType.toLowerCase())
-      );
-      if (activeItem) {
-        activeItem.classList.add('active');
+        categories = [];
+        renderCategories();
       }
     }
 </script>
+
 </body>
 </html>
-
