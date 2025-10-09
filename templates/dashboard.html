@@ -10,10 +10,12 @@
       --us-min:160px; --us-max:420px; --us-w:260px;
       --bar-w:6px;
       --shadow: 0 1px 3px rgba(0,0,0,.08),0 6px 20px rgba(0,0,0,.06);
-      --bg:#f5f5f7; --card:#fff; --text:#222; --muted:#666; --brand:#2962ff;
+      --bg:#f8f9fa; --card:#fff; --text:#2c3e50; --muted:#7f8c8d; --brand:#2c5aa0;
+      --accent:#1a5276; --light-bg:#e8f4f8; --border:#d6eaf8;
+      --success:#28a745; --warning:#ffc107; --danger:#dc3545;
     }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg);}
+    body{margin:0;font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial;color:var(--text);background:var(--bg);}
     .app{height:100vh;display:grid;
       grid-template-columns:var(--ls-w) var(--bar-w) var(--us-w) var(--bar-w) 1fr;
       transition:grid-template-columns .2s ease;}
@@ -21,16 +23,17 @@
     .collapse-us{grid-template-columns:var(--ls-w) var(--bar-w) 0 var(--bar-w) 1fr;}
     .collapse-both{grid-template-columns:0 0 0 0 1fr;}
     .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;}
-    .ls{padding:14px;position:relative;overflow-y:visible;}
-    .us{padding:16px;position:relative;overflow:auto;}
+    .ls{padding:14px;position:relative;overflow-y:visible;background:var(--light-bg);}
+    .us{padding:16px;position:relative;overflow:auto;background:var(--light-bg);}
     .main{background:transparent;padding:24px;overflow:auto;}
-    .pane-title{font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:2px 0 10px;display:flex;align-items:center;justify-content:space-between;}
-    .btn{border:0;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer;
-         background:#eceff1;color:#111;width:100%;text-align:left;margin-bottom:8px;}
+    .pane-title{font-size:14px;font-weight:600;color:var(--accent);margin:2px 0 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px;}
+    .btn{border:0;border-radius:8px;padding:10px 12px;font-weight:600;cursor:pointer;
+         background:#e8f4f8;color:#2c5aa0;width:100%;text-align:left;margin-bottom:8px;transition:all 0.2s ease;}
+    .btn:hover{background:#d6eaf8;transform:translateY(-1px);}
     .btn.brand{background:var(--brand);color:#fff;}
     .btn.inline{width:auto;margin:0 8px 0 0;padding:8px 10px;}
     .muted{color:var(--muted);}
-    /* ç§»é™¤åˆ†å‰²çº¿çš„æ‹–æ‹½æ ·å¼ */
+    /* 移除分割线的拖拽样式 */
     .resizer{
       position:relative;
       background:transparent;
@@ -43,12 +46,12 @@
       bottom:0;
       left:calc(50% - 1px);
       width:2px;
-      background:#e0e0e0;
+      background:#d6eaf8;
     }
-    .topbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px;background:var(--card);border-bottom:1px solid #eee;}
-    .upload-card{background:#fafafa;border:1px dashed #ddd;border-radius:12px;padding:14px;}
-    input[type="file"]{width:100%;margin:10px 0;}
-    .logout{display:block;margin-top:12px;color:var(--muted);text-decoration:none;}
+    .topbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px;background:var(--card);border-bottom:1px solid #eee;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+    .upload-card{background:#f8fbff;border:1px dashed #b3d9ff;border-radius:12px;padding:14px;}
+    input[type="file"]{width:100%;margin:10px 0;padding:8px;border:1px solid var(--border);border-radius:6px;background:#fff;}
+    .logout{display:block;margin-top:12px;color:var(--muted);text-decoration:none;font-weight:500;}
     .collapse-btn {
       position: absolute;
       top: 50%;
@@ -59,24 +62,25 @@
       height: 24px;
       border: none;
       border-radius: 4px;
-      background: #ddd;
+      background: #b3d9ff;
       cursor: pointer;
       font-size: 12px;
       line-height: 1;
+      color: var(--brand);
     }
-    .collapse-btn:hover { background: #bbb; }
+    .collapse-btn:hover { background: #99ccff; }
     .document-item {
       position: relative;
       padding: 8px 24px 8px 8px;
       margin: 4px 0;
-      background: #f0f0f0;
+      background: #e8f4f8;
       border-radius: 6px;
       cursor: grab;
-      border: 1px solid #ddd;
+      border: 1px solid #b3d9ff;
       transition: all 0.2s ease;
     }
     .document-item:hover {
-      background: #e0e0e0;
+      background: #d6eaf8;
       transform: translateY(-1px);
     }
     .document-item.dragging {
@@ -111,27 +115,30 @@
       cursor: pointer;
       transition: all 0.2s ease;
       border: 2px dashed transparent;
+      background: #e8f4f8;
     }
     .category:hover {
-      background: #f0f0f0;
+      background: #d6eaf8;
     }
     .category.drag-over {
       border-color: var(--brand);
-      background: #e3f2fd;
+      background: #cfe2f3;
       transform: scale(1.02);
     }
     .category-title {
       font-weight: bold;
       margin-bottom: 6px;
+      color: var(--accent);
     }
     .documents-list {
       min-height: 20px;
       padding: 4px;
       border-radius: 6px;
-      background: #f8f8f8;
+      background: #f8fbff;
     }
     .active-category {
-      background: #e8f5e9 !important;
+      background: #d5e8d4 !important;
+      border-left: 4px solid #4caf50;
     }
     .delete-category {
       position: absolute;
@@ -166,9 +173,11 @@
       cursor: pointer;
       font-weight: 600;
       margin-left: 8px;
+      transition: all 0.2s ease;
     }
     .action-btn:hover {
       opacity: 0.9;
+      transform: translateY(-1px);
     }
     .action-btn.secondary {
       background: #4caf50;
@@ -255,12 +264,13 @@
       border-radius: 8px;
       display: flex;
       position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     .template-selector-modal .sidebar {
       width: 200px;
-      background-color: #f8f8f8;
-      border-right: 1px solid #e0e0e0;
+      background-color: #f0f4f8;
+      border-right: 1px solid #d6eaf8;
       padding: 15px;
       overflow-y: auto;
     }
@@ -269,6 +279,7 @@
       font-size: 16px;
       font-weight: bold;
       margin-bottom: 15px;
+      color: var(--accent);
     }
 
     .template-selector-modal .sidebar-section {
@@ -277,7 +288,7 @@
 
     .template-selector-modal .sidebar-section-title {
       font-size: 13px;
-      color: #666;
+      color: var(--muted);
       margin-bottom: 8px;
       font-weight: bold;
     }
@@ -291,15 +302,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: all 0.2s ease;
     }
 
     .template-selector-modal .sidebar-item:hover {
-      background-color: #e9e9e9;
+      background-color: #e8f4f8;
     }
 
     .template-selector-modal .sidebar-item.active {
-      background-color: #e0e0e0;
+      background-color: #d6eaf8;
       font-weight: bold;
+      color: var(--accent);
     }
 
     .template-selector-modal .arrow-icon {
@@ -307,7 +320,7 @@
       height: 0;
       border-top: 4px solid transparent;
       border-bottom: 4px solid transparent;
-      border-left: 4px solid #666;
+      border-left: 4px solid var(--muted);
       margin-left: 8px;
     }
 
@@ -327,21 +340,29 @@
 
     .template-selector-modal .content-box {
       width: 240px;
-      border: 1px solid #e0e0e0;
+      border: 1px solid #d6eaf8;
       border-radius: 6px;
       padding: 12px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      background: #f8fbff;
+      transition: all 0.2s ease;
+    }
+
+    .template-selector-modal .content-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .template-selector-modal .content-box-title {
       font-weight: bold;
       margin-bottom: 8px;
       font-size: 14px;
+      color: var(--accent);
     }
 
     .template-selector-modal .content-box-description {
       font-size: 12px;
-      color: #666;
+      color: var(--muted);
       margin-bottom: 12px;
     }
 
@@ -356,7 +377,7 @@
       position: absolute;
       bottom: 15px;
       right: 15px;
-      background-color: #007bff;
+      background-color: var(--brand);
       color: white;
       border: none;
       padding: 8px 16px;
@@ -364,10 +385,11 @@
       cursor: pointer;
       font-weight: bold;
       font-size: 14px;
+      transition: all 0.2s ease;
     }
 
     .template-selector-modal .generate-button:hover {
-      background-color: #0069d9;
+      background-color: #1a4a7a;
     }
 
     .hidden {
@@ -380,6 +402,186 @@
       overflow-y: auto;
       margin-bottom: 10px;
     }
+    
+    /* NEW STYLES - Enhanced UI to match the image */
+    .main h1 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 24px;
+    }
+    
+    .main-content {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-top: 20px;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    
+    .document-preview {
+      background: #f8fbff;
+      border: 1px solid #d6eaf8;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .document-preview h2 {
+      color: var(--accent);
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 1px solid #d6eaf8;
+      padding-bottom: 8px;
+    }
+    
+    .document-preview h3 {
+      color: var(--brand);
+      margin-top: 15px;
+      font-size: 16px;
+    }
+    
+    .document-preview ul {
+      padding-left: 20px;
+    }
+    
+    .document-preview li {
+      margin-bottom: 5px;
+    }
+    
+    .document-preview strong {
+      color: var(--accent);
+    }
+    
+    /* Enhanced sidebar styling */
+    .ls .pane-title {
+      font-size: 16px;
+      color: var(--brand);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+    
+    .account-section .pane-title {
+      font-size: 16px;
+      color: var(--brand);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+    
+    /* Enhanced button styling */
+    .btn {
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+    
+    .btn:before {
+      content: "•";
+      margin-right: 8px;
+      color: var(--brand);
+    }
+    
+    .btn.brand:before {
+      color: white;
+    }
+    
+    /* Enhanced category styling */
+    .category {
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #d6eaf8;
+      background: #f8fbff;
+    }
+    
+    .category-title {
+      font-size: 14px;
+      color: var(--accent);
+    }
+    
+    .active-category {
+      background: #e8f5e8 !important;
+      border-left: 4px solid var(--success);
+    }
+    
+    /* Enhanced topbar styling */
+    .topbar {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .topbar .muted {
+      font-weight: 500;
+    }
+    
+    /* Enhanced upload card */
+    .upload-card {
+      background: #f8fbff;
+      border: 2px dashed #b3d9ff;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    /* Document list styling */
+    .documents-list {
+      background: white;
+      border-radius: 6px;
+      padding: 8px;
+      border: 1px solid #e8f4f8;
+    }
+    
+    /* Document item styling */
+    .document-item {
+      background: white;
+      border: 1px solid #e8f4f8;
+      border-radius: 6px;
+      padding: 10px 30px 10px 12px;
+      margin: 6px 0;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    
+    .document-item:hover {
+      background: #f0f8ff;
+      border-color: #b3d9ff;
+    }
+    
+    /* Welcome message styling */
+    .welcome-message {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    
+    .profession-badge {
+      display: inline-block;
+      background: var(--light-bg);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -387,11 +589,21 @@
   
   <aside id="ls" class="sidebar ls">
     <div class="pane-title">
-      Categories <button id="addCategoryBtn" class="add-category-icon">+</button>
+      ALL DOCUMENT
+      <button id="addCategoryBtn" class="add-category-icon">+</button>
     </div>
     <div class="categories-container">
       <div class="category active-category" data-category="all">
         <div class="category-title">All Documents</div>
+      </div>
+      <div class="category" data-category="healthcare">
+        <div class="category-title">Healthcare</div>
+      </div>
+      <div class="category" data-category="law">
+        <div class="category-title">Law</div>
+      </div>
+      <div class="category" data-category="engineering">
+        <div class="category-title">Engineering</div>
       </div>
     </div>
     <div class="account-section">
@@ -399,12 +611,12 @@
       <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
       <button class="btn">{{ latest_membership }}</button>
       <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
-      <a class="logout" href="/logout">Logout</a>
+      <a class="logout" href="/logout">Log Out</a>
     </div>
   </aside>
 
   <div id="bar-ls" class="resizer">
-    <button id="btnLS" class="collapse-btn">Â«</button>
+    <button id="btnLS" class="collapse-btn">«</button>
   </div>
   <aside id="us" class="sidebar us">
     <div class="pane-title">Upload Document</div>
@@ -419,24 +631,74 @@
     <div id="documents-container" class="documents-list"></div>
   </aside>
   <div id="bar-us" class="resizer">
-    <button id="btnUS" class="collapse-btn">Â«</button>
+    <button id="btnUS" class="collapse-btn">«</button>
   </div>
   <main class="main">
     <div class="topbar">
-      <div class="muted">Welcome, {{ name }}</div>
-      <div class="muted">{{ profession }}</div>
+      <div class="welcome-message">Welcome, {{ name }}</div>
+      <div class="profession-badge">{{ profession }}</div>
       <div class="topbar-actions">
-  <button id="downloadBtn" class="action-btn secondary">Download</button>
-  {% if latest_membership != "Free" %}
-    <button id="generateBtn" class="action-btn">Generate</button>
-  {% else %}
-    <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
-  {% endif %}
-</div>
-
+        <button id="downloadBtn" class="action-btn secondary">Download</button>
+        {% if latest_membership != "Free" %}
+          <button id="generateBtn" class="action-btn">Generate</button>
+        {% else %}
+          <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
+        {% endif %}
+      </div>
     </div>
-    <h1>Welcome, {{ name }}</h1>
-    <p class="muted"></p>
+    
+    <div class="main-content">
+      <h1>PCP Project 1</h1>
+      
+      <div class="document-preview">
+        <h2>Narrative Record of the PCP Project Briefing – 7th July</h2>
+        
+        <p>The existing construction with the first four years has been a vision for our future acquisitions. Our mission is prosperous. With our key defects, an exciting experience at the university. Plans installed within our newly and formerly new business partners include "Skin Solutions" (sunshine), full-time company and special service delivery team during the year, including programs starting to "Bills up" into, but all along with "Mix now was underway" and eventually ending the acquisition in the transition metal portfolio market position on the Project Capitaine Project (FCP).</p>
+        
+        <h3>Setting the Stage: Purpose and Expectation</h3>
+        
+        <p>From critical to customer objectives, to gain its cleanest image for FCP projects, each stage continues to continue, and results consistent with the anticipated level of development, social growth project details, which we take into account, including successors in process management and process. We recognise that planned initiatives can be coming forward as part of the planning, "for future, challenging," and are able to provide further information.</p>
+        
+        <p>We plan a dedicated business for project and guide assignments, highlighting the transformation potential of the PCP. "This second of knowledge puts this goal from the project, to incorporate core solutions they've done in other branches, from the competition industry. So if you are confident that if you have the knowledge of the tool," the record was encouraging, and there might indicate that this project is a unique opportunity for growth and product learning.</p>
+        
+        <h3>Individual and Group Accountability</h3>
+        
+        <p>From additional third-years of prior work, continuously and opportunistically taking place together with client needs in Argentina & Honduras. The final position is written to highly, accorded to a written fit group, whether one or Gamma, or two or two groups included in the report, where the person is named "I am"; what is clear for the FCP, every group member must understand the entire product, and will then assigned suit, "When I am the customers", when you come for the number one, written text, from the title group, individual written text?</p>
+        
+        <p><strong>Evaluation:</strong> Each subject must be able to explain and identify the main product, and will then respond.</p>
+        
+        <p><strong>Admission:</strong></p>
+        <ul>
+          <li><strong>Key Data and Attendance</strong></li>
+          <li>From Actualities to Auditors to the project</li>
+          <li>The July Project funding facility</li>
+          <li>Total Equipment: Special Stock Accounts</li>
+          <li>Total Equipment: Board of Directors</li>
+          <li>Job Retirement: First Assurance Fee</li>
+          <li>Allocation: The Employee of Admissions "Assessment due on a re-association. So even though you want a suitable way to say you didn't have up for the assessment, you don't plan, likely use things on that."</li>
+        </ul>
+        
+        <p><strong>Admission:</strong> All students must attend these dates and ensure their availability.</p>
+        
+        <h3>Originality and Process Over Product</h3>
+        
+        <p>There are not many advantages in determining how, why, who should be required to facilitate your resolution. This will undoubtedly contribute to all contributing time and timely. But for some tasks with signs, need to be prepared. This means that you go to the project. As the museum is provided, you just be prepared soon!" The focus here exists. The outstanding academic beauty that the world will achieve towards.</p>
+        
+        <h3>Group Formation and Real-World Dynamics</h3>
+        
+        <p>Including all the activities of great excellence. These aspects of our life currently have stopped expanding beyond the rolling spot schedule and exhibition conditions. To the end, each takes you give them plans that working with the people known by the team, giving them a true generation of time, also for those outstanding projects developed.</p>
+        
+        <p><strong>Assessment Criteria:</strong> Ability to reach a higher level of confidence and complete a successful approach for the period.</p>
+        
+        <h3>Supervisor's Role and Client Simulation</h3>
+        
+        <p>From consultants to supervisors with an employee to a client, providing resources to the facilities, "You Avancate and Be a client... It was my own seven local of requirements in a general guideline that from three years start free that have been proven to be important your product." This resulted in client relationships in relation to fellow communications and hospitality.</p>
+        
+        <h3>Technical Support and Self-Malance</h3>
+        
+        <p>Additional content would go here...</p>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -849,95 +1111,78 @@
       const addCategoryBtn = document.getElementById("addCategoryBtn");
   
       addCategoryBtn.addEventListener("click", function () {
-        const categoryName = prompt("Enter new category name:");
-        if (categoryName && categoryName.trim()) {
-          addCategory(categoryName.trim());
+        const name = prompt("Enter new category name:");
+        if (name) {
+          addCategory(name);
         }
       });
     });
-
-    // Template modal functions
-    function showTemplateContent(templateType) {
-      // Hide all content
-      document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => {
-        div.classList.add('hidden');
-      });
-      
-      // Show selected content
-      const targetContent = document.getElementById(`${templateType}-content`);
-      if (targetContent) {
-        targetContent.classList.remove('hidden');
+  
+    // Load categories from server
+    async function loadCategories() {
+      try {
+        const res = await fetch("/get_categories");
+        const result = await res.json();
+        if (result.success) {
+          categories = result.categories;
+          renderCategories();
+        } else {
+          console.error("Failed to load categories:", result.error);
+        }
+      } catch (err) {
+        console.error("Error loading categories:", err);
       }
-      
-      // Update active state
-      document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      event.target.classList.add('active');
     }
+  
+    // Initialize categories on page load
+    document.addEventListener('DOMContentLoaded', loadCategories);
 
-    // Generate button functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const generateBtn = document.getElementById('generateBtn');
-      const templateModal = document.getElementById('templateSelectorModal');
-      const generateButton = document.querySelector('.generate-button');
-      
-      // Show template modal
-      if (generateBtn) {
-        generateBtn.onclick = () => {
-          templateModal.classList.remove('hidden');
-        };
-      }
-      
-      // Close modal when clicking outside
-      if (templateModal) {
-        templateModal.onclick = (e) => {
-          if (e.target === templateModal) {
-            templateModal.classList.add('hidden');
-          }
-        };
-      }
-      
-      // Generate button in modal
-      if (generateButton) {
-        generateButton.onclick = () => {
-          templateModal.classList.add('hidden');
-          alert('Template generation started!');
-        };
+    // Template selector modal functionality
+    const generateBtn = document.getElementById('generateBtn');
+    const templateSelectorModal = document.getElementById('templateSelectorModal');
+    const generateNowBtn = templateSelectorModal.querySelector('.generate-button');
+    
+    if (generateBtn && !generateBtn.disabled) {
+      generateBtn.addEventListener('click', function() {
+        templateSelectorModal.classList.remove('hidden');
+        showTemplateContent('meeting'); // Show default content
+      });
+    }
+    
+    // Close modal when clicking outside
+    templateSelectorModal.addEventListener('click', function(e) {
+      if (e.target === templateSelectorModal) {
+        templateSelectorModal.classList.add('hidden');
       }
     });
-
-  async function loadCategories() {
-  try {
-    const res = await fetch("/get_categories");
-    if (!res.ok) throw new Error("Failed to load categories");
-    categories = await res.json();
-    renderCategories();
     
-  } catch (err) {
-    console.error("Error loading categories:", err);
-    categories = []; // fallback
-    renderCategories();
-  }
-}
-
+    generateNowBtn.addEventListener('click', function() {
+      alert('Generating document...');
+      templateSelectorModal.classList.add('hidden');
+    });
+    
+    function showTemplateContent(templateType) {
+      // Hide all content areas
+      const contentAreas = document.querySelectorAll('.content-area > div');
+      contentAreas.forEach(area => area.classList.add('hidden'));
+      
+      // Show selected content
+      const selectedContent = document.getElementById(`${templateType}-content`);
+      if (selectedContent) {
+        selectedContent.classList.remove('hidden');
+      }
+      
+      // Update active state in sidebar
+      const sidebarItems = document.querySelectorAll('.sidebar-item');
+      sidebarItems.forEach(item => item.classList.remove('active'));
+      
+      const activeItem = Array.from(sidebarItems).find(item => 
+        item.textContent.trim().toLowerCase().includes(templateType.toLowerCase())
+      );
+      if (activeItem) {
+        activeItem.classList.add('active');
+      }
+    }
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
