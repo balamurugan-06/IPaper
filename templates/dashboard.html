@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -30,29 +29,14 @@
     *{box-sizing:border-box; margin:0; padding:0;}
     html,body{height:100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;}
     body{color:var(--text);background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);font-size: 14px;line-height: 1.6;-webkit-font-smoothing: antialiased;}
-    .app {
-  display: grid;
-  grid-template-columns: 260px 1fr; /* Sidebar + Main layout */
-  height: 100vh;
-}
+    .app{height:100vh;display:grid;grid-template-columns:var(--ls-w) var(--bar-w) var(--us-w) var(--bar-w) 1fr;transition:grid-template-columns .3s cubic-bezier(0.4, 0, 0.2, 1);}
     .collapse-ls{grid-template-columns:0 var(--bar-w) var(--us-w) var(--bar-w) 1fr;}
     .collapse-us{grid-template-columns:var(--ls-w) var(--bar-w) 0 var(--bar-w) 1fr;}
     .collapse-both{grid-template-columns:0 0 0 0 1fr;}
     .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;backdrop-filter: blur(10px);} 
     .ls{padding:24px 20px;position:relative;overflow-y:visible;border-right: 1px solid var(--border);} 
     .us{padding:24px 20px;position:relative;overflow:auto;border-right: 1px solid var(--border);} 
-    .main {
-  padding: 32px;
-  background: linear-gradient(to bottom right, #f3f6fc, #dfe8f9);
-  overflow-y: auto;
-  z-index: 1;
-}
-    .sidebar {
-  background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  z-index: 2;
-  position: relative;
-}
+    .main{background:transparent;padding:32px;overflow:auto;}
     .pane-title{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;}
     .btn{border:0;border-radius:8px;padding:12px 16px;font-weight:500;cursor:pointer;background:var(--hover);color:var(--text);width:100%;text-align:left;margin-bottom:8px;transition: all 0.2s ease;font-size: 13px;border: 1px solid transparent;}
     .btn:hover{background:#e2e8f0;transform: translateY(-1px);box-shadow: var(--shadow-sm);}    
@@ -379,4 +363,3 @@
 </script>
 </body>
 </html>
-
