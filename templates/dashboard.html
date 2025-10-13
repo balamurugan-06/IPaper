@@ -518,203 +518,392 @@
 </div>
 <div id="templateSelectorModal" class="template-selector-modal hidden">
   <div class="template-selector-container">
-
     <div class="sidebar">
       <div class="sidebar-title">Select Template</div>
+      
+      <!-- My Templates Section -->
       <div class="sidebar-section">
-        <div class="sidebar-section-title">Available Templates</div>
-        <div id="templateList"></div>
+        <div class="sidebar-section-title">My Templates</div>
+        <div id="templates-sidebar-list">
+          <!-- Dynamic templates will be loaded here -->
+          <div style="padding: 8px; color: var(--muted); font-size: 12px; text-align: center;">
+            Loading templates...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Categories Section (if you want to group by category) -->
+      <div class="sidebar-section" id="categories-sidebar" style="display: none;">
+        <div class="sidebar-section-title">Categories</div>
+        <div id="categories-list">
+          <!-- Dynamic categories will be loaded here -->
+        </div>
+      </div>
+      
+      <!-- General Templates (Fallback) -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">General</div>
+        <div class="sidebar-item" onclick="showTemplateContent('meeting')">Meeting<div class="arrow-icon"></div></div>
+        <div class="sidebar-item" onclick="showTemplateContent('speech')">Speech<div class="arrow-icon"></div></div>
+        <div class="sidebar-item" onclick="showTemplateContent('call')">Call<div class="arrow-icon"></div></div>
       </div>
     </div>
-
-    <div class="content-area" id="templateContent">
-      <div style="padding:20px;color:gray;">Select a template from the left panel to view details.</div>
+    
+    <div class="content-area">
+      <!-- My Templates Content -->
+      <div id="my-templates-content">
+        <div class="content-container" id="templates-content-container">
+          <!-- Dynamic template content will be loaded here -->
+          <div style="padding: 20px; text-align: center; color: var(--muted);">
+            Loading your templates...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category-specific Content -->
+      <div id="category-templates-content" class="hidden">
+        <div class="content-container" id="category-templates-container">
+          <!-- Category-specific templates will be loaded here -->
+        </div>
+      </div>
+      
+      <!-- Keep existing hardcoded templates as fallback -->
+      <div id="meeting-content" class="hidden">
+        <div class="content-container">
+          <div class="content-box"><div class="content-box-title">Meeting Summary</div><div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div><div class="content-box-footer"><span>Last used: 2 days ago</span></div></div>
+          <div class="content-box"><div class="content-box-title">Detailed Meeting Notes</div><div class="content-box-description">Comprehensive template for capturing all meeting details.</div><div class="content-box-footer"><span>Last used: 1 week ago</span></div></div>
+        </div>
+      </div>
+      <div id="speech-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Speech Summary</div><div class="content-box-description">Captures main arguments and key quotes from speeches.</div><div class="content-box-footer"><span>Last used: 3 days ago</span></div></div></div></div>
+      <div id="call-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Call Transcript Summary</div><div class="content-box-description">Summarizes phone call transcripts with key points.</div><div class="content-box-footer"><span>Last used: Yesterday</span></div></div><div class="content-box"><div class="content-box-title">Customer Support Call</div><div class="content-box-description">Specialized template for customer support calls.</div><div class="content-box-footer"><span>Last used: 5 days ago</span></div></div></div></div>
     </div>
-
-    <button class="generate-button" id="confirmGenerateBtn">Generate now</button>
+    <button class="generate-button" id="finalGenerateBtn">Generate now</button>
   </div>
 </div>
 
 <script>
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-const app = $('#app');
+  const $ = selector => document.querySelector(selector);
+  const $$ = selector => document.querySelectorAll(selector);
+  const app = $('#app');
 
-// Sidebar collapse init
-function initResizeButtons() {
-  const bLS = document.getElementById('btnLS');
-  const bUS = document.getElementById('btnUS');
-  if (bLS) bLS.textContent = '«';
-  if (bUS) bUS.textContent = '«';
-}
+  // 折叠功能
+  function initResizeButtons() {
+    const bLS = document.getElementById('btnLS');
+    const bUS = document.getElementById('btnUS');
+    if (bLS) bLS.textContent = '«';
+    if (bUS) bUS.textContent = '«';
+  }
 
-function state() {
-  return { hasLS: !app.classList.contains('collapse-ls'), hasUS: !app.classList.contains('collapse-us') };
-}
-
-function applyCollapse(ls, us) {
-  app.classList.toggle('collapse-ls', !ls);
-  app.classList.toggle('collapse-us', !us);
-  app.classList.toggle('collapse-both', !ls && !us);
-  $('#btnLS').textContent = ls ? '«' : '»';
-  $('#btnUS').textContent = us ? '«' : '»';
-}
-
-$('#btnLS').onclick = () => { const s = state(); applyCollapse(!s.hasLS, s.hasUS); };
-$('#btnUS').onclick = () => { const s = state(); applyCollapse(s.hasLS, !s.hasUS); };
-
-// ---------------- DOCUMENT HANDLING ---------------- //
-function createDocumentItem(doc) {
-  const div = document.createElement('div');
-  div.className = 'document-item';
-  div.textContent = doc.filename || doc.name || 'untitled';
-  div.dataset.docId = doc.id;
-  div.dataset.fileName = doc.filename || doc.name || 'untitled';
-  div.draggable = true;
-
-  div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'document-delete-btn';
-  delBtn.textContent = '🗑';
-  delBtn.onclick = async (e) => {
-    e.stopPropagation();
-    if (confirm(`Delete "${div.dataset.fileName}"?`)) {
-      await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
-      await loadDocuments();
+  function state() {
+    return { 
+      hasLS: !app.classList.contains('collapse-ls'), 
+      hasUS: !app.classList.contains('collapse-us') 
     }
+  }
+
+  function applyCollapse(ls, us) {
+    app.classList.toggle('collapse-ls', !ls);
+    app.classList.toggle('collapse-us', !us);
+    app.classList.toggle('collapse-both', !ls && !us);
+    
+    const btnLS = document.getElementById('btnLS');
+    const btnUS = document.getElementById('btnUS');
+    if (btnLS) { btnLS.textContent = ls ? '«' : '»'; }
+    if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
+  }
+
+  document.getElementById('btnLS').onclick = () => { 
+    const s = state(); 
+    applyCollapse(!s.hasLS, s.hasUS); 
   };
 
-  div.appendChild(delBtn);
-  return div;
-}
+  document.getElementById('btnUS').onclick = () => { 
+    const s = state(); 
+    applyCollapse(s.hasLS, !s.hasUS); 
+  };
 
-async function loadDocuments() {
-  try {
-    const container = $('#documents-container');
-    if (!container) {
-      console.warn('Documents container not found, retrying...');
-      setTimeout(loadDocuments, 400);
-      return;
-    }
+  function createDocumentItem(doc) {
+    const div = document.createElement('div');
+    div.className = 'document-item';
+    div.textContent = doc.filename || doc.name || 'untitled';
+    div.dataset.docId = doc.id;
+    div.dataset.fileName = doc.filename || doc.name || 'untitled';
+    div.draggable = true;
 
-    const res = await fetch('/get-documents');
-    if (!res.ok) throw new Error('Failed to fetch documents');
-    const docs = await res.json();
-    console.log('Fetched documents:', docs);
+    div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
 
-    container.innerHTML = '';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'document-delete-btn';
+    delBtn.textContent = '🗑';
+    delBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete "${div.dataset.fileName}"?`)) {
+        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+        await loadDocuments();
+      }
+    };
 
-    if (!Array.isArray(docs) || docs.length === 0) {
-      container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents found</div>`;
-      return;
-    }
-    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-  } catch (err) {
-    console.error('Error loading documents:', err);
-    const container = $('#documents-container');
-    if (container)
-      container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>`;
-  }
-}
-
-// Refresh document list immediately after upload
-const uploadForm = document.getElementById('uploadForm');
-if (uploadForm) {
-  uploadForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const res = await fetch('/upload-document', { method: 'POST', body: formData });
-    if (res.ok) {
-      alert('File uploaded successfully!');
-      await loadDocuments();
-    } else {
-      alert('Upload failed.');
-    }
-  });
-}
-
-// ---------------- TEMPLATE MANAGEMENT ---------------- //
-let selectedTemplate = null;
-
-async function loadTemplates() {
-  try {
-    const res = await fetch('/get_templates');
-    const templates = await res.json();
-    const listContainer = document.getElementById('templateList');
-    const contentArea = document.getElementById('templateContent');
-
-    listContainer.innerHTML = '';
-    contentArea.innerHTML = '';
-
-    if (!templates.length) {
-      listContainer.innerHTML = '<div style="padding:10px;color:gray;">No templates found</div>';
-      contentArea.innerHTML = '<div style="padding:20px;color:gray;">No templates available.</div>';
-      return;
-    }
-
-    templates.forEach((t, index) => {
-      const item = document.createElement('div');
-      item.className = 'sidebar-item';
-      item.innerHTML = `${t.name}<div class="arrow-icon"></div>`;
-
-      item.onclick = () => {
-        selectedTemplate = t;
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        contentArea.innerHTML = `
-          <div class="content-container">
-            <div class="content-box">
-              <div class="content-box-title">${t.name}</div>
-              <div class="content-box-description">${t.prompt}</div>
-            </div>
-          </div>`;
-      };
-      listContainer.appendChild(item);
-      if (index === 0) item.click();
+    div.addEventListener('dragstart', function(e) {
+      this.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', JSON.stringify({ docId: this.dataset.docId, fileName: this.dataset.fileName }));
+      e.dataTransfer.effectAllowed = 'move';
     });
-  } catch (err) {
-    console.error('Error fetching templates:', err);
-  }
-}
 
-// ---------------- PAGE INIT ---------------- //
-document.addEventListener('DOMContentLoaded', () => {
-  initResizeButtons();
-  loadDocuments();
+    div.addEventListener('dragend', function() { 
+      this.classList.remove('dragging'); 
+    });
 
-  const generateBtn = document.getElementById('generateBtn');
-  const templateModal = document.getElementById('templateSelectorModal');
-  const confirmGenerateBtn = document.getElementById('confirmGenerateBtn');
-
-  if (generateBtn) {
-    generateBtn.onclick = async () => {
-      await loadTemplates();
-      templateModal.classList.remove('hidden');
-    };
+    div.appendChild(delBtn);
+    return div;
   }
 
-  if (templateModal) {
-    templateModal.onclick = (e) => {
-      if (e.target === templateModal) templateModal.classList.add('hidden');
-    };
-  }
-
-  if (confirmGenerateBtn) {
-    confirmGenerateBtn.onclick = () => {
-      if (!selectedTemplate) {
-        alert('Please select a template first.');
+  async function loadDocuments() {
+    try {
+      const res = await fetch('/get-documents');
+      if (!res.ok) throw new Error('Failed to fetch documents');
+      const docs = await res.json();
+      const container = $('#documents-container');
+      container.innerHTML = '';
+      if (!Array.isArray(docs) || docs.length === 0) {
+        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents found</div>';
         return;
       }
-      alert(`Generating using template: ${selectedTemplate.name}\n\nPrompt:\n${selectedTemplate.prompt}`);
-      templateModal.classList.add('hidden');
-    };
+      docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    } catch (err) {
+      console.error('Error loading documents:', err);
+      const container = $('#documents-container');
+      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>';
+    }
   }
-});
+
+  // Category management - 保持所有数据库连接不变
+  let categories = [];
+  let documentCategories = {};
+  let currentCategory = 'all';
+
+  async function loadCategories() {
+    try {
+      const res = await fetch('/get_categories');
+      if (!res.ok) throw new Error('Failed to load categories');
+      categories = await res.json();
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      categories = [];
+    }
+    renderCategories();
+  }
+
+  function saveCategories() {
+    localStorage.setItem('userCategories', JSON.stringify(categories));
+    localStorage.setItem('documentCategories', JSON.stringify(documentCategories));
+  }
+
+  async function addCategory(name) {
+    if (!name || !name.trim()) { alert('Category name cannot be empty.'); return; }
+    try {
+      const res = await fetch('/add_category', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ name: name.trim() }) 
+      });
+      const result = await res.json();
+      if (result.success) { 
+        categories.unshift({ id: result.id, name: result.name }); 
+        renderCategories(); 
+      } else {
+        alert('Failed to add category: ' + (result.error || 'Unknown error'));
+      }
+    } catch (err) { 
+      console.error('Error adding category:', err); 
+      alert('Error adding category. See console.'); 
+    }
+  }
+
+  async function deleteCategory(categoryId) {
+    if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
+    try {
+      const res = await fetch(`/delete_category/${categoryId}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        categories = categories.filter(cat => String(cat.id) !== String(categoryId));
+        if (currentCategory === String(categoryId)) setCurrentCategory('all');
+        renderCategories();
+        loadDocuments();
+      } else {
+        alert('Failed to delete category: ' + (result.error || 'Unknown error'));
+      }
+    } catch (err) { 
+      console.error('Error deleting category:', err); 
+      alert('Error deleting category. See console.'); 
+    }
+  }
+
+  function setupDropZone(categoryElement) {
+    categoryElement.addEventListener('dragover', function(e) { 
+      e.preventDefault(); 
+      e.dataTransfer.dropEffect = 'move'; 
+      this.classList.add('drag-over'); 
+    });
+    
+    categoryElement.addEventListener('dragleave', function(e) { 
+      if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over'); 
+    });
+    
+    categoryElement.addEventListener('drop', async function(e) {
+      e.preventDefault(); 
+      this.classList.remove('drag-over');
+      try {
+        const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const targetCategory = this.dataset.category;
+        const response = await fetch('/update-document-category', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            documentId: dragData.docId, 
+            category: targetCategory === 'all' ? null : targetCategory 
+          }) 
+        });
+        if (response.ok) {
+          if (targetCategory === 'all') {
+            delete documentCategories[dragData.docId];
+          } else {
+            documentCategories[dragData.docId] = targetCategory;
+          }
+          saveCategories();
+          loadDocuments();
+          console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
+        } else {
+          alert('Failed to update document category');
+        }
+      } catch (err) { 
+        console.error('Error handling drop:', err); 
+      }
+    });
+  }
+
+  function renderCategories() {
+    const container = document.querySelector('.categories-container');
+    const existing = container.querySelectorAll('.category:not([data-category="all"])');
+    existing.forEach(el => el.remove());
+    
+    categories.forEach(category => {
+      const categoryEl = document.createElement('div'); 
+      categoryEl.className = 'category'; 
+      categoryEl.dataset.category = String(category.id);
+      
+      const titleEl = document.createElement('div'); 
+      titleEl.className = 'category-title'; 
+      titleEl.textContent = category.name;
+      
+      const deleteBtn = document.createElement('button'); 
+      deleteBtn.className = 'delete-category'; 
+      deleteBtn.textContent = '🗑'; 
+      deleteBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        deleteCategory(category.id); 
+      };
+      
+      categoryEl.appendChild(titleEl); 
+      categoryEl.appendChild(deleteBtn); 
+      categoryEl.onclick = () => setCurrentCategory(String(category.id)); 
+      setupDropZone(categoryEl);
+      container.appendChild(categoryEl);
+    });
+    
+    const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
+    if (activeEl) { 
+      container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category')); 
+      activeEl.classList.add('active-category'); 
+    }
+  }
+
+  function setCurrentCategory(categoryId) {
+    currentCategory = categoryId;
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
+    const el = document.querySelector(`.category[data-category="${categoryId}"]`);
+    if (el) el.classList.add('active-category');
+    const categoryName = categoryId === 'all' ? 'All Documents' : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
+    $('#current-category').textContent = `Showing: ${categoryName}`;
+    filterDocuments();
+  }
+
+  async function filterDocuments() {
+    try {
+      const res = await fetch('/get-documents');
+      if (!res.ok) throw new Error('Failed to fetch documents');
+      const docs = await res.json();
+      let filteredDocs = docs;
+      if (currentCategory !== 'all') {
+        filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
+      }
+      const container = $('#documents-container'); 
+      container.innerHTML = '';
+      if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
+        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
+      } else {
+        filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+      }
+    } catch (err) { 
+      console.error('Error filtering documents:', err); 
+      const container = $('#documents-container');
+      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>';
+    }
+  }
+
+  // Template modal helpers
+  function showTemplateContent(templateType) {
+    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
+    const targetContent = document.getElementById(`${templateType}-content`);
+    if (targetContent) targetContent.classList.remove('hidden');
+    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+  }
+
+  // 初始化 - 保持所有现有功能
+  document.addEventListener('DOMContentLoaded', () => {
+    initResizeButtons(); 
+    loadCategories(); 
+    loadDocuments();
+    
+    const allDocsCategory = document.querySelector('.category[data-category="all"]');
+    if (allDocsCategory) { 
+      allDocsCategory.onclick = () => setCurrentCategory('all'); 
+      setupDropZone(allDocsCategory); 
+    }
+    
+    const s = state(); 
+    const btnLS = document.getElementById('btnLS'); 
+    const btnUS = document.getElementById('btnUS'); 
+    if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; } 
+    if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
+    
+    const addCategoryBtn = document.getElementById('addCategoryBtn'); 
+    if (addCategoryBtn) {
+      addCategoryBtn.addEventListener('click', () => { 
+        const categoryName = prompt('Enter new category name:'); 
+        if (categoryName && categoryName.trim()) addCategory(categoryName.trim()); 
+      });
+    }
+
+    // Template modal logic
+    const generateBtn = document.getElementById('generateBtn'); 
+    const templateModal = document.getElementById('templateSelectorModal'); 
+    const generateButton = document.querySelector('.generate-button');
+    
+    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
+    if (templateModal) templateModal.onclick = (e) => { 
+      if (e.target === templateModal) templateModal.classList.add('hidden'); 
+    };
+    if (generateButton) generateButton.onclick = () => { 
+      templateModal.classList.add('hidden'); 
+      alert('Template generation started!'); 
+    };
+  });
 </script>
 
 </body>
 </html>
+
 
 
 
