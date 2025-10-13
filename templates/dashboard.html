@@ -826,7 +826,49 @@
     if (event && event.target) event.target.classList.add('active');
   }
 
-  // 初始化 - 保持所有现有功能
+
+
+async function loadTemplates() {
+  try {
+    const res = await fetch('/get_templates');
+    if (!res.ok) throw new Error('Failed to fetch templates');
+    const templates = await res.json();
+
+    const contentArea = document.querySelector('.template-selector-modal .content-area');
+    contentArea.innerHTML = ''; // clear old hardcoded content
+
+    if (templates.length === 0) {
+      contentArea.innerHTML = '<div style="padding:20px;color:gray;">No templates found.</div>';
+      return;
+    }
+
+    // dynamically create boxes for each template
+    const container = document.createElement('div');
+    container.className = 'content-container';
+
+    templates.forEach(t => {
+      const box = document.createElement('div');
+      box.className = 'content-box';
+      box.innerHTML = `
+        <div class="content-box-title">${t.name}</div>
+        <div class="content-box-description">${t.prompt.substring(0, 100)}...</div>
+      `;
+      box.onclick = () => {
+        alert('Selected template: ' + t.name + '\\n\\nPrompt:\\n' + t.prompt);
+        // You can later replace this with logic to send the prompt to backend
+      };
+      container.appendChild(box);
+    });
+
+    contentArea.appendChild(container);
+  } catch (err) {
+    console.error('Error loading templates:', err);
+  }
+}
+
+
+
+  
   document.addEventListener('DOMContentLoaded', () => {
     initResizeButtons(); 
     loadCategories(); 
@@ -875,4 +917,5 @@
 </script>
 </body>
 </html>
+
 
