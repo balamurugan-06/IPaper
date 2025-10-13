@@ -934,10 +934,21 @@ def feedback():
     return render_template('feedback.html')
 
 
-@app.route('/get_templates', methods=['GET'])
+@app.route('/get_templates')
 def get_templates():
-    templates = db.execute("SELECT summarytemplateid, templatename, promptinstructions FROM uploadsummarytemplates ORDER BY id DESC").fetchall()
-    return jsonify([{'id': t[0], 'name': t[1], 'prompt': t[3]} for t in templates])
+    templates = db.session.execute("""
+        SELECT summarytemplateid, templatename,promptinstructions
+        FROM uploadsummarytemplates
+        ORDER BY summarytemplateid DESC
+    """).fetchall()
+
+    return jsonify([
+        {
+            'id': t.summarytemplateid,
+            'name': t.templatename,
+            'prompt': t.promptinstructions
+        } for t in templates
+    ])
 
         
 
@@ -945,6 +956,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
