@@ -857,7 +857,13 @@
     const templateModal = document.getElementById('templateSelectorModal'); 
     const generateButton = document.querySelector('.generate-button');
     
-    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
+    if (generateBtn) {
+  generateBtn.onclick = async () => {
+    await loadTemplates(); // fetch templates dynamically
+    templateModal.classList.remove('hidden');
+  };
+}
+
     if (templateModal) templateModal.onclick = (e) => { 
       if (e.target === templateModal) templateModal.classList.add('hidden'); 
     };
@@ -869,3 +875,4 @@
 </script>
 </body>
 </html>
+
