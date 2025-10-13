@@ -816,43 +816,54 @@
 
 
 
+let selectedTemplate = null;
+
 async function loadTemplates() {
   try {
     const res = await fetch('/get_templates');
-    if (!res.ok) throw new Error('Failed to fetch templates');
     const templates = await res.json();
 
-    const contentArea = document.querySelector('.template-selector-modal .content-area');
-    contentArea.innerHTML = ''; // clear old hardcoded content
+    const listContainer = document.getElementById('templateList');
+    const contentArea = document.getElementById('templateContent');
 
-    if (templates.length === 0) {
-      contentArea.innerHTML = '<div style="padding:20px;color:gray;">No templates found.</div>';
+    listContainer.innerHTML = '';
+    contentArea.innerHTML = '';
+
+    if (!templates.length) {
+      listContainer.innerHTML = '<div style="padding:10px;color:gray;">No templates found</div>';
+      contentArea.innerHTML = '<div style="padding:20px;color:gray;">No templates available.</div>';
       return;
     }
 
-    // dynamically create boxes for each template
-    const container = document.createElement('div');
-    container.className = 'content-container';
+    templates.forEach((t, index) => {
+      const item = document.createElement('div');
+      item.className = 'sidebar-item';
+      item.innerHTML = `${t.name}<div class="arrow-icon"></div>`;
 
-    templates.forEach(t => {
-      const box = document.createElement('div');
-      box.className = 'content-box';
-      box.innerHTML = `
-        <div class="content-box-title">${t.name}</div>
-        <div class="content-box-description">${t.prompt.substring(0, 100)}...</div>
-      `;
-      box.onclick = () => {
-        alert('Selected template: ' + t.name + '\\n\\nPrompt:\\n' + t.prompt);
-        // You can later replace this with logic to send the prompt to backend
+      item.onclick = () => {
+        selectedTemplate = t;
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        contentArea.innerHTML = `
+          <div class="content-container">
+            <div class="content-box">
+              <div class="content-box-title">${t.name}</div>
+              <div class="content-box-description">${t.prompt}</div>
+            </div>
+          </div>
+        `;
       };
-      container.appendChild(box);
-    });
 
-    contentArea.appendChild(container);
+      listContainer.appendChild(item);
+      // Auto select the first one
+      if (index === 0) item.click();
+    });
   } catch (err) {
-    console.error('Error loading templates:', err);
+    console.error('Error fetching templates:', err);
   }
 }
+
 
 
 
@@ -905,6 +916,7 @@ async function loadTemplates() {
 </script>
 </body>
 </html>
+
 
 
 
