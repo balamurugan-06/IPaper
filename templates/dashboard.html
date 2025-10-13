@@ -893,7 +893,15 @@ function useSelectedTemplate() {
   document.getElementById('templateModal').classList.add('hidden');
 }
 
+  window.addEventListener('click', (e) => {
+  if (e.target.classList.contains('template-selector-modal')) {
+    document.getElementById('templateModal').classList.add('hidden');
+  }
+});
+
+  
 </script>
 </body>
 </html>
+
 
