@@ -878,24 +878,12 @@
       });
     }
 
-    // Template modal logic
-    const generateBtn = document.getElementById('generateBtn'); 
-    const templateModal = document.getElementById('templateSelectorModal'); 
-    const generateButton = document.querySelector('.generate-button');
-    
-    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
-    if (templateModal) templateModal.onclick = (e) => { 
-      if (e.target === templateModal) templateModal.classList.add('hidden'); 
-    };
-    if (generateButton) generateButton.onclick = () => { 
-      templateModal.classList.add('hidden'); 
-      alert('Template generation started!'); 
-    };
-  });
+   
 </script>
 
 </body>
 </html>
+
 
 
 
