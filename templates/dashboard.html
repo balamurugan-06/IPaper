@@ -516,58 +516,25 @@
     <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
   </main>
 </div>
+
 <div id="templateSelectorModal" class="template-selector-modal hidden">
   <div class="template-selector-container">
     <div class="sidebar">
       <div class="sidebar-title">Select Template</div>
-      
-      <!-- My Templates Section -->
       <div class="sidebar-section">
-        <div class="sidebar-section-title">My Templates</div>
-        <div id="templates-sidebar-list">
-          <!-- Dynamic templates will be loaded here -->
-          <div style="padding: 8px; color: var(--muted); font-size: 12px; text-align: center;">
-            Loading templates...
-          </div>
-        </div>
+        <div class="sidebar-section-title">Recently Used</div>
       </div>
-      
-      <!-- Categories Section (if you want to group by category) -->
-      <div class="sidebar-section" id="categories-sidebar" style="display: none;">
-        <div class="sidebar-section-title">Categories</div>
-        <div id="categories-list">
-          <!-- Dynamic categories will be loaded here -->
-        </div>
-      </div>
-      
-      <!-- General Templates (Fallback) -->
       <div class="sidebar-section">
         <div class="sidebar-section-title">General</div>
         <div class="sidebar-item" onclick="showTemplateContent('meeting')">Meeting<div class="arrow-icon"></div></div>
         <div class="sidebar-item" onclick="showTemplateContent('speech')">Speech<div class="arrow-icon"></div></div>
         <div class="sidebar-item" onclick="showTemplateContent('call')">Call<div class="arrow-icon"></div></div>
+        <div class="sidebar-item">Interview<div class="arrow-icon"></div></div>
+        <div class="sidebar-item">Medical<div class="arrow-icon"></div></div>
+        <div class="sidebar-item">Sales<div class="arrow-icon"></div></div>
       </div>
     </div>
-    
     <div class="content-area">
-      <!-- My Templates Content -->
-      <div id="my-templates-content">
-        <div class="content-container" id="templates-content-container">
-          <!-- Dynamic template content will be loaded here -->
-          <div style="padding: 20px; text-align: center; color: var(--muted);">
-            Loading your templates...
-          </div>
-        </div>
-      </div>
-      
-      <!-- Category-specific Content -->
-      <div id="category-templates-content" class="hidden">
-        <div class="content-container" id="category-templates-container">
-          <!-- Category-specific templates will be loaded here -->
-        </div>
-      </div>
-      
-      <!-- Keep existing hardcoded templates as fallback -->
       <div id="meeting-content" class="hidden">
         <div class="content-container">
           <div class="content-box"><div class="content-box-title">Meeting Summary</div><div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div><div class="content-box-footer"><span>Last used: 2 days ago</span></div></div>
@@ -577,7 +544,7 @@
       <div id="speech-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Speech Summary</div><div class="content-box-description">Captures main arguments and key quotes from speeches.</div><div class="content-box-footer"><span>Last used: 3 days ago</span></div></div></div></div>
       <div id="call-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Call Transcript Summary</div><div class="content-box-description">Summarizes phone call transcripts with key points.</div><div class="content-box-footer"><span>Last used: Yesterday</span></div></div><div class="content-box"><div class="content-box-title">Customer Support Call</div><div class="content-box-description">Specialized template for customer support calls.</div><div class="content-box-footer"><span>Last used: 5 days ago</span></div></div></div></div>
     </div>
-    <button class="generate-button" id="finalGenerateBtn">Generate now</button>
+    <button class="generate-button">Generate now</button>
   </div>
 </div>
 
@@ -693,7 +660,11 @@
     renderCategories();
   }
 
-  
+  function saveCategories() {
+    localStorage.setItem('userCategories', JSON.stringify(categories));
+    localStorage.setItem('documentCategories', JSON.stringify(documentCategories));
+  }
+
   async function addCategory(name) {
     if (!name || !name.trim()) { alert('Category name cannot be empty.'); return; }
     try {
@@ -846,7 +817,14 @@
     }
   }
 
-  
+  // Template modal helpers
+  function showTemplateContent(templateType) {
+    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
+    const targetContent = document.getElementById(`${templateType}-content`);
+    if (targetContent) targetContent.classList.remove('hidden');
+    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+  }
 
   // 初始化 - 保持所有现有功能
   document.addEventListener('DOMContentLoaded', () => {
@@ -874,285 +852,20 @@
       });
     }
 
-
-    // Template management functions
-let userTemplates = [];
-let selectedTemplateId = null;
-
-async function loadTemplates() {
-    try {
-        const res = await fetch('/get_templates');
-        if (!res.ok) throw new Error('Failed to fetch templates');
-        const data = await res.json();
-        userTemplates = data.templates || [];
-        renderTemplates();
-        renderCategories();
-    } catch (err) {
-        console.error('Error loading templates:', err);
-        userTemplates = [];
-        document.getElementById('templates-sidebar-list').innerHTML = 
-            '<div style="padding: 8px; color: var(--muted); font-size: 12px; text-align: center;">Failed to load templates</div>';
-    }
-}
-
-function renderTemplates() {
-    const sidebarList = document.getElementById('templates-sidebar-list');
-    const contentContainer = document.getElementById('templates-content-container');
-    
-    // Clear existing content
-    sidebarList.innerHTML = '';
-    contentContainer.innerHTML = '';
-    
-    if (userTemplates.length === 0) {
-        sidebarList.innerHTML = 
-            '<div style="padding: 8px; color: var(--muted); font-size: 12px; text-align: center;">No templates created yet</div>';
-        contentContainer.innerHTML = 
-            '<div style="padding: 20px; text-align: center; color: var(--muted);">Create your first template in Template Management</div>';
-        return;
-    }
-    
-    // Render "All Templates" sidebar item
-    const allTemplatesItem = document.createElement('div');
-    allTemplatesItem.className = 'sidebar-item active';
-    allTemplatesItem.innerHTML = `All Templates<div class="arrow-icon"></div>`;
-    allTemplatesItem.onclick = () => showAllTemplates();
-    sidebarList.appendChild(allTemplatesItem);
-    
-    // Render individual template sidebar items
-    userTemplates.forEach(template => {
-        const sidebarItem = document.createElement('div');
-        sidebarItem.className = 'sidebar-item';
-        sidebarItem.innerHTML = `${template.name}<div class="arrow-icon"></div>`;
-        sidebarItem.onclick = () => showUserTemplate(template.id);
-        sidebarList.appendChild(sidebarItem);
-    });
-    
-    // Render all templates in content area
-    renderAllTemplates();
-}
-
-function renderCategories() {
-    const categoriesContainer = document.getElementById('categories-list');
-    const categoriesSection = document.getElementById('categories-sidebar');
-    
-    // Extract unique categories
-    const categories = [...new Set(userTemplates.map(t => t.category).filter(Boolean))];
-    
-    if (categories.length === 0) {
-        categoriesSection.style.display = 'none';
-        return;
-    }
-    
-    categoriesSection.style.display = 'block';
-    categoriesContainer.innerHTML = '';
-    
-    categories.forEach(category => {
-        const categoryItem = document.createElement('div');
-        categoryItem.className = 'sidebar-item';
-        categoryItem.innerHTML = `${category}<div class="arrow-icon"></div>`;
-        categoryItem.onclick = () => showCategoryTemplates(category);
-        categoriesContainer.appendChild(categoryItem);
-    });
-}
-
-function renderAllTemplates() {
-    const contentContainer = document.getElementById('templates-content-container');
-    contentContainer.innerHTML = '';
-    
-    userTemplates.forEach(template => {
-        const contentBox = createTemplateBox(template);
-        contentContainer.appendChild(contentBox);
-    });
-}
-
-function createTemplateBox(template) {
-    const contentBox = document.createElement('div');
-    contentBox.className = 'content-box';
-    contentBox.dataset.templateId = template.id;
-    contentBox.onclick = () => selectTemplate(template.id);
-    
-    const categoryBadge = template.category ? 
-        `<div style="font-size: 10px; color: var(--brand); margin-bottom: 5px;">${template.category}</div>` : '';
-    
-    contentBox.innerHTML = `
-        ${categoryBadge}
-        <div class="content-box-title">${template.name}</div>
-        <div class="content-box-description">${template.prompt.substring(0, 120)}${template.prompt.length > 120 ? '...' : ''}</div>
-        <div class="content-box-footer">
-            <span>Custom Template</span>
-        </div>
-    `;
-    
-    return contentBox;
-}
-
-function showAllTemplates() {
-    // Hide all content areas
-    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
-    
-    // Show my templates content
-    const myTemplatesContent = document.getElementById('my-templates-content');
-    myTemplatesContent.classList.remove('hidden');
-    
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    // Render all templates
-    renderAllTemplates();
-}
-
-function showUserTemplate(templateId) {
-    // Hide all content areas
-    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
-    
-    // Show my templates content
-    const myTemplatesContent = document.getElementById('my-templates-content');
-    myTemplatesContent.classList.remove('hidden');
-    
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    // Filter to show only this template
-    const contentContainer = document.getElementById('templates-content-container');
-    contentContainer.innerHTML = '';
-    
-    const template = userTemplates.find(t => t.id === templateId);
-    if (template) {
-        const contentBox = createTemplateBox(template);
-        contentContainer.appendChild(contentBox);
-        selectTemplate(templateId);
-    }
-}
-
-function showCategoryTemplates(category) {
-    // Hide all content areas
-    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
-    
-    // Show category templates content
-    const categoryContent = document.getElementById('category-templates-content');
-    categoryContent.classList.remove('hidden');
-    
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    // Render category templates
-    const categoryContainer = document.getElementById('category-templates-container');
-    categoryContainer.innerHTML = '';
-    
-    const categoryTemplates = userTemplates.filter(t => t.category === category);
-    categoryTemplates.forEach(template => {
-        const contentBox = createTemplateBox(template);
-        categoryContainer.appendChild(contentBox);
-    });
-}
-
-function selectTemplate(templateId) {
-    selectedTemplateId = templateId;
-    
-    // Remove selection from all templates
-    document.querySelectorAll('.content-box').forEach(box => {
-        box.style.border = '1px solid #d6eaf8';
-        box.style.background = '#f8fbff';
-    });
-    
-    // Highlight selected template
-    const selectedBox = document.querySelector(`.content-box[data-template-id="${templateId}"]`);
-    if (selectedBox) {
-        selectedBox.style.border = '2px solid var(--brand)';
-        selectedBox.style.background = '#e8f4f8';
-    }
-}
-
-async function generateWithTemplate() {
-    if (!selectedTemplateId) {
-        alert('Please select a template first');
-        return;
-    }
-    
-    const template = userTemplates.find(t => t.id === selectedTemplateId);
-    if (!template) {
-        alert('Selected template not found');
-        return;
-    }
-    
-    // Close modal
-    document.getElementById('templateSelectorModal').classList.add('hidden');
-    
-    // Show loading state
-    console.log('Generating with template:', template);
-    
-    // Send to backend for generation
-    try {
-        const response = await fetch('/generate-with-template', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                templateId: selectedTemplateId,
-                templateName: template.name,
-                templatePrompt: template.prompt
-            })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            alert(`Generation started with template: ${template.name}`);
-            // Handle the generation result as needed
-            console.log('Generation result:', result);
-        } else {
-            alert('Generation failed. Please try again.');
-        }
-    } catch (error) {
-        console.error('Generation error:', error);
-        alert('Error during generation. Please check your connection.');
-    }
-}
-
-    document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons(); 
-    loadCategories(); 
-    loadDocuments();
-    loadTemplates(); // Load templates on page load
-    
-    // ... existing code ...
-    
-    // Update template modal logic
+    // Template modal logic
     const generateBtn = document.getElementById('generateBtn'); 
     const templateModal = document.getElementById('templateSelectorModal'); 
-    const generateButton = document.getElementById('finalGenerateBtn');
+    const generateButton = document.querySelector('.generate-button');
     
-    if (generateBtn) generateBtn.onclick = () => {
-        templateModal.classList.remove('hidden');
-        // Show all templates by default
-        showAllTemplates();
-    };
-    
+    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
     if (templateModal) templateModal.onclick = (e) => { 
-        if (e.target === templateModal) templateModal.classList.add('hidden'); 
+      if (e.target === templateModal) templateModal.classList.add('hidden'); 
     };
-    
-    if (generateButton) generateButton.onclick = generateWithTemplate;
-});
-   
+    if (generateButton) generateButton.onclick = () => { 
+      templateModal.classList.add('hidden'); 
+      alert('Template generation started!'); 
+    };
+  });
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
