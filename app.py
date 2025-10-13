@@ -934,45 +934,18 @@ def feedback():
     return render_template('feedback.html')
 
 
-
-        
-@app.route('/get_templates')
+@app.route('/get_templates', methods=['GET'])
 def get_templates():
-    try:
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'error': 'Not authenticated'}), 401
-            
-        cursor = mysql.connection.cursor()
-        cursor.execute("""
-            SELECT summarytemplateid, templatename, promptinstructions 
-            FROM uploadsummarytemplates 
-            WHERE CreatedBy = %s
-        """, (user_id,))
-        templates = cursor.fetchall()
-        cursor.close()
+    templates = db.execute("SELECT summarytemplateid, templatename, promptinstructions FROM uploadsummarytemplates ORDER BY id DESC").fetchall()
+    return jsonify([{'id': t[0], 'name': t[1], 'prompt': t[3]} for t in templates])
+
         
-        # Convert to list of dictionaries
-        template_list = []
-        for template in templates:
-            template_list.append({
-                'id': template[0],
-                'name': template[1],
-                'category': template[2],
-                'prompt': template[3]
-            })
-            
-        return jsonify(templates=template_list)
-    except Exception as e:
-        print(f"Error fetching templates: {e}")
-        return jsonify({'error': 'Failed to fetch templates'}), 500
-
-
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
