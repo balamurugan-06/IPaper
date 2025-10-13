@@ -517,26 +517,27 @@
   </main>
 </div>
 
+<!-- Template Selector Modal -->
 <div id="templateSelectorModal" class="template-selector-modal hidden">
   <div class="template-selector-container">
+
+    <!-- Sidebar (Template List) -->
     <div class="sidebar">
       <div class="sidebar-title">Select Template</div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Recently Used</div>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section">
-  <div class="sidebar-section-title">Available Templates</div>
-  <div id="templateList"></div>
-</div>
-</div>
-<div class="content-area" id="templateContent"></div>
 
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Available Templates</div>
+        <div id="templateList"></div>
       </div>
     </div>
-    <div class="content-area">
-      
-    <button class="generate-button">Generate now</button>
+
+    <!-- Right Content Area -->
+    <div class="content-area" id="templateContent">
+      <div style="padding:20px;color:gray;">Select a template from the left panel to view details.</div>
+    </div>
+
+    <!-- Generate Button -->
+    <button class="generate-button" id="confirmGenerateBtn">Generate now</button>
   </div>
 </div>
 
@@ -909,6 +910,7 @@ async function loadTemplates() {
 </script>
 </body>
 </html>
+
 
 
 
