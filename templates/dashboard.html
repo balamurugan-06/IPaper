@@ -525,13 +525,13 @@
         <div class="sidebar-section-title">Recently Used</div>
       </div>
       <div class="sidebar-section">
-        <div class="sidebar-section-title">General</div>
-        <div class="sidebar-item" onclick="showTemplateContent('meeting')">Meeting<div class="arrow-icon"></div></div>
-        <div class="sidebar-item" onclick="showTemplateContent('speech')">Speech<div class="arrow-icon"></div></div>
-        <div class="sidebar-item" onclick="showTemplateContent('call')">Call<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Interview<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Medical<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Sales<div class="arrow-icon"></div></div>
+        <div class="sidebar-section">
+  <div class="sidebar-section-title">Available Templates</div>
+  <div id="templateList"></div>
+</div>
+</div>
+<div class="content-area" id="templateContent"></div>
+
       </div>
     </div>
     <div class="content-area">
@@ -909,6 +909,7 @@ async function loadTemplates() {
 </script>
 </body>
 </html>
+
 
 
 
