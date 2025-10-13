@@ -938,7 +938,7 @@ def feedback():
 def get_templates():
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id, name, prompt FROM UserTemplate ORDER BY id DESC")
+        cur.execute("SELECT summarytemplateid, templatename, promptinstructions FROM uploadsummarytemplates ORDER BY id DESC")
         templates = cur.fetchall()
         cur.close()
         return jsonify([
@@ -954,6 +954,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
