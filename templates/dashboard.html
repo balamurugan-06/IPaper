@@ -517,36 +517,19 @@
   </main>
 </div>
 
-<div id="templateSelectorModal" class="template-selector-modal hidden">
+<div id="templateModal" class="template-selector-modal hidden">
   <div class="template-selector-container">
     <div class="sidebar">
-      <div class="sidebar-title">Select Template</div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Recently Used</div>
-      </div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">General</div>
-        <div class="sidebar-item" onclick="showTemplateContent('meeting')">Meeting<div class="arrow-icon"></div></div>
-        <div class="sidebar-item" onclick="showTemplateContent('speech')">Speech<div class="arrow-icon"></div></div>
-        <div class="sidebar-item" onclick="showTemplateContent('call')">Call<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Interview<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Medical<div class="arrow-icon"></div></div>
-        <div class="sidebar-item">Sales<div class="arrow-icon"></div></div>
-      </div>
+      <div class="sidebar-title">Templates</div>
+      <div id="templateList" class="sidebar-section"></div>
     </div>
     <div class="content-area">
-      <div id="meeting-content" class="hidden">
-        <div class="content-container">
-          <div class="content-box"><div class="content-box-title">Meeting Summary</div><div class="content-box-description">Summarizes key points, decisions, and action items from meetings.</div><div class="content-box-footer"><span>Last used: 2 days ago</span></div></div>
-          <div class="content-box"><div class="content-box-title">Detailed Meeting Notes</div><div class="content-box-description">Comprehensive template for capturing all meeting details.</div><div class="content-box-footer"><span>Last used: 1 week ago</span></div></div>
-        </div>
-      </div>
-      <div id="speech-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Speech Summary</div><div class="content-box-description">Captures main arguments and key quotes from speeches.</div><div class="content-box-footer"><span>Last used: 3 days ago</span></div></div></div></div>
-      <div id="call-content" class="hidden"><div class="content-container"><div class="content-box"><div class="content-box-title">Call Transcript Summary</div><div class="content-box-description">Summarizes phone call transcripts with key points.</div><div class="content-box-footer"><span>Last used: Yesterday</span></div></div><div class="content-box"><div class="content-box-title">Customer Support Call</div><div class="content-box-description">Specialized template for customer support calls.</div><div class="content-box-footer"><span>Last used: 5 days ago</span></div></div></div></div>
+      <div id="templateContent" class="content-container"></div>
+      <button class="generate-button" onclick="useSelectedTemplate()">Use Template</button>
     </div>
-    <button class="generate-button">Generate now</button>
   </div>
 </div>
+
 
 <script>
   const $ = selector => document.querySelector(selector);
@@ -866,6 +849,51 @@
       alert('Template generation started!'); 
     };
   });
+
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+  const modal = document.getElementById('templateModal');
+  modal.classList.remove('hidden');
+
+  try {
+    const res = await fetch('/get_templates');
+    const templates = await res.json();
+    const list = document.getElementById('templateList');
+    const content = document.getElementById('templateContent');
+    list.innerHTML = '';
+    content.innerHTML = '';
+
+    templates.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'sidebar-item';
+      item.textContent = t.name;
+      item.onclick = () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        content.innerHTML = `
+          <div class="content-box">
+            <div class="content-box-title">${t.name}</div>
+            <div class="content-box-description">${t.prompt}</div>
+          </div>
+        `;
+        content.dataset.selectedTemplateId = t.id;
+      };
+      list.appendChild(item);
+    });
+  } catch (err) {
+    console.error('Failed to load templates:', err);
+  }
+});
+
+function useSelectedTemplate() {
+  const selectedId = document.getElementById('templateContent').dataset.selectedTemplateId;
+  if (!selectedId) return alert('Please select a template');
+  // Proceed with generation logic using selectedId
+  console.log('Using template ID:', selectedId);
+  document.getElementById('templateModal').classList.add('hidden');
+}
+
 </script>
 </body>
 </html>
+
