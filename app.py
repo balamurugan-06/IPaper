@@ -936,19 +936,31 @@ def feedback():
 
 @app.route('/get_templates')
 def get_templates():
-    templates = db.session.execute("""
-        SELECT summarytemplateid, templatename,promptinstructions
-        FROM uploadsummarytemplates
-        ORDER BY summarytemplateid DESC
-    """).fetchall()
+    if 'user_id' not in session:
+        return redirect('/login')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT summaryTemplateid, templatename, promptinstructions
+            FROM uploadsummarytemplates
+            ORDER BY summarytemplateid DESC
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
 
-    return jsonify([
-        {
-            'id': t.summarytemplateid,
-            'name': t.templatename,
-            'prompt': t.promptinstructions
-        } for t in templates
-    ])
+        templates = [
+            {
+                'id': row[0],
+                'name': row[1],
+                'prompt': row[3]
+            } for row in rows
+        ]
+        return jsonify(templates)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
         
 
@@ -956,6 +968,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
