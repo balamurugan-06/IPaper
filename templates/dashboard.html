@@ -693,11 +693,7 @@
     renderCategories();
   }
 
-  function saveCategories() {
-    localStorage.setItem('userCategories', JSON.stringify(categories));
-    localStorage.setItem('documentCategories', JSON.stringify(documentCategories));
-  }
-
+  
   async function addCategory(name) {
     if (!name || !name.trim()) { alert('Category name cannot be empty.'); return; }
     try {
@@ -883,6 +879,7 @@
 
 </body>
 </html>
+
 
 
 
