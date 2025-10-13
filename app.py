@@ -934,11 +934,27 @@ def feedback():
     return render_template('feedback.html')
 
 
+@app.route('/get_templates', methods=['GET'])
+def get_templates():
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, name, prompt FROM UserTemplate ORDER BY id DESC")
+        templates = cur.fetchall()
+        cur.close()
+        return jsonify([
+            {"id": t[0], "name": t[1], "prompt": t[2]} for t in templates
+        ])
+    except Exception as e:
+        print("Error loading templates:", e)
+        return jsonify([])
+
+
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
