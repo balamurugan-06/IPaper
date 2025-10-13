@@ -898,24 +898,36 @@ async function loadTemplates() {
     const templateModal = document.getElementById('templateSelectorModal'); 
     const generateButton = document.querySelector('.generate-button');
     
-    if (generateBtn) {
+   if (generateBtn) {
   generateBtn.onclick = async () => {
-    await loadTemplates(); // fetch templates dynamically
+    await loadTemplates();
     templateModal.classList.remove('hidden');
   };
 }
 
-    if (templateModal) templateModal.onclick = (e) => { 
-      if (e.target === templateModal) templateModal.classList.add('hidden'); 
-    };
-    if (generateButton) generateButton.onclick = () => { 
-      templateModal.classList.add('hidden'); 
-      alert('Template generation started!'); 
-    };
-  });
+if (templateModal) {
+  templateModal.onclick = (e) => {
+    if (e.target === templateModal) templateModal.classList.add('hidden');
+  };
+}
+
+const confirmGenerateBtn = document.getElementById('confirmGenerateBtn');
+if (confirmGenerateBtn) {
+  confirmGenerateBtn.onclick = () => {
+    if (!selectedTemplate) {
+      alert('Please select a template first.');
+      return;
+    }
+    alert(`Generating using template: ${selectedTemplate.name}\n\nPrompt:\n${selectedTemplate.prompt}`);
+    templateModal.classList.add('hidden');
+  };
+}
+
+    
 </script>
 </body>
 </html>
+
 
 
 
