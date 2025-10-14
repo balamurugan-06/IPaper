@@ -899,9 +899,81 @@ function useSelectedTemplate() {
   }
 });
 
+
+  let selectedDocumentId = null;
+
+// Allow selecting only one document for summarization
+function createDocumentItem(doc) {
+  const div = document.createElement('div');
+  div.className = 'document-item';
+  div.textContent = doc.filename || doc.name || 'untitled';
+  div.dataset.docId = doc.id;
+
+  div.onclick = (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.document-item').forEach(d => d.classList.remove('active-category'));
+    div.classList.add('active-category');
+    selectedDocumentId = doc.id;
+  };
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'document-delete-btn';
+  delBtn.textContent = '🗑';
+  delBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (confirm(`Delete "${doc.filename}"?`)) {
+      await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+      await loadDocuments();
+    }
+  };
+
+  div.appendChild(delBtn);
+  return div;
+}
+
+// Extend useSelectedTemplate to summarize document
+async function useSelectedTemplate() {
+  const selectedId = document.getElementById('templateContent').dataset.selectedTemplateId;
+  if (!selectedId) return alert('Please select a template');
+  if (!selectedDocumentId) return alert('Please select one document from the list before generating.');
+
+  try {
+    const resT = await fetch('/get_templates');
+    const templates = await resT.json();
+    const chosen = templates.find(t => t.id == selectedId);
+    if (!chosen) return alert('Template not found');
+
+    const response = await fetch('/summarize_document', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        document_id: selectedDocumentId,
+        prompt: chosen.prompt
+      })
+    });
+
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error || 'Unknown error');
+
+    document.getElementById('templateModal').classList.add('hidden');
+
+    // Display the summary nicely in the dashboard
+    const main = document.querySelector('.main');
+    const preview = document.createElement('div');
+    preview.className = 'document-preview';
+    preview.innerHTML = `<h2>Summary for ${data.filename}</h2><p>${data.summary.replace(/\n/g, '<br>')}</p>`;
+    main.appendChild(preview);
+
+  } catch (err) {
+    alert('Error summarizing: ' + err.message);
+    console.error(err);
+  }
+}
+
   
 </script>
 </body>
 </html>
+
 
 
