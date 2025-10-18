@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feedback</title>
+  <title>Feedback Form</title>
   <style>
     :root {
       --primary: #2c5aa0;
@@ -92,7 +92,6 @@
       justify-content: center;
       gap: 12px;
       margin: 15px 0;
-      flex-direction: row-reverse;
     }
     
     .rating input { 
@@ -103,13 +102,22 @@
       font-size: 32px;
       color: #e0e0e0;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, transform 0.1s ease;
+    }
+    
+
+    .rating label:hover,
+    .rating label:hover ~ label {
+      color: #e0e0e0; 
     }
     
     .rating input:checked ~ label,
-    .rating label:hover,
-    .rating label:hover ~ label {
+    .rating:hover label {
       color: gold;
+    }
+    
+    .rating label:hover {
+      transform: scale(1.2);
     }
     
     .rating-value {
@@ -150,6 +158,14 @@
       color: var(--text-light);
       font-size: 14px;
       margin-top: 5px;
+    }
+    
+    .rating-feedback {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--text-light);
+      min-height: 20px;
     }
     
     @media (max-width: 600px) {
@@ -203,15 +219,19 @@
       <div class="form-group">
         <label>Rating</label>
         <div class="rating">
-          <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
-          <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
-          <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
-          <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
-          <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
-          
-          
+          <input type="radio" id="star1" name="rating" value="1">
+          <label for="star1">★</label>
+          <input type="radio" id="star2" name="rating" value="2">
+          <label for="star2">★</label>
+          <input type="radio" id="star3" name="rating" value="3">
+          <label for="star3">★</label>
+          <input type="radio" id="star4" name="rating" value="4">
+          <label for="star4">★</label>
+          <input type="radio" id="star5" name="rating" value="5">
+          <label for="star5">★</label>
         </div>
         <div class="rating-value" id="ratingValue">0/5</div>
+        <div class="rating-feedback" id="ratingFeedback"></div>
       </div>
       
       <button type="submit">Submit</button>
@@ -221,14 +241,57 @@
   <script>
     const stars = document.querySelectorAll(".rating input");
     const ratingValue = document.getElementById("ratingValue");
+    const ratingFeedback = document.getElementById("ratingFeedback");
     const feedbackText = document.getElementById("feedback_text");
     const charCount = document.getElementById("charCount");
 
-    // Rating functionality
-    stars.forEach(star => {
-      star.addEventListener("change", () => {
-        ratingValue.textContent = star.value + "/5";
+    let currentRating = 0;
+
+
+    function updateStars(rating) {
+      stars.forEach((star, index) => {
+        const label = document.querySelector(`label[for="${star.id}"]`);
+        if (index < rating) {
+          label.style.color = "gold";
+        } else {
+          label.style.color = "#e0e0e0";
+        }
       });
+    }
+
+
+    function updateRatingText(rating) {
+      ratingValue.textContent = rating + "/5";
+      
+      const feedbackTexts = {
+        1: "Poor - We'll work hard to improve",
+        2: "Fair - We appreciate your honest feedback",
+        3: "Good - Thank you for your feedback",
+        4: "Very Good - We're glad you liked it",
+        5: "Excellent - We're thrilled you loved it!"
+      };
+      
+      ratingFeedback.textContent = feedbackTexts[rating] || "";
+    }
+
+
+    stars.forEach(star => {
+      star.addEventListener("click", (e) => {
+        const value = parseInt(star.value);
+        currentRating = value;
+        updateStars(value);
+        updateRatingText(value);
+      });
+
+
+      star.addEventListener("mouseover", () => {
+        const hoverValue = parseInt(star.value);
+        updateStars(hoverValue);
+      });
+    });
+
+    document.querySelector('.rating').addEventListener('mouseleave', () => {
+      updateStars(currentRating);
     });
 
     // Character count functionality
@@ -238,6 +301,10 @@
 
     // Initialize character count
     charCount.textContent = feedbackText.value.length;
+
+
+    updateStars(0);
+    updateRatingText(0);
   </script>
 </body>
 </html>
