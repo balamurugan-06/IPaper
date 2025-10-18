@@ -28,24 +28,26 @@
             background-color: var(--background);
             color: var(--text);
             line-height: 1.6;
-            padding: 40px 20px;
+            padding: 10px 20px;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding-top: 0;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 15px;
+            padding-top: 0;
         }
         
         h1 {
             font-size: 32px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 15px;
+            margin-bottom: 2px;
         }
         
         .subtitle {
@@ -59,13 +61,13 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 30px;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
         
         .plan-card {
             background-color: var(--card);
             border-radius: 12px;
-            padding: 40px 30px;
+            padding: 5px 15px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             transition: all 0.3s ease;
@@ -79,15 +81,15 @@
         }
         
         .plan-header {
-            margin-bottom: 25px;
+            margin-bottom: 0px;
             text-align: center;
         }
         
         .plan-title {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .plan-price {
@@ -110,14 +112,14 @@
         }
         
         .features-list {
-            margin-bottom: 25px;
+            margin-bottom: 0px;
             flex-grow: 1;
         }
         
         .feature-item {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 5px;
         }
         
         .feature-icon {
@@ -140,8 +142,8 @@
         .limits-section {
             background-color: #f8f9fa;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            padding: 2px;
+            margin: 5px 0;
         }
         
         .limits-title {
@@ -210,10 +212,10 @@
         .security-section {
             background-color: var(--card);
             border-radius: 12px;
-            padding: 30px;
+            padding: 15px;
             box-shadow: var(--shadow);
             border-top: 4px solid var(--primary);
-            margin-top: 40px;
+            margin-top: 20px;
         }
         
         .security-title {
@@ -424,7 +426,6 @@
             document.body.style.overflow = 'auto';
         }
         
-        // 格式化信用卡号
         document.addEventListener('DOMContentLoaded', function() {
             const cardNumberInput = document.getElementById('card_number');
             if (cardNumberInput) {
@@ -446,7 +447,6 @@
                 });
             }
             
-            // 格式化过期日期
             const expiryInput = document.getElementById('expiry');
             if (expiryInput) {
                 expiryInput.addEventListener('input', function(e) {
@@ -568,61 +568,60 @@
         </div>
     </div>
 
-    <!-- 付款弹窗 -->
     <div class="popup-overlay" id="popup-overlay">
         <div class="popup-content">
             <button class="close-btn" onclick="closePopup()">&times;</button>
             <form method="POST" action="/payment_process" class="payment-form">
                 <input type="hidden" name="selected_plan" id="selected_plan">
-                <h3>Enter Payment Details</h3>
+                <h3 style="font-size: 18px; margin-bottom: 15px;">Enter Payment Details</h3>
 
-                <div class="total-display" id="total-amount">Total: $10/ Month - Professional Plan</div>
+                <div class="total-display" id="total-amount" style="font-size: 14px; padding: 10px; margin-bottom: 15px;">Total: $10/ Month - Professional Plan</div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="first_name">First name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="Jane" required>
+                        <label for="first_name" style="font-size: 11px; margin: 8px 0 4px;">First name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="Jane" required style="padding: 8px; font-size: 13px;">
                     </div>
                     <div class="form-group">
-                        <label for="last_name">Last name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="Doe" required>
+                        <label for="last_name" style="font-size: 11px; margin: 8px 0 4px;">Last name</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="Doe" required style="padding: 8px; font-size: 13px;">
                     </div>
                 </div>
 
                 <div class="form-group card-icons-wrapper">
-                    <label for="card_number">Card number</label>
-                    <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required maxlength="19">
+                    <label for="card_number" style="font-size: 11px; margin: 8px 0 4px;">Card number</label>
+                    <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required maxlength="19" style="padding: 8px; font-size: 13px;">
                     <div class="card-icons-right">
-                        <img src="https://img.icons8.com/color/48/visa.png" alt="visa">
-                        <img src="https://img.icons8.com/color/48/mastercard.png" alt="mastercard">
-                        <img src="https://img.icons8.com/color/48/amex.png" alt="amex">
+                        <img src="https://img.icons8.com/color/48/visa.png" alt="visa" style="height: 16px;">
+                        <img src="https://img.icons8.com/color/48/mastercard.png" alt="mastercard" style="height: 16px;">
+                        <img src="https://img.icons8.com/color/48/amex.png" alt="amex" style="height: 16px;">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="expiry">MM/YY</label>
-                        <input type="text" id="expiry" name="card_expiry" placeholder="MM/YY" required maxlength="5">
+                        <label for="expiry" style="font-size: 11px; margin: 8px 0 4px;">MM/YY</label>
+                        <input type="text" id="expiry" name="card_expiry" placeholder="MM/YY" required maxlength="5" style="padding: 8px; font-size: 13px;">
                     </div>
                     <div class="form-group card-icons-wrapper">
-                        <label for="cvv">CVV</label>
-                        <input type="number" id="cvv" name="card_cvv" placeholder="123" required maxlength="3">
+                        <label for="cvv" style="font-size: 11px; margin: 8px 0 4px;">CVV</label>
+                        <input type="number" id="cvv" name="card_cvv" placeholder="123" required maxlength="3" style="padding: 8px; font-size: 13px;">
                         <div class="card-icons-right">
-                            <img src="https://img.icons8.com/ios-filled/50/lock-2.png" alt="cvc">
+                            <img src="https://img.icons8.com/ios-filled/50/lock-2.png" alt="cvc" style="height: 16px;">
                         </div>
                     </div>
                 </div>
 
-                <div class="secure-checkout">
+                <div class="secure-checkout" style="margin: 12px 0; font-size: 11px;">
                     <i class="fas fa-lock"></i>
                     <span>Secure checkout - Encrypted</span>
                 </div>
 
-                <div class="terms-agreement">
+                <div class="terms-agreement" style="font-size: 11px; margin: 10px 0 12px;">
                     By paying, you agree to the <a href="#">Terms</a>.
                 </div>
 
-                <button class="btn btn-primary" type="submit" style="width: 100%;">Submit Payment</button>
+                <button class="btn btn-primary" type="submit" style="width: 100%; padding: 10px; font-size: 14px;">Submit Payment</button>
             </form>
         </div>
     </div>
