@@ -28,7 +28,7 @@
     }
     *{box-sizing:border-box; margin:0; padding:0;}
     html,body{height:100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;}
-    body{color:var(--text);background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);font-size: 14px;line-height: 1.6;-webkit-font-smoothing: antialiased;}
+    body{color:var(--text);background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);font-size: 14px;line-height: 1.6;-webkit-font-smoothing: antialiased;}
     .app{height:100vh;display:grid;grid-template-columns:var(--ls-w) var(--bar-w) var(--us-w) var(--bar-w) 1fr;transition:grid-template-columns .3s cubic-bezier(0.4, 0, 0.2, 1);}
     .collapse-ls{grid-template-columns:0 var(--bar-w) var(--us-w) var(--bar-w) 1fr;}
     .collapse-us{grid-template-columns:var(--ls-w) var(--bar-w) 0 var(--bar-w) 1fr;}
@@ -47,10 +47,15 @@
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
     .resizer:hover::after{background: var(--brand);}
 
-    .topbar{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
-    .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:20px;transition: all 0.3s ease;}    
-    input[type="file"]{width:100%;margin:12px 0;padding: 10px;border: 1px solid var(--border);border-radius: 8px;background: white;font-size: 13px;cursor: pointer;}    
-    input[type="file"]::file-selector-button{background: var(--brand);color: white;border: none;padding: 8px 16px;border-radius: 6px;cursor: pointer;font-weight: 500;margin-right: 12px;transition: all 0.2s ease;}    
+    .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
+    .user-info {display: flex;gap: 12px;align-items: center;}
+    .topbar-actions {display: flex;gap: 8px;margin-top: 25px;} /* 增加上边距，使按钮下移 */
+    
+    /* 调整上传区域尺寸 */
+    .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:16px;transition: all 0.3s ease;margin-bottom: 16px;}    
+    input[type="file"]{width:100%;margin:8px 0;padding: 8px;border: 1px solid var(--border);border-radius: 6px;background: white;font-size: 12px;cursor: pointer;}    
+    input[type="file"]::file-selector-button{background: var(--brand);color: white;border: none;padding: 6px 12px;border-radius: 4px;cursor: pointer;font-weight: 500;margin-right: 8px;transition: all 0.2s ease;font-size: 11px;}    
+    
     .logout{display:block;margin-top:16px;color:var(--danger);text-decoration:none;font-size: 13px;font-weight: 500;padding: 8px 12px;border-radius: 6px;transition: all 0.2s ease;}    
     .document-item {position: relative;padding: 12px 32px 12px 16px;margin: 6px 0;background: white;border-radius: 8px;cursor: grab;border: 1px solid var(--border);transition: all 0.2s ease;font-size: 13px;font-weight: 500;}    
     .document-item:hover {background: var(--hover);transform: translateX(4px);box-shadow: var(--shadow-sm);border-color: var(--brand);}    
@@ -66,6 +71,7 @@
     .category:hover .delete-category {opacity: 1;}    
     .action-btn {background: var(--brand);color: white;border: none;border-radius: 8px;padding: 10px 20px;cursor: pointer;font-weight: 600;margin-left: 8px;transition: all 0.2s ease;font-size: 13px;box-shadow: var(--shadow-sm);}    
     .action-btn.secondary {background: var(--success);}    
+    .action-btn.tertiary {background: var(--accent);} /* 新增Foreigner按钮样式 */
     .template-selector-modal {position: fixed;top: 0;left: 0;right: 0;bottom: 0;background: rgba(0,0,0,0.6);z-index: 1001;display: flex;justify-content: center;align-items: center;backdrop-filter: blur(4px);}    
     .template-selector-container {width: 75%;height: 75%;max-width: 900px;max-height: 650px;background: white;border-radius: 16px;display: flex;position: relative;box-shadow: var(--shadow-lg);overflow: hidden;}    
     .hidden {display: none;}    
@@ -454,6 +460,16 @@
       color: var(--accent);
       margin-bottom: 5px;
     }
+    /* 固定右上角 logo 样式 */
+    .top-right-logo {
+     position: fixed;
+     top: 0px;
+     right: 20px;
+     width: 80px;          /* logo 大小可自行调整 */
+     height: auto;
+     z-index: 1000;
+}
+
     
     .profession-badge {
       display: inline-block;
@@ -468,68 +484,74 @@
   </style>
 </head>
 <body>
-<div id="app" class="app">
-  <aside id="ls" class="sidebar ls">
-    <div class="pane-title">Categories <button id="addCategoryBtn" class="add-category-icon">+</button></div>
-    <div class="categories-container">
-      <div class="category active-category" data-category="all"><div class="category-title">All Documents</div></div>
-    </div>
-    <div class="account-section">
-      <div class="pane-title">Account</div>
-      <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
-      <button class="btn">{{ latest_membership }}</button>
-      <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
-      <a class="logout" href="/logout">Logout</a>
-    </div>
-  </aside>
+  <!-- 顶部右上角 Logo -->
+  <img src="ipaper.JPG" alt="Logo" class="top-right-logo">
 
-  <div id="bar-ls" class="resizer"><button id="btnLS" class="collapse-btn">«</button></div>
-  <aside id="us" class="sidebar us">
-    <div class="pane-title">Upload Document</div>
-    <div class="upload-card">
-      <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required multiple />
-        <button type="submit" class="btn brand" style="width:100%">Upload Files</button>
-      </form>
-    </div>
-    <div class="pane-title" style="margin-top:24px">Documents</div>
-    <div id="current-category" class="muted" style="margin-bottom:12px">Showing: All Documents</div>
-    <div id="documents-container" class="documents-list"></div>
-  </aside>
+  <div id="app" class="app">
+    <aside id="ls" class="sidebar ls">
+      <div class="pane-title">Categories <button id="addCategoryBtn" class="add-category-icon">+</button></div>
+      <div class="categories-container">
+        <div class="category active-category" data-category="all"><div class="category-title">All Documents</div></div>
+      </div>
+      <div class="account-section">
+        <div class="pane-title">Account</div>
+        <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
+        <button class="btn">{{ latest_membership }}</button>
+        <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
+        <a class="logout" href="/logout">Logout</a>
+      </div>
+    </aside>
 
-  <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn">«</button></div>
+    <div id="bar-ls" class="resizer"><button id="btnLS" class="collapse-btn">«</button></div>
+    <aside id="us" class="sidebar us">
+      <div class="pane-title">Upload Document</div>
+      <!-- 调整后的上传区域 -->
+      <div class="upload-card">
+        <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
+          <input type="file" name="file" required multiple />
+          <button type="submit" class="btn brand" style="width:100%">Upload Files</button>
+        </form>
+      </div>
+      <div class="pane-title" style="margin-top:24px">Documents</div>
+      <div id="current-category" class="muted" style="margin-bottom:12px">Showing: All Documents</div>
+      <div id="documents-container" class="documents-list"></div>
+    </aside>
 
-  <main class="main">
-    <div class="topbar">
-      <div class="muted">{{ name }}</div>
-      <div class="muted">{{ profession }}</div>
-      <div class="topbar-actions">
-        <button id="downloadBtn" class="action-btn secondary">Download</button>
-        {% if latest_membership != "Free" %}
-          <button id="generateBtn" class="action-btn">Generate</button>
-        {% else %}
-          <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
-        {% endif %}
+    <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn">«</button></div>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="user-info">
+          <div class="muted">{{ name }}</div>
+          <div class="muted">{{ profession }}</div>
+        </div>
+        <div class="topbar-actions">
+          <button id="downloadBtn" class="action-btn secondary">Download</button>
+          {% if latest_membership != "Free" %}
+            <button id="generateBtn" class="action-btn">Generate</button>
+          {% else %}
+            <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
+          {% endif %}
+          <button id="foreignerBtn" class="action-btn tertiary">Foreigner</button> <!-- 新增Foreigner按钮 -->
+        </div>
+      </div>
+      <h1>Welcome back, {{ name }}</h1>
+      <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
+    </main>
+  </div>
+
+  <div id="templateModal" class="template-selector-modal hidden">
+    <div class="template-selector-container">
+      <div class="sidebar">
+        <div class="sidebar-title">Templates</div>
+        <div id="templateList" class="sidebar-section"></div>
+      </div>
+      <div class="content-area">
+        <div id="templateContent" class="content-container"></div>
+        <button class="generate-button" onclick="useSelectedTemplate()">Use Template</button>
       </div>
     </div>
-    <h1>Welcome back, {{ name }}</h1>
-    <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
-  </main>
-</div>
-
-<div id="templateModal" class="template-selector-modal hidden">
-  <div class="template-selector-container">
-    <div class="sidebar">
-      <div class="sidebar-title">Templates</div>
-      <div id="templateList" class="sidebar-section"></div>
-    </div>
-    <div class="content-area">
-      <div id="templateContent" class="content-container"></div>
-      <button class="generate-button" onclick="useSelectedTemplate()">Use Template</button>
-    </div>
   </div>
-</div>
-
 
 <script>
   const $ = selector => document.querySelector(selector);
@@ -562,15 +584,16 @@
     if (btnUS) { btnUS.textContent = us ? '«' : '»'; }
   }
 
-  document.getElementById('btnLS').onclick = () => { 
+  // 修复折叠按钮事件监听器
+  document.getElementById('btnLS').addEventListener('click', () => { 
     const s = state(); 
     applyCollapse(!s.hasLS, s.hasUS); 
-  };
+  });
 
-  document.getElementById('btnUS').onclick = () => { 
+  document.getElementById('btnUS').addEventListener('click', () => { 
     const s = state(); 
     applyCollapse(s.hasLS, !s.hasUS); 
-  };
+  });
 
   function createDocumentItem(doc) {
     const div = document.createElement('div');
@@ -789,123 +812,112 @@
       const container = $('#documents-container'); 
       container.innerHTML = '';
       if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
-        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
-      } else {
-        filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents found</div>';
+        return;
       }
-    } catch (err) { 
-      console.error('Error filtering documents:', err); 
+      filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+    } catch (err) {
+      console.error('Error filtering documents:', err);
       const container = $('#documents-container');
       container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>';
     }
   }
 
-  // Template modal helpers
-  function showTemplateContent(templateType) {
-    document.querySelectorAll('.template-selector-modal .content-area > div').forEach(div => div.classList.add('hidden'));
-    const targetContent = document.getElementById(`${templateType}-content`);
-    if (targetContent) targetContent.classList.remove('hidden');
-    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
+  // Template selector functionality
+  const templateModal = $('#templateModal');
+  const templateList = $('#templateList');
+  const templateContent = $('#templateContent');
+
+  function showTemplateModal() {
+    templateModal.classList.remove('hidden');
+    loadTemplates();
   }
 
-  // 初始化 - 保持所有现有功能
-  document.addEventListener('DOMContentLoaded', () => {
-    initResizeButtons(); 
-    loadCategories(); 
-    loadDocuments();
-    
-    const allDocsCategory = document.querySelector('.category[data-category="all"]');
-    if (allDocsCategory) { 
-      allDocsCategory.onclick = () => setCurrentCategory('all'); 
-      setupDropZone(allDocsCategory); 
-    }
-    
-    const s = state(); 
-    const btnLS = document.getElementById('btnLS'); 
-    const btnUS = document.getElementById('btnUS'); 
-    if (btnLS) { btnLS.textContent = s.hasLS ? '«' : '»'; } 
-    if (btnUS) { btnUS.textContent = s.hasUS ? '«' : '»'; }
-    
-    const addCategoryBtn = document.getElementById('addCategoryBtn'); 
-    if (addCategoryBtn) {
-      addCategoryBtn.addEventListener('click', () => { 
-        const categoryName = prompt('Enter new category name:'); 
-        if (categoryName && categoryName.trim()) addCategory(categoryName.trim()); 
-      });
-    }
+  function hideTemplateModal() {
+    templateModal.classList.add('hidden');
+  }
 
-    // Template modal logic
-    const generateBtn = document.getElementById('generateBtn'); 
-    const templateModal = document.getElementById('templateSelectorModal'); 
-    const generateButton = document.querySelector('.generate-button');
-    
-    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
-    if (templateModal) templateModal.onclick = (e) => { 
-      if (e.target === templateModal) templateModal.classList.add('hidden'); 
-    };
-    if (generateButton) generateButton.onclick = () => { 
-      templateModal.classList.add('hidden'); 
-      alert('Template generation started!'); 
-    };
-  });
+  function loadTemplates() {
+    // This would normally be fetched from the server
+    const templates = [
+      { id: 'resume', name: 'Resume', description: 'Professional resume template', content: 'Resume content...' },
+      { id: 'cover-letter', name: 'Cover Letter', description: 'Cover letter template', content: 'Cover letter content...' },
+      { id: 'business-plan', name: 'Business Plan', description: 'Business plan template', content: 'Business plan content...' },
+      { id: 'report', name: 'Report', description: 'Formal report template', content: 'Report content...' }
+    ];
 
-
-  document.getElementById('generateBtn').addEventListener('click', async () => {
-  const modal = document.getElementById('templateModal');
-  modal.classList.remove('hidden');
-
-  try {
-    const res = await fetch('/get_templates');
-    const templates = await res.json();
-    const list = document.getElementById('templateList');
-    const content = document.getElementById('templateContent');
-    list.innerHTML = '';
-    content.innerHTML = '';
-
-    templates.forEach(t => {
+    templateList.innerHTML = '';
+    templates.forEach(template => {
       const item = document.createElement('div');
       item.className = 'sidebar-item';
-      item.textContent = t.name;
-      item.onclick = () => {
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        content.innerHTML = `
-          <div class="content-box">
-            <div class="content-box-title">${t.name}</div>
-            <div class="content-box-description">${t.prompt}</div>
-          </div>
-        `;
-        content.dataset.selectedTemplateId = t.id;
-      };
-      list.appendChild(item);
+      item.textContent = template.name;
+      item.dataset.templateId = template.id;
+      item.onclick = () => selectTemplate(template);
+      templateList.appendChild(item);
     });
-  } catch (err) {
-    console.error('Failed to load templates:', err);
+
+    if (templates.length > 0) {
+      selectTemplate(templates[0]);
+    }
   }
-});
 
-function useSelectedTemplate() {
-  const selectedId = document.getElementById('templateContent').dataset.selectedTemplateId;
-  if (!selectedId) return alert('Please select a template');
-  // Proceed with generation logic using selectedId
-  console.log('Using template ID:', selectedId);
-  document.getElementById('templateModal').classList.add('hidden');
-}
+  function selectTemplate(template) {
+    templateList.querySelectorAll('.sidebar-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    templateList.querySelector(`.sidebar-item[data-template-id="${template.id}"]`).classList.add('active');
 
-  window.addEventListener('click', (e) => {
-  if (e.target.classList.contains('template-selector-modal')) {
-    document.getElementById('templateModal').classList.add('hidden');
+    templateContent.innerHTML = `
+      <div class="content-box">
+        <div class="content-box-title">${template.name}</div>
+        <div class="content-box-description">${template.description}</div>
+        <div class="content-box-footer">
+          <span>Last updated: 2023-10-15</span>
+          <span>Uses: 1,234</span>
+        </div>
+      </div>
+    `;
   }
-});
 
+  function useSelectedTemplate() {
+    const selectedItem = templateList.querySelector('.sidebar-item.active');
+    if (selectedItem) {
+      const templateId = selectedItem.dataset.templateId;
+      alert(`Using template: ${templateId}`);
+      hideTemplateModal();
+    }
+  }
 
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    initResizeButtons();
+    loadDocuments();
+    loadCategories();
+    
+    // Add category button
+    $('#addCategoryBtn').onclick = () => {
+      const name = prompt('Enter category name:');
+      if (name) addCategory(name);
+    };
 
-  
+    // Generate button
+    $('#generateBtn').onclick = showTemplateModal;
+
+    // Download button
+    $('#downloadBtn').onclick = () => {
+      alert('Download functionality would go here');
+    };
+
+    // Foreigner button
+    $('#foreignerBtn').onclick = () => {
+      alert('Foreigner functionality would go here');
+    };
+
+    // Close modal when clicking outside
+    templateModal.onclick = (e) => {
+      if (e.target === templateModal) hideTemplateModal();
+    };
+  });
 </script>
 </body>
 </html>
-
-
-
-
