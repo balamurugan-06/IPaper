@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash, session, jsonify, make_response, send_from_directory, send_file, Response, url_for
 import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -299,10 +299,16 @@ def upload_document():
 
 @app.route('/view-document/<int:doc_id>')
 def view_document(doc_id):
+    # ensure user logged in
+    if 'user_id' not in session:
+        return redirect('/login')
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT attachment, filename FROM files WHERE fileid = %s", (doc_id,))
+
+        # fetch attachment + filename + userid (so we can verify ownership)
+        cur.execute("SELECT attachment, filename, userid FROM files WHERE fileid = %s", (doc_id,))
         row = cur.fetchone()
         cur.close()
         conn.close()
@@ -310,16 +316,27 @@ def view_document(doc_id):
         if not row:
             return "File not found", 404
 
-        file_path, filename = row
+        file_path, filename, owner_userid = row
 
-        # 🟢 Check file existence
-        if not os.path.exists(file_path):
+        # Security check: only owner can view
+        if owner_userid != session.get('user_id'):
+            return "Forbidden: you don't have permission to view this file.", 403
+
+        # Check file existence
+        if not file_path or not os.path.exists(file_path):
             return f"File missing on server: {file_path}", 404
 
-        # ✅ Serve directly from uploads folder
-        return send_file(file_path, as_attachment=False, download_name=filename)
+        # Serve safely using send_from_directory (so we pass directory + safe filename)
+        safe_filename = os.path.basename(file_path)
+        directory = os.path.dirname(file_path) or app.config.get('UPLOAD_FOLDER')
+
+        # Use send_from_directory so Flask handles headers and path safely
+        return send_from_directory(directory, safe_filename, as_attachment=False, download_name=filename)
+
     except Exception as e:
-        return f"Error displaying document: {e}", 500
+        # in dev you may want a traceback; in prod don't leak internals
+        app.logger.exception("Error in view_document")
+        return f"Error displaying document: {str(e)}", 500
 
 
 
@@ -994,6 +1011,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
