@@ -996,120 +996,94 @@
   }
 
  // ✅ Template Modal - Final Fixed Version
-document.addEventListener("DOMContentLoaded", () => {
-  // --- Initialize your existing features ---
-  initResizeButtons();
-  loadCategories();
-  loadDocuments();
+const modal = document.getElementById('templateModal');
+  const categoryList = document.getElementById('categoryList');
+  const templateCards = document.getElementById('templateCards');
+  const categoryTitle = document.getElementById('categoryTitle');
+  const generateNowBtn = document.getElementById('generateNowBtn');
+  const generateBtn = document.getElementById('generateBtn'); // <-- important
 
-  const allDocsCategory = document.querySelector('.category[data-category="all"]');
-  if (allDocsCategory) {
-    allDocsCategory.onclick = () => setCurrentCategory('all');
-    setupDropZone(allDocsCategory);
-  }
+  let allTemplates = [];
+  let selectedCategory = null;
+  let selectedTemplateId = null;
 
-  const s = state();
-  const btnLS = document.getElementById('btnLS');
-  const btnUS = document.getElementById('btnUS');
-  if (btnLS) btnLS.textContent = s.hasLS ? '«' : '»';
-  if (btnUS) btnUS.textContent = s.hasUS ? '«' : '»';
-
-  const addCategoryBtn = document.getElementById('addCategoryBtn');
-  if (addCategoryBtn) {
-    addCategoryBtn.addEventListener('click', () => {
-      const categoryName = prompt('Enter new category name:');
-      if (categoryName && categoryName.trim()) addCategory(categoryName.trim());
+  // Open modal when "Generate" is clicked
+  if (generateBtn) {
+    generateBtn.addEventListener('click', async () => {
+      modal.classList.remove('hidden');
+      await loadTemplates();
     });
   }
 
-  // --- Template modal logic ---
-  const modal = document.getElementById('templateModal');
-const categoryList = document.getElementById('categoryList');
-const templateCards = document.getElementById('templateCards');
-const categoryTitle = document.getElementById('categoryTitle');
-const generateNowBtn = document.getElementById('generateNowBtn'); // 👈 new button reference
+  // Load templates
+  async function loadTemplates() {
+    try {
+      const res = await fetch('/get_templates');
+      allTemplates = await res.json();
 
-let allTemplates = [];
-let selectedCategory = null;
-let selectedTemplateId = null;
-
-// Show modal when "Generate" button clicked
-document.getElementById('generateBtn').addEventListener('click', async () => {
-  modal.classList.remove('hidden');
-  await loadTemplates();
-});
-
-// Load templates from backend
-async function loadTemplates() {
-  try {
-    const res = await fetch('/get_templates');
-    allTemplates = await res.json();
-
-    // Extract unique categories
-    const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
-    categoryList.innerHTML = '';
-    categories.forEach(cat => {
-      const li = document.createElement('li');
-      li.textContent = cat;
-      li.onclick = () => showTemplatesByCategory(cat, li);
-      categoryList.appendChild(li);
-    });
-  } catch (err) {
-    console.error('Failed to load templates:', err);
+      const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
+      categoryList.innerHTML = '';
+      categories.forEach(cat => {
+        const li = document.createElement('li');
+        li.textContent = cat;
+        li.onclick = () => showTemplatesByCategory(cat, li);
+        categoryList.appendChild(li);
+      });
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    }
   }
-}
 
-// Display templates for selected category
-function showTemplatesByCategory(category, el) {
-  selectedCategory = category;
-  document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
-  el.classList.add('active');
-  categoryTitle.textContent = category;
+  function showTemplatesByCategory(category, el) {
+    selectedCategory = category;
+    document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
+    el.classList.add('active');
+    categoryTitle.textContent = category;
 
-  const filtered = allTemplates.filter(t => (t.category || 'Uncategorized') === category);
-  templateCards.innerHTML = filtered.map(t => `
-    <div class="template-card" data-id="${t.id}">
-      <h4>${t.name}</h4>
-      <p>${t.prompt}</p>
-    </div>
-  `).join('');
+    const filtered = allTemplates.filter(t => (t.category || 'Uncategorized') === category);
+    templateCards.innerHTML = filtered.map(t => `
+      <div class="template-card" data-id="${t.id}">
+        <h4>${t.name}</h4>
+        <p>${t.prompt}</p>
+      </div>
+    `).join('');
 
-  // Add click handlers for each card
-  document.querySelectorAll('.template-card').forEach(card => {
-    card.addEventListener('click', () => selectTemplate(card));
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => selectTemplate(card));
+    });
+  }
+
+  function selectTemplate(card) {
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedTemplateId = card.getAttribute('data-id');
+  }
+
+  function closeTemplateModal() {
+    modal.classList.add('hidden');
+    selectedTemplateId = null;
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  }
+
+  generateNowBtn.addEventListener('click', () => {
+    if (!selectedTemplateId) {
+      alert('Please select a template first.');
+      return;
+    }
+    const selected = allTemplates.find(t => t.id == selectedTemplateId);
+    alert(`🧠 Generating with template: "${selected.name}"`);
+    closeTemplateModal();
   });
-}
 
-// Select a template (highlight)
-function selectTemplate(card) {
-  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selectedTemplateId = card.getAttribute('data-id');
-}
-
-// Close popup
-function closeTemplateModal() {
-  modal.classList.add('hidden');
-  selectedTemplateId = null;
-  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
-}
-
-// "Generate Now" button action
-generateNowBtn.addEventListener('click', () => {
-  if (!selectedTemplateId) {
-    alert('Please select a template before generating.');
-    return;
-  }
-
-  const selected = allTemplates.find(t => t.id == selectedTemplateId);
-  alert(`🧠 Generating with template: "${selected.name}"`);
-  closeTemplateModal();
-});
-
+  // Close modal when clicking outside
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) closeTemplateModal();
+  });
   
 </script>
 </body>
 </html>
+
 
 
 
