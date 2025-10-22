@@ -620,6 +620,35 @@
   pointer-events: all;
 }
 
+    /* Highlight selected template card */
+.template-card.selected {
+  border: 2px solid #3b82f6;
+  background: #e0f2fe;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+}
+
+/* "Generate Now" button */
+.generate-now-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 24px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  transition: all 0.2s ease;
+}
+
+.generate-now-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  transform: translateY(-2px);
+}
+
     
   </style>
 </head>
@@ -693,6 +722,7 @@
     </div>
     <button class="close-popup" onclick="closeTemplateModal()">×</button>
   </div>
+  <button id="generateNowBtn" class="generate-now-btn">Generate Now</button>
 </div>
 
 
@@ -994,76 +1024,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Template modal logic ---
   const modal = document.getElementById('templateModal');
-  const categoryList = document.getElementById('categoryList');
-  const templateCards = document.getElementById('templateCards');
-  const categoryTitle = document.getElementById('categoryTitle');
-  const generateBtn = document.getElementById('generateBtn');
-  let allTemplates = [];
-  let selectedCategory = null;
+const categoryList = document.getElementById('categoryList');
+const templateCards = document.getElementById('templateCards');
+const categoryTitle = document.getElementById('categoryTitle');
+const generateNowBtn = document.getElementById('generateNowBtn'); // 👈 new button reference
 
-  // ✅ Ensure modal hidden on load
-  if (modal) modal.classList.add('hidden');
+let allTemplates = [];
+let selectedCategory = null;
+let selectedTemplateId = null;
 
-  // ✅ Open modal when Generate is clicked
-  if (generateBtn) {
-    generateBtn.addEventListener('click', async () => {
-      modal.classList.remove('hidden');
-      await loadTemplates();
-    });
-  }
-
-  // ✅ Fetch templates from backend
-  async function loadTemplates() {
-    try {
-      const res = await fetch('/get_templates');
-      allTemplates = await res.json();
-
-      // Group by categories
-      const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
-      categoryList.innerHTML = '';
-      categories.forEach(cat => {
-        const li = document.createElement('li');
-        li.textContent = cat;
-        li.onclick = () => showTemplatesByCategory(cat, li);
-        categoryList.appendChild(li);
-      });
-    } catch (err) {
-      console.error('❌ Failed to load templates:', err);
-    }
-  }
-
-  // ✅ Show templates under selected category
-  function showTemplatesByCategory(category, el) {
-    selectedCategory = category;
-    document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
-    el.classList.add('active');
-    categoryTitle.textContent = category;
-
-    const filtered = allTemplates.filter(t => (t.category || 'Uncategorized') === category);
-    templateCards.innerHTML = filtered.map(t => `
-      <div class="template-card" onclick="selectTemplate(${t.id})">
-        <h4>${t.name}</h4>
-        <p>${t.prompt}</p>
-      </div>
-    `).join('');
-  }
-
-  // ✅ Close modal with "×" or background click
-  window.closeTemplateModal = () => modal.classList.add('hidden');
-  window.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.add('hidden');
-  });
-
-  // ✅ Handle template selection
-  window.selectTemplate = (id) => {
-    const selected = allTemplates.find(t => t.id === id);
-    if (!selected) return;
-    alert(`✅ Using template: ${selected.name}`);
-    closeTemplateModal();
-  };
+// Show modal when "Generate" button clicked
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  modal.classList.remove('hidden');
+  await loadTemplates();
 });
 
+// Load templates from backend
+async function loadTemplates() {
+  try {
+    const res = await fetch('/get_templates');
+    allTemplates = await res.json();
 
+    // Extract unique categories
+    const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
+    categoryList.innerHTML = '';
+    categories.forEach(cat => {
+      const li = document.createElement('li');
+      li.textContent = cat;
+      li.onclick = () => showTemplatesByCategory(cat, li);
+      categoryList.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Failed to load templates:', err);
+  }
+}
+
+// Display templates for selected category
+function showTemplatesByCategory(category, el) {
+  selectedCategory = category;
+  document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
+  el.classList.add('active');
+  categoryTitle.textContent = category;
+
+  const filtered = allTemplates.filter(t => (t.category || 'Uncategorized') === category);
+  templateCards.innerHTML = filtered.map(t => `
+    <div class="template-card" data-id="${t.id}">
+      <h4>${t.name}</h4>
+      <p>${t.prompt}</p>
+    </div>
+  `).join('');
+
+  // Add click handlers for each card
+  document.querySelectorAll('.template-card').forEach(card => {
+    card.addEventListener('click', () => selectTemplate(card));
+  });
+}
+
+// Select a template (highlight)
+function selectTemplate(card) {
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedTemplateId = card.getAttribute('data-id');
+}
+
+// Close popup
+function closeTemplateModal() {
+  modal.classList.add('hidden');
+  selectedTemplateId = null;
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+}
+
+// "Generate Now" button action
+generateNowBtn.addEventListener('click', () => {
+  if (!selectedTemplateId) {
+    alert('Please select a template before generating.');
+    return;
+  }
+
+  const selected = allTemplates.find(t => t.id == selectedTemplateId);
+  alert(`🧠 Generating with template: "${selected.name}"`);
+  closeTemplateModal();
+});
 
   
 </script>
