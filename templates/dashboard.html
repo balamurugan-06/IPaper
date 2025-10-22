@@ -990,76 +990,71 @@
       });
     }
 
-    // Template modal logic
-    const generateBtn = document.getElementById('generateBtn'); 
-    const templateModal = document.getElementById('templateSelectorModal'); 
-    const generateButton = document.querySelector('.generate-button');
     
-    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
-    if (templateModal) templateModal.onclick = (e) => { 
-      if (e.target === templateModal) templateModal.classList.add('hidden'); 
-    };
-    if (generateButton) generateButton.onclick = () => { 
-      templateModal.classList.add('hidden'); 
-      alert('Template generation started!'); 
-    };
-  });
 
+    const modal = document.getElementById('templateModal');
+const categoryList = document.getElementById('categoryList');
+const templateCards = document.getElementById('templateCards');
+const categoryTitle = document.getElementById('categoryTitle');
+let allTemplates = [];
+let selectedCategory = null;
 
-  document.getElementById('generateBtn').addEventListener('click', async () => {
-  const modal = document.getElementById('templateModal');
+document.getElementById('generateBtn').addEventListener('click', async () => {
   modal.classList.remove('hidden');
+  await loadTemplates();
+});
 
+async function loadTemplates() {
   try {
     const res = await fetch('/get_templates');
-    const templates = await res.json();
-    const list = document.getElementById('templateList');
-    const content = document.getElementById('templateContent');
-    list.innerHTML = '';
-    content.innerHTML = '';
+    allTemplates = await res.json();
 
-    templates.forEach(t => {
-      const item = document.createElement('div');
-      item.className = 'sidebar-item';
-      item.textContent = t.name;
-      item.onclick = () => {
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        content.innerHTML = `
-          <div class="content-box">
-            <div class="content-box-title">${t.name}</div>
-            <div class="content-box-description">${t.prompt}</div>
-          </div>
-        `;
-        content.dataset.selectedTemplateId = t.id;
-      };
-      list.appendChild(item);
+    // Extract unique categories
+    const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
+    categoryList.innerHTML = '';
+    categories.forEach(cat => {
+      const li = document.createElement('li');
+      li.textContent = cat;
+      li.onclick = () => showTemplatesByCategory(cat, li);
+      categoryList.appendChild(li);
     });
   } catch (err) {
     console.error('Failed to load templates:', err);
   }
-});
-
-function useSelectedTemplate() {
-  const selectedId = document.getElementById('templateContent').dataset.selectedTemplateId;
-  if (!selectedId) return alert('Please select a template');
-  // Proceed with generation logic using selectedId
-  console.log('Using template ID:', selectedId);
-  document.getElementById('templateModal').classList.add('hidden');
 }
 
-  window.addEventListener('click', (e) => {
-  if (e.target.classList.contains('template-selector-modal')) {
-    document.getElementById('templateModal').classList.add('hidden');
-  }
-});
+function showTemplatesByCategory(category, el) {
+  selectedCategory = category;
+  document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
+  el.classList.add('active');
+  categoryTitle.textContent = category;
 
+  const filtered = allTemplates.filter(t => (t.category || 'Uncategorized') === category);
+  templateCards.innerHTML = filtered.map(t => `
+    <div class="template-card" onclick="selectTemplate(${t.id})">
+      <h4>${t.name}</h4>
+      <p>${t.prompt}</p>
+    </div>
+  `).join('');
+}
+
+function selectTemplate(id) {
+  const selected = allTemplates.find(t => t.id === id);
+  if (!selected) return;
+  alert(`✅ Using template: ${selected.name}`);
+  closeTemplateModal();
+}
+
+function closeTemplateModal() {
+  modal.classList.add('hidden');
+}
 
 
   
 </script>
 </body>
 </html>
+
 
 
 
