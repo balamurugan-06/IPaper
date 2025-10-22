@@ -25,7 +25,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-app.config['UPLOAD_FOLDER'] = 'uploads'
+aUPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Session(app)
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -243,39 +245,50 @@ def upload_document():
     if 'user_id' not in session:
         return redirect('/login')
 
-    # allow multiple files
     files = request.files.getlist('file')
-    folder_id_raw = request.form.get('folder_id')  # optional
-    folder_id = None
-    try:
-        if folder_id_raw:
-            folder_id = int(folder_id_raw)
-    except Exception:
-        folder_id = None
+    folder_id_raw = request.form.get('folder_id')
+    folder_id = int(folder_id_raw) if folder_id_raw and folder_id_raw.isdigit() else None
 
-    if not files or len(files) == 0 or files[0].filename == '':
+    if not files or files[0].filename == '':
         flash("No file selected", "error")
         return redirect('/dashboard')
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                data = file.read()
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+                # If file already exists, rename it
+                base, ext = os.path.splitext(filename)
+                counter = 1
+                while os.path.exists(save_path):
+                    filename = f"{base}_{counter}{ext}"
+                    save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    counter += 1
+
+                # Save to disk instead of DB
+                file.save(save_path)
+
+                # Store only path + filename in DB
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, attachment)
                     VALUES (%s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, psycopg2.Binary(data)))
+                """, (session['user_id'], folder_id, filename, save_path))  # save_path instead of binary
+
         conn.commit()
         cur.close()
         conn.close()
-        flash("Files uploaded", "success")
+        flash("Files uploaded successfully!", "success")
+
     except Exception as e:
-        flash("Upload failed: " + str(e), "error")
+        flash(f"Upload failed: {e}", "error")
 
     return redirect('/dashboard')
+
     
 
 @app.route('/view-document/<int:doc_id>')
@@ -287,25 +300,15 @@ def view_document(doc_id):
         row = cur.fetchone()
         cur.close()
         conn.close()
-        if not row:
-            return "Not found", 404
-        data, filename = row
-        bytes_data = data.tobytes() if hasattr(data, 'tobytes') else data
-        response = make_response(bytes_data)
-        # infer content-type
-        name_lower = (filename or '').lower()
-        if name_lower.endswith('.pdf'):
-            ctype = 'application/pdf'
-        elif name_lower.endswith('.docx'):
-            ctype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        elif name_lower.endswith('.doc'):
-            ctype = 'application/msword'
-        else:
-            ctype = 'application/octet-stream'
 
-        response.headers.set('Content-Type', ctype)
-        response.headers.set('Content-Disposition', 'inline', filename=filename)
-        return response
+        if not row:
+            return "File not found", 404
+
+        file_path, filename = row
+        if not os.path.exists(file_path):
+            return "File missing on server", 404
+
+        return send_file(file_path, download_name=filename)
     except Exception as e:
         return f"Error displaying document: {e}", 500
 
@@ -319,17 +322,28 @@ def delete_document(doc_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # ensure this belongs to user
-        cur.execute("SELECT fileid FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
-        if cur.fetchone():
+        cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
+        row = cur.fetchone()
+        if row:
+            attachment = row[0]
+            # Remove DB row
             cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
             conn.commit()
+            # Try to remove file on disk if it exists and is a path
+            try:
+                if isinstance(attachment, str) and os.path.exists(attachment):
+                    os.remove(attachment)
+            except Exception as e:
+                # Log, but don't fail the request
+                print("Failed to remove file from disk:", e)
             flash("Document deleted", "success")
         cur.close()
         conn.close()
     except Exception as e:
         flash("Delete failed: " + str(e), "error")
     return redirect('/dashboard')
+
+
 
 
 
@@ -969,6 +983,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
