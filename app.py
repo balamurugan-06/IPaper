@@ -260,9 +260,11 @@ def upload_document():
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
+
+                # 🟢 Save to /uploads folder
                 save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-                # If file already exists, rename it
+                # Prevent overwriting same file name
                 base, ext = os.path.splitext(filename)
                 counter = 1
                 while os.path.exists(save_path):
@@ -270,24 +272,28 @@ def upload_document():
                     save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     counter += 1
 
-                # Save to disk instead of DB
+                # ✅ Save file to disk (not DB)
                 file.save(save_path)
 
-                # Store only path + filename in DB
+                # ✅ Save only path and filename in DB
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, attachment)
                     VALUES (%s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, save_path))  # save_path instead of binary
+                """, (session['user_id'], folder_id, filename, save_path))
 
         conn.commit()
-        cur.close()
-        conn.close()
         flash("Files uploaded successfully!", "success")
 
     except Exception as e:
+        conn.rollback()
         flash(f"Upload failed: {e}", "error")
 
+    finally:
+        cur.close()
+        conn.close()
+
     return redirect('/dashboard')
+
 
     
 
@@ -305,10 +311,13 @@ def view_document(doc_id):
             return "File not found", 404
 
         file_path, filename = row
-        if not os.path.exists(file_path):
-            return "File missing on server", 404
 
-        return send_file(file_path, download_name=filename)
+        # 🟢 Check file existence
+        if not os.path.exists(file_path):
+            return f"File missing on server: {file_path}", 404
+
+        # ✅ Serve directly from uploads folder
+        return send_file(file_path, as_attachment=False, download_name=filename)
     except Exception as e:
         return f"Error displaying document: {e}", 500
 
@@ -324,25 +333,27 @@ def delete_document(doc_id):
         cur = conn.cursor()
         cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
         row = cur.fetchone()
+
         if row:
             attachment = row[0]
-            # Remove DB row
+
+            # Remove record from DB
             cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
             conn.commit()
-            # Try to remove file on disk if it exists and is a path
-            try:
-                if isinstance(attachment, str) and os.path.exists(attachment):
-                    os.remove(attachment)
-            except Exception as e:
-                # Log, but don't fail the request
-                print("Failed to remove file from disk:", e)
-            flash("Document deleted", "success")
+
+            # 🟢 Delete actual file from disk
+            if attachment and isinstance(attachment, str) and os.path.exists(attachment):
+                os.remove(attachment)
+
+            flash("Document deleted successfully!", "success")
+
         cur.close()
         conn.close()
-    except Exception as e:
-        flash("Delete failed: " + str(e), "error")
-    return redirect('/dashboard')
 
+    except Exception as e:
+        flash(f"Delete failed: {e}", "error")
+
+    return redirect('/dashboard')
 
 
 
@@ -983,6 +994,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
