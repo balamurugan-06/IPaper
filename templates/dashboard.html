@@ -481,58 +481,6 @@
       font-weight: 500;
       margin-left: 10px;
     }   
-
-/* Overlay + Modal */
-.template-modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: none; justify-content:center; align-items:center; z-index:9999; }
-.template-modal { width: 86%; max-width:1100px; background:#fff; border-radius:14px; padding:20px; box-shadow:0 20px 50px rgba(2,6,23,0.35); display:flex; flex-direction:column; }
-
-/* Header */
-.template-modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.template-modal-header h2 { font-size:20px; color:#0f172a; margin:0; }
-
-/* Layout */
-.template-body { display:flex; gap:18px; align-items:stretch; }
-.template-sidebar { width:200px; padding:8px 6px; border-right:1px solid #eef2ff; }
-.template-main { flex:1; padding:6px; overflow:auto; }
-.template-preview { width:320px; padding:10px; background:#fbfdff; border-left:1px solid #eef6ff; border-radius:8px; }
-
-/* Sidebar */
-.sidebar-title { font-weight:700; color:#1f2937; margin-bottom:8px; }
-.template-cats { display:flex; flex-direction:column; gap:8px; }
-.sidebar-item { padding:8px 10px; border-radius:8px; cursor:pointer; color:#334155; font-size:14px; }
-.sidebar-item.active { background:#e6f0ff; border-left:4px solid #2563eb; color:#1e40af; font-weight:600; }
-
-/* Search */
-.template-search { width:100%; padding:8px;border-radius:8px;border:1px solid #e6eefb }
-
-/* Grid (cards) */
-.template-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; align-items:stretch; }
-@media (max-width:1000px){ .template-grid { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:640px){ .template-grid { grid-template-columns:repeat(1,1fr); } }
-
-.template-card { background:#fff; border-radius:12px; padding:14px; border:1px solid #e6eefb; text-align:left; cursor:pointer; transition:all .18s ease; display:flex; flex-direction:column; gap:8px; min-height:120px; }
-.template-card img { width:44px; height:44px; object-fit:contain; border-radius:8px; }
-.template-card .title { color:#0b3d91; font-weight:700; font-size:15px; }
-.template-card .meta { font-size:13px; color:#475569; }
-.template-card .tags { font-size:12px; color:#2563eb; }
-
-.template-card:hover { transform:translateY(-6px); box-shadow:0 10px 26px rgba(37,99,235,0.14); border-color:#3b82f6; background:#f8fbff; }
-.template-card.selected { border:2px solid #0ea5e9; box-shadow:0 12px 30px rgba(14,165,233,0.12); transform:none; }
-
-/* Preview */
-.preview-title { font-weight:700; color:#0b3d91; margin-bottom:6px; }
-.preview-tags { color:#2563eb; font-size:13px; margin-bottom:10px; }
-.preview-prompt { background:#ffffff; padding:10px; border-radius:8px; border:1px solid #eef7ff; height:260px; overflow:auto; color:#334155; font-size:13px; white-space:pre-wrap; }
-
-/* Close + buttons */
-.close-btn { background:none;border:none;font-size:22px;color:#475569;cursor:pointer; }
-.generate-btn { background:#2563eb;color:#fff;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600; }
-.generate-btn[disabled] { opacity:0.6; cursor:not-allowed; }
-
-/* Show modal helper */
-.template-modal-overlay.show { display:flex; }
-
-    
   </style>
 </head>
 <body>
@@ -584,7 +532,7 @@
           {% else %}
             <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
           {% endif %}
-          <button id="foreignerBtn" class="action-btn tertiary">Share</button> <!-- 新增Foreigner按钮 -->
+          <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
         </div>
       </div>
       <h1>Welcome back, {{ name }}</h1>
@@ -592,57 +540,18 @@
     </main>
   </div>
 
-
-  
-
-  <div id="templateModal" class="template-modal-overlay" aria-hidden="true">
-  <div class="template-modal">
-    <div class="template-modal-header">
-      <div style="display:flex;gap:12px;align-items:center">
-        <h2>Select Summary Template</h2>
-        <div id="templateCount" style="color:#6b7280;font-size:13px;"></div>
+  <div id="templateModal" class="template-selector-modal hidden">
+    <div class="template-selector-container">
+      <div class="sidebar">
+        <div class="sidebar-title">Templates</div>
+        <div id="templateList" class="sidebar-section"></div>
       </div>
-      <button class="close-btn" id="closeTemplateModal" aria-label="Close modal">&times;</button>
-    </div>
-
-    <div class="template-body">
-      <aside class="template-sidebar">
-        <div class="sidebar-title">Categories</div>
-        <div id="templateCategories" class="template-cats">
-          <div class="sidebar-item active" data-cat="all">All</div>
-          <!-- categories will be injected -->
-        </div>
-
-        <div style="margin-top:16px;">
-          <input id="templateSearch" placeholder="Search templates..." class="template-search">
-        </div>
-      </aside>
-
-      <main class="template-main">
-        <div id="templateGrid" class="template-grid" role="list">
-          <!-- template cards injected here -->
-        </div>
-      </main>
-
-      <section class="template-preview">
-        <div id="previewTitle" class="preview-title">Choose a template</div>
-        <div id="previewTags" class="preview-tags"></div>
-        <div id="previewPrompt" class="preview-prompt">Template instructions will appear here.</div>
-
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <select id="docSelect" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6eefb;">
-            <option value="">Choose document to summarize</option>
-          </select>
-          <button id="generateNowBtn" class="generate-btn">Generate now</button>
-        </div>
-      </section>
-    </div>
-
-    <div class="template-footer" style="text-align:right;margin-top:12px;">
-      <small style="color:#64748b">Templates from admin — prompts are fetched from DB</small>
+      <div class="content-area">
+        <div id="templateContent" class="content-container"></div>
+        <button class="generate-button" onclick="useSelectedTemplate()">Use Template</button>
+      </div>
     </div>
   </div>
-</div>
 
 <script>
   const $ = selector => document.querySelector(selector);
@@ -948,178 +857,76 @@
       });
     }
 
-   
+    // Template modal logic
+    const generateBtn = document.getElementById('generateBtn'); 
+    const templateModal = document.getElementById('templateSelectorModal'); 
+    const generateButton = document.querySelector('.generate-button');
+    
+    if (generateBtn) generateBtn.onclick = () => templateModal.classList.remove('hidden');
+    if (templateModal) templateModal.onclick = (e) => { 
+      if (e.target === templateModal) templateModal.classList.add('hidden'); 
+    };
+    if (generateButton) generateButton.onclick = () => { 
+      templateModal.classList.add('hidden'); 
+      alert('Template generation started!'); 
+    };
+  });
 
 
-    // ---------- Modal show/hide ----------
-const modal = document.getElementById('templateModal');
-const openBtn = document.getElementById('generateBtn'); // keep your generate button id
-const closeBtn = document.getElementById('closeTemplateModal');
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+  const modal = document.getElementById('templateModal');
+  modal.classList.remove('hidden');
 
-openBtn.addEventListener('click', () => {
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
-  loadTemplatesAndDocs();
-});
-closeBtn.addEventListener('click', () => {
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
-});
-
-// ---------- Load templates and documents ----------
-async function loadTemplatesAndDocs(){
-  // fetch templates (your existing backend endpoint)
-  let templates = [];
   try {
     const res = await fetch('/get_templates');
-    templates = await res.json();
-  } catch (err) {
-    console.error('Failed to fetch templates', err);
-    templates = [];
-  }
+    const templates = await res.json();
+    const list = document.getElementById('templateList');
+    const content = document.getElementById('templateContent');
+    list.innerHTML = '';
+    content.innerHTML = '';
 
-  // fetch documents for docSelect (keep your backend endpoint)
-  let docs = [];
-  try {
-    const r2 = await fetch('/get-documents');
-    docs = await r2.json();
-  } catch(e){ docs = []; }
-
-  renderTemplates(templates);
-  populateDocs(docs);
-}
-
-// ---------- Render templates into grid ----------
-function renderTemplates(templates){
-  const grid = document.getElementById('templateGrid');
-  const cats = document.getElementById('templateCategories');
-  grid.innerHTML = ''; // clear
-
-  // build categories set
-  const categories = new Set(['all']);
-  templates.forEach(t => { if (t.category) categories.add(t.category); });
-
-  // render category buttons (only if not already present)
-  cats.innerHTML = '<div class="sidebar-item active" data-cat="all">All</div>';
-  categories.forEach(cat => {
-    if (cat === 'all') return;
-    const b = document.createElement('div');
-    b.className = 'sidebar-item';
-    b.dataset.cat = cat;
-    b.textContent = cat;
-    b.onclick = () => {
-      document.querySelectorAll('.sidebar-item').forEach(el=>el.classList.remove('active'));
-      b.classList.add('active');
-      filterTemplates();
-    };
-    cats.appendChild(b);
-  });
-
-  // injection of cards
-  templates.forEach(t => {
-    const card = document.createElement('div');
-    card.className = 'template-card';
-    card.dataset.id = t.summarytemplateid || t.id || t.template_id || t.summarytemplateid;
-    card.dataset.cat = t.category || 'uncategorized';
-    card.innerHTML = `
-      <div style="display:flex;gap:12px;align-items:center;">
-        <img src="${t.icon || '/static/images/default-icon.png'}" alt="icon">
-        <div style="flex:1;">
-          <div class="title">${escapeHtml(t.templatename || t.name || t.title || 'Template')}</div>
-          <div class="meta">${escapeHtml(t.short_description || t.description || t.promptinstructions?.slice(0,80) || '')}</div>
-        </div>
-      </div>
-      <div class="tags">${(t.tags || []).slice(0,3).join(', ')}</div>
-    `;
-    card.onclick = () => {
-      document.querySelectorAll('.template-card').forEach(c=>c.classList.remove('selected'));
-      card.classList.add('selected');
-      showPreview(t);
-    };
-    grid.appendChild(card);
-  });
-
-  document.getElementById('templateCount').textContent = `${templates.length} templates`;
-  // search filter handler
-  document.getElementById('templateSearch').oninput = filterTemplates;
-}
-
-function filterTemplates(){
-  const q = document.getElementById('templateSearch').value.toLowerCase();
-  const activeCatEl = document.querySelector('.sidebar-item.active');
-  const cat = activeCatEl ? activeCatEl.dataset.cat : 'all';
-  document.querySelectorAll('.template-card').forEach(card=>{
-    const text = card.textContent.toLowerCase();
-    const catMatch = (cat === 'all') || (card.dataset.cat === cat);
-    const qMatch = q.length === 0 || text.indexOf(q) !== -1;
-    card.style.display = (catMatch && qMatch) ? '' : 'none';
-  });
-}
-
-// ---------- Preview a selected template ----------
-function showPreview(t){
-  document.getElementById('previewTitle').textContent = t.templatename || t.name || 'Template';
-  document.getElementById('previewTags').textContent = (t.tags || []).join(' • ');
-  document.getElementById('previewPrompt').textContent = t.promptinstructions || t.description || 'No instructions';
-  // set selected id on grid for generate call
-  document.getElementById('templateGrid').dataset.selected = t.summarytemplateid || t.id || t.template_id;
-}
-
-// ---------- Populate documents select ----------
-function populateDocs(docs){
-  const sel = document.getElementById('docSelect');
-  sel.innerHTML = '<option value="">Choose document to summarize</option>';
-  docs.forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d.fileid || d.id || d.fileId;
-    opt.textContent = d.filename || d.name;
-    sel.appendChild(opt);
-  });
-}
-
-// ---------- Generate now button (calls your backend) ----------
-document.getElementById('generateNowBtn').addEventListener('click', async ()=>{
-  const selectedTemplateId = document.getElementById('templateGrid').dataset.selected;
-  const selectedDocId = document.getElementById('docSelect').value;
-  if (!selectedTemplateId) return alert('Please select a template first.');
-  if (!selectedDocId) return alert('Please choose a document.');
-
-  const btn = document.getElementById('generateNowBtn');
-  btn.disabled = true; btn.textContent = 'Generating...';
-
-  try {
-    const res = await fetch('/generate_summary', {
-      method:'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ template_id: selectedTemplateId, document_id: selectedDocId })
+    templates.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'sidebar-item';
+      item.textContent = t.name;
+      item.onclick = () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        content.innerHTML = `
+          <div class="content-box">
+            <div class="content-box-title">${t.name}</div>
+            <div class="content-box-description">${t.prompt}</div>
+          </div>
+        `;
+        content.dataset.selectedTemplateId = t.id;
+      };
+      list.appendChild(item);
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Generation failed');
-
-    // open result in new tab
-    const w = window.open('', '_blank');
-    w.document.write(`<html><head><title>Summary</title></head><body style="font-family:Inter,Arial;padding:24px">`);
-    w.document.write(`<h2>${escapeHtml(document.querySelector('.template-card.selected .title')?.textContent || 'Summary')}</h2>`);
-    w.document.write(`<pre style="white-space:pre-wrap;line-height:1.6;background:#fff;padding:16px;border-radius:8px;border:1px solid #eef7ff;">${escapeHtml(data.summary||data.content||'')}</pre>`);
-    w.document.close();
-
-    // optionally close modal
-    modal.classList.remove('show'); modal.setAttribute('aria-hidden','true');
-  } catch (err){
-    alert('Error: ' + (err.message || err));
-  } finally {
-    btn.disabled = false; btn.textContent = 'Generate now';
+  } catch (err) {
+    console.error('Failed to load templates:', err);
   }
 });
 
-// small helper to avoid html injection
-function escapeHtml(s){ if (!s) return ''; return s.replaceAll && s.replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function useSelectedTemplate() {
+  const selectedId = document.getElementById('templateContent').dataset.selectedTemplateId;
+  if (!selectedId) return alert('Please select a template');
+  // Proceed with generation logic using selectedId
+  console.log('Using template ID:', selectedId);
+  document.getElementById('templateModal').classList.add('hidden');
+}
+
+  window.addEventListener('click', (e) => {
+  if (e.target.classList.contains('template-selector-modal')) {
+    document.getElementById('templateModal').classList.add('hidden');
+  }
+});
+
+
 
   
 </script>
 </body>
 </html>
-
 
 
 
