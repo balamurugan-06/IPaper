@@ -994,13 +994,30 @@ def get_templates():
         print("Error in /get_templates:", e)
         return jsonify({'error': str(e)}), 500
 
+@app.route('/debug-files')
+def debug_files():
+    try:
+        files = os.listdir(app.config['UPLOAD_FOLDER'])
+        # Show DB entries too for cross-check
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT fileid, filename, attachment, userid FROM files ORDER BY fileid DESC LIMIT 50")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
 
+        html = "<h3>Files on disk:</h3><pre>{}</pre>".format("\n".join(files))
+        html += "<h3>Latest DB file rows:</h3><pre>{}</pre>".format("\n".join(str(r) for r in rows))
+        return html
+    except Exception as e:
+        return f"Error inspecting uploads: {e}", 500
         
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
