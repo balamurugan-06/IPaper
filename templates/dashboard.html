@@ -674,15 +674,6 @@
 </head>
 <body>
   
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flash-messages">
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
   <img src="/static/images/logo.jpeg" alt="Logo" class="top-right-logo">
 
   <div id="app" class="app">
@@ -706,11 +697,22 @@
       <!-- 调整后的上传区域 -->
       <div class="upload-card">
         <form id="uploadForm" action="/upload-document" method="post" enctype="multipart/form-data">
-          <input type="file" name="file" required multiple />
-          <button type="submit" class="btn brand" style="width:100%">Upload Files</button>
+            <input type="hidden" name="folder_id" id="folder_id" value="">
+            <input type="file" name="file" required multiple />
+            <button type="submit" class="btn brand" style="width:100%">Upload Files</button>
         </form>
       </div>
       <div class="pane-title" style="margin-top:24px">Documents</div>
+      
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
       <div id="current-category" class="muted" style="margin-bottom:12px">Showing: All Documents</div>
       <div id="documents-container" class="documents-list"></div>
     </aside>
@@ -1110,6 +1112,13 @@ const modal = document.getElementById('templateModal');
     if (e.target === modal) closeTemplateModal();
   });
 
+  document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+  const name = prompt('Enter a name for the new category (subfolder):');
+  if (name && name.trim()) {
+    await addCategory(name.trim());
+  }
+});
+  
 document.addEventListener('DOMContentLoaded', () => {
   try {
     // init UI controls (resizer buttons)
@@ -1137,6 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
