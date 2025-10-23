@@ -1008,18 +1008,28 @@
 
   function setCurrentCategory(categoryId) {
   currentCategory = categoryId;
+
+  // Highlight active folder
   document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
   const el = document.querySelector(`.category[data-category="${categoryId}"]`);
   if (el) el.classList.add('active-category');
-  const categoryName = categoryId === 'all' ? 'All Documents' : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
+
+  // Update display text
+  const categoryName = categoryId === 'all'
+    ? 'All Documents'
+    : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
   $('#current-category').textContent = `Showing: ${categoryName}`;
 
-  // ✅ Update hidden folder_id field so upload knows where to go
+  // ✅ Update hidden folder_id input before upload
   const folderInput = document.getElementById('folder_id');
-  if (folderInput) folderInput.value = categoryId === 'all' ? '' : categoryId;
+  if (folderInput) {
+    folderInput.value = (categoryId === 'all') ? '' : categoryId;
+  }
 
+  // Refresh file list for selected folder
   filterDocuments();
 }
+
 
 
   async function filterDocuments() {
@@ -1164,6 +1174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
