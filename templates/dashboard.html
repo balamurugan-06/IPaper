@@ -648,12 +648,41 @@
   background: linear-gradient(135deg, #2563eb, #4f46e5);
   transform: translateY(-2px);
 }
-
+.flash-messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+.flash {
+  background: #4caf50; /* green for success */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  animation: fadeOut 4s forwards;
+}
+.flash.error { background: #f44336; } /* red for error */
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; display: none; }
+}
     
   </style>
 </head>
 <body>
-  <!-- 顶部右上角 Logo -->
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
   <img src="/static/images/logo.jpeg" alt="Logo" class="top-right-logo">
 
   <div id="app" class="app">
@@ -1108,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
