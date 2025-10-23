@@ -995,14 +995,20 @@
   }
 
   function setCurrentCategory(categoryId) {
-    currentCategory = categoryId;
-    document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
-    const el = document.querySelector(`.category[data-category="${categoryId}"]`);
-    if (el) el.classList.add('active-category');
-    const categoryName = categoryId === 'all' ? 'All Documents' : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
-    $('#current-category').textContent = `Showing: ${categoryName}`;
-    filterDocuments();
-  }
+  currentCategory = categoryId;
+  document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
+  const el = document.querySelector(`.category[data-category="${categoryId}"]`);
+  if (el) el.classList.add('active-category');
+  const categoryName = categoryId === 'all' ? 'All Documents' : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
+  $('#current-category').textContent = `Showing: ${categoryName}`;
+
+  // ✅ Update hidden folder_id field so upload knows where to go
+  const folderInput = document.getElementById('folder_id');
+  if (folderInput) folderInput.value = categoryId === 'all' ? '' : categoryId;
+
+  filterDocuments();
+}
+
 
   async function filterDocuments() {
     try {
@@ -1146,6 +1152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
