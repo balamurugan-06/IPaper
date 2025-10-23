@@ -831,7 +831,7 @@ def get_documents():
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            SELECT f.fileid, f.filename, f.folderid, fo.foldername
+            SELECT f.fileid, f.filename, f.folderid, fo.foldername, f.attachment
             FROM files f
             LEFT JOIN folders fo ON f.folderid = fo.folderid
             WHERE f.userid = %s AND f.filename IS NOT NULL
@@ -841,13 +841,13 @@ def get_documents():
         cur.close()
         conn.close()
         docs = [
-            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3]}
+            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3], "path": r[4]}
             for r in rows if r[1]
         ]
         return jsonify(docs)
     except Exception as e:
+        print("get-documents error:", e)
         return jsonify([])
-
 
 @app.route('/add_category', methods=['POST'])
 def add_category():
@@ -1017,6 +1017,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
