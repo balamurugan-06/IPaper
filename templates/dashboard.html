@@ -1080,10 +1080,35 @@ const modal = document.getElementById('templateModal');
   window.addEventListener('click', (e) => {
     if (e.target === modal) closeTemplateModal();
   });
+
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    // init UI controls (resizer buttons)
+    initResizeButtons();
+
+    // load categories and documents into UI
+    loadCategories();
+    loadDocuments();
+
+    // setup collapse button labels (safe guard)
+    const s = state();
+    const btnLS = document.getElementById('btnLS');
+    const btnUS = document.getElementById('btnUS');
+    if (btnLS) btnLS.textContent = s.hasLS ? '«' : '»';
+    if (btnUS) btnUS.textContent = s.hasUS ? '«' : '»';
+
+    // wire buttons if not already wired earlier
+    if (btnLS) btnLS.onclick = () => { const st = state(); applyCollapse(!st.hasLS, st.hasUS); };
+    if (btnUS) btnUS.onclick = () => { const st = state(); applyCollapse(st.hasLS, !st.hasUS); };
+  } catch (err) {
+    console.error('Init error:', err);
+  }
+});
   
 </script>
 </body>
 </html>
+
 
 
 
