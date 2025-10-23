@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -959,40 +960,50 @@
   }
 
   function renderCategories() {
-    const container = document.querySelector('.categories-container');
-    const existing = container.querySelectorAll('.category:not([data-category="all"])');
-    existing.forEach(el => el.remove());
-    
-    categories.forEach(category => {
-      const categoryEl = document.createElement('div'); 
-      categoryEl.className = 'category'; 
-      categoryEl.dataset.category = String(category.id);
-      
-      const titleEl = document.createElement('div'); 
-      titleEl.className = 'category-title'; 
-      titleEl.textContent = category.name;
-      
-      const deleteBtn = document.createElement('button'); 
-      deleteBtn.className = 'delete-category'; 
-      deleteBtn.textContent = '🗑'; 
-      deleteBtn.onclick = (e) => { 
-        e.stopPropagation(); 
-        deleteCategory(category.id); 
-      };
-      
-      categoryEl.appendChild(titleEl); 
-      categoryEl.appendChild(deleteBtn); 
-      categoryEl.onclick = () => setCurrentCategory(String(category.id)); 
-      setupDropZone(categoryEl);
-      container.appendChild(categoryEl);
-    });
-    
-    const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
-    if (activeEl) { 
-      container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category')); 
-      activeEl.classList.add('active-category'); 
-    }
+  const container = document.querySelector('.categories-container');
+
+  // 🔹 Keep All Documents and remove others
+  const existing = container.querySelectorAll('.category:not([data-category="all"])');
+  existing.forEach(el => el.remove());
+
+  // 🔹 Rebuild subfolders
+  categories.forEach(category => {
+    const categoryEl = document.createElement('div');
+    categoryEl.className = 'category';
+    categoryEl.dataset.category = String(category.id);
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'category-title';
+    titleEl.textContent = category.name;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-category';
+    deleteBtn.textContent = '🗑';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteCategory(category.id);
+    };
+
+    categoryEl.appendChild(titleEl);
+    categoryEl.appendChild(deleteBtn);
+    categoryEl.onclick = () => setCurrentCategory(String(category.id));
+    setupDropZone(categoryEl);
+    container.appendChild(categoryEl);
+  });
+
+  // ✅ Always reattach click event to "All Documents"
+  const allCategory = container.querySelector('.category[data-category="all"]');
+  if (allCategory) {
+    allCategory.onclick = () => setCurrentCategory('all');
   }
+
+  // ✅ Maintain active highlight
+  const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
+  container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
+  if (activeEl) activeEl.classList.add('active-category');
+}
+
+  
 
   function setCurrentCategory(categoryId) {
   currentCategory = categoryId;
@@ -1152,6 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
