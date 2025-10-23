@@ -299,44 +299,34 @@ def upload_document():
 
 @app.route('/view-document/<int:doc_id>')
 def view_document(doc_id):
-    # ensure user logged in
     if 'user_id' not in session:
         return redirect('/login')
 
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT attachment, filename, userid FROM files WHERE fileid = %s", (doc_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
 
-        # fetch attachment + filename + userid (so we can verify ownership)
-        cur.execute("SELECT attachment, filename, userid FROM files WHERE fileid = %s", (doc_id,))
-        row = cur.fetchone()
-        cur.close()
-        conn.close()
+    if not row:
+        return "File not found", 404
 
-        if not row:
-            return "File not found", 404
+    file_path, filename, owner_userid = row
 
-        file_path, filename, owner_userid = row
+    if owner_userid != session['user_id']:
+        return "Unauthorized", 403
 
-        # Security check: only owner can view
-        if owner_userid != session.get('user_id'):
-            return "Forbidden: you don't have permission to view this file.", 403
+    if not os.path.exists(file_path):
+        # 👇 Try resolving relative uploads path if stored relative
+        alt_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(file_path))
+        if os.path.exists(alt_path):
+            file_path = alt_path
+        else:
+            return f"File not found on disk: {file_path}", 404
 
-        # Check file existence
-        if not file_path or not os.path.exists(file_path):
-            return f"File missing on server: {file_path}", 404
-
-        # Serve safely using send_from_directory (so we pass directory + safe filename)
-        safe_filename = os.path.basename(file_path)
-        directory = os.path.dirname(file_path) or app.config.get('UPLOAD_FOLDER')
-
-        # Use send_from_directory so Flask handles headers and path safely
-        return send_from_directory(directory, safe_filename, as_attachment=False, download_name=filename)
-
-    except Exception as e:
-        # in dev you may want a traceback; in prod don't leak internals
-        app.logger.exception("Error in view_document")
-        return f"Error displaying document: {str(e)}", 500
+    # 👇 Explicit MIME type fixes “blank tab” issue
+    return send_file(file_path, mimetype='application/pdf', as_attachment=False)
 
 
 
@@ -1011,6 +1001,7 @@ def get_templates():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
