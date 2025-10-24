@@ -1258,40 +1258,42 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const uploadBtn = document.getElementById('uploadBtn');
+
+
+  const uploadBtn = document.getElementById('uploadBtn');
 const uploadModal = document.getElementById('uploadModal');
 const cancelUpload = document.getElementById('cancelUpload');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
-// 🟢 Show modal when clicking Upload
+// 🟢 Open popup
 uploadBtn.addEventListener('click', () => {
-  uploadModal.classList.remove('hidden');
-  uploadModal.classList.add('flex');
+  uploadModal.style.display = 'flex';  // show overlay
 });
 
-// 🔴 Close modal when Cancel clicked
+// 🔴 Close popup
 cancelUpload.addEventListener('click', () => {
-  uploadModal.classList.add('hidden');
-  uploadModal.classList.remove('flex');
+  uploadModal.style.display = 'none';
+  document.getElementById('modalUploadForm').reset();
 });
 
-// 🧲 Drag and drop behavior
+// 🧲 Drag & drop zone
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => {
   e.preventDefault();
-  dropZone.classList.add('bg-blue-50');
+  dropZone.classList.add('active');
 });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('bg-blue-50'));
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   fileInput.files = e.dataTransfer.files;
-  dropZone.classList.remove('bg-blue-50');
+  dropZone.classList.remove('active');
 });
   
 </script>
 </body>
 </html>
+
 
 
 
