@@ -828,6 +828,7 @@ def get_documents():
     if 'user_id' not in session:
         return jsonify([])
 
+    # Read category filter (from URL parameter)
     category_filter = request.args.get('category', 'all')
 
     try:
@@ -835,7 +836,7 @@ def get_documents():
         cur = conn.cursor()
 
         if category_filter == 'all':
-            # Only show files uploaded to "All Documents"
+            # ✅ Show only files uploaded directly under "All Documents"
             cur.execute("""
                 SELECT f.fileid, f.filename, f.folderid, fo.foldername
                 FROM files f
@@ -844,7 +845,7 @@ def get_documents():
                 ORDER BY f.fileid DESC
             """, (session['user_id'],))
         else:
-            # Only show files uploaded to the selected subfolder
+            # ✅ Show only files for this selected subfolder
             cur.execute("""
                 SELECT f.fileid, f.filename, f.folderid, fo.foldername
                 FROM files f
@@ -853,18 +854,21 @@ def get_documents():
                 ORDER BY f.fileid DESC
             """, (session['user_id'], category_filter))
 
-     
         rows = cur.fetchall()
         cur.close()
         conn.close()
+
         docs = [
-            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3], "path": r[4]}
-            for r in rows if r[1]
+            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3]}
+            for r in rows
         ]
         return jsonify(docs)
+
     except Exception as e:
-        print("get-documents error:", e)
-        return jsonify([])
+        print("❌ Error in /get-documents:", e)
+        return jsonify({'error': str(e)}), 500
+
+
 
 @app.route('/add_category', methods=['POST'])
 def add_category():
@@ -1034,6 +1038,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
