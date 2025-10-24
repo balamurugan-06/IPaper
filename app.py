@@ -832,24 +832,24 @@ def get_documents():
         cur = conn.cursor()
         category_filter = request.args.get('category', 'all')
 
-if category_filter == 'all':
-    # Only files not assigned to any folder (no folderid)
-    cur.execute("""
-        SELECT f.fileid, f.filename, f.folderid, fo.foldername
-        FROM files f
-        LEFT JOIN folders fo ON f.folderid = fo.folderid
-        WHERE f.userid = %s AND f.folderid IS NULL
-        ORDER BY f.fileid DESC
-    """, (session['user_id'],))
-else:
-    # Files inside a specific folder
-    cur.execute("""
-        SELECT f.fileid, f.filename, f.folderid, fo.foldername
-        FROM files f
-        LEFT JOIN folders fo ON f.folderid = fo.folderid
-        WHERE f.userid = %s AND f.folderid = %s
-        ORDER BY f.fileid DESC
-    """, (session['user_id'], category_filter))
+        if category_filter == 'all':
+            # Only files not assigned to any folder (no folderid)
+            cur.execute("""
+                SELECT f.fileid, f.filename, f.folderid, fo.foldername
+                FROM files f
+                LEFT JOIN folders fo ON f.folderid = fo.folderid
+                WHERE f.userid = %s AND f.folderid IS NULL
+                ORDER BY f.fileid DESC
+            """, (session['user_id'],))
+        else:
+            # Files inside a specific folder
+            cur.execute("""
+                SELECT f.fileid, f.filename, f.folderid, fo.foldername
+                FROM files f
+                LEFT JOIN folders fo ON f.folderid = fo.folderid
+                WHERE f.userid = %s AND f.folderid = %s
+                ORDER BY f.fileid DESC
+            """, (session['user_id'], category_filter))
 
         rows = cur.fetchall()
         cur.close()
@@ -1031,6 +1031,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
