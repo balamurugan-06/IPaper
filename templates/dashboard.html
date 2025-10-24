@@ -1033,27 +1033,25 @@
 
 
   async function filterDocuments() {
-    try {
-      const res = await fetch(`/get-documents?category=${currentCategory}`);
-      if (!res.ok) throw new Error('Failed to fetch documents');
-      const docs = await res.json();
-      let filteredDocs = docs;
-      if (currentCategory !== 'all') {
-        filteredDocs = docs.filter(doc => String(doc.category) === String(currentCategory));
-      }
-      const container = $('#documents-container'); 
-      container.innerHTML = '';
-      if (!Array.isArray(filteredDocs) || filteredDocs.length === 0) {
-        container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
-      } else {
-        filteredDocs.forEach(doc => container.appendChild(createDocumentItem(doc)));
-      }
-    } catch (err) { 
-      console.error('Error filtering documents:', err); 
-      const container = $('#documents-container');
-      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Unable to load documents</div>';
+  try {
+    const res = await fetch(`/get-documents?category=${currentCategory}`);
+    if (!res.ok) throw new Error('Failed to fetch documents');
+
+    const docs = await res.json();
+    const container = document.getElementById('documents-container');
+    container.innerHTML = '';
+
+    if (!Array.isArray(docs) || docs.length === 0) {
+      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No documents in this category</div>';
+      return;
     }
+
+    docs.forEach(doc => container.appendChild(createDocumentItem(doc)));
+  } catch (err) {
+    console.error('Error filtering documents:', err);
   }
+}
+
 
  // ✅ Template Modal - Final Fixed Version
 const modal = document.getElementById('templateModal');
@@ -1174,6 +1172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
