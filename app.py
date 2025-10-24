@@ -840,7 +840,7 @@ def get_documents():
         if category_filter == 'all':
             # ✅ Show only files uploaded directly under "All Documents"
             cur.execute("""
-                SELECT f.fileid, f.filename, f.folderid, fo.foldername
+                SELECT f.fileid, f.filename, f.title, f.folderid, fo.foldername
                 FROM files f
                 LEFT JOIN folders fo ON f.folderid = fo.folderid
                 WHERE f.userid = %s AND f.folderid IS NULL
@@ -849,7 +849,7 @@ def get_documents():
         else:
             # ✅ Show only files for this selected subfolder
             cur.execute("""
-                SELECT f.fileid, f.filename, f.folderid, fo.foldername
+                SELECT f.fileid, f.filename, f.title, f.folderid, fo.foldername
                 FROM files f
                 LEFT JOIN folders fo ON f.folderid = fo.folderid
                 WHERE f.userid = %s AND f.folderid = %s
@@ -861,7 +861,7 @@ def get_documents():
         conn.close()
 
         docs = [
-            {"id": r[0], "filename": r[1], "category": r[2], "category_name": r[3]}
+            {"id": r[0], "filename": r[1], "title": r[2], "category": r[3], "category_name": r[4]}
             for r in rows
         ]
         return jsonify(docs)
@@ -1040,6 +1040,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
