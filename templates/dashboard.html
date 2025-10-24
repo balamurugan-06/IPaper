@@ -734,6 +734,11 @@
     background-color: #3b82f6;
     color: #fff;
   }
+
+    .document-item.selected {
+  border: 2px solid #4CAF50;
+  background-color: #eaffea;
+  transition: 0.2s ease;
     
   </style>
 </head>
@@ -898,7 +903,20 @@
     div.dataset.fileName = doc.filename || doc.name || 'untitled';
     div.draggable = true;
 
-    div.onclick = () => window.open(`/view-document/${doc.id}`, '_blank');
+    div.onclick = (e) => {
+  e.stopPropagation();
+
+  // Remove highlight from others
+  document.querySelectorAll('.document-item.selected').forEach(item => {
+    item.classList.remove('selected');
+  });
+
+  // Highlight this one
+  div.classList.add('selected');
+  window.selectedDocId = doc.id; // store selected document ID globally
+  console.log('Selected document:', window.selectedDocId);
+};
+
 
     const delBtn = document.createElement('button');
     delBtn.className = 'document-delete-btn';
@@ -1157,11 +1175,17 @@ const modal = document.getElementById('templateModal');
 
   // Open modal when "Generate" is clicked
   if (generateBtn) {
-    generateBtn.addEventListener('click', async () => {
-      modal.classList.remove('hidden');
-      await loadTemplates();
-    });
-  }
+  generateBtn.addEventListener('click', async () => {
+    if (!window.selectedDocId) {
+      alert('⚠️ Please select a document first before generating.');
+      return;
+    }
+
+    // Open modal for template selection
+    modal.classList.remove('hidden');
+    await loadTemplates();
+  });
+}
 
   // Load templates
   async function loadTemplates() {
@@ -1308,6 +1332,7 @@ fileInput.addEventListener('change', () => {
 </script>
 </body>
 </html>
+
 
 
 
