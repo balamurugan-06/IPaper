@@ -827,13 +827,15 @@ def delete_template(id):
 def get_documents():
     if 'user_id' not in session:
         return jsonify([])
+
+    category_filter = request.args.get('category', 'all')
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        category_filter = request.args.get('category', 'all')
 
         if category_filter == 'all':
-            # Only files not assigned to any folder (no folderid)
+            # Only show files uploaded to "All Documents"
             cur.execute("""
                 SELECT f.fileid, f.filename, f.folderid, fo.foldername
                 FROM files f
@@ -842,7 +844,7 @@ def get_documents():
                 ORDER BY f.fileid DESC
             """, (session['user_id'],))
         else:
-            # Files inside a specific folder
+            # Only show files uploaded to the selected subfolder
             cur.execute("""
                 SELECT f.fileid, f.filename, f.folderid, fo.foldername
                 FROM files f
@@ -851,6 +853,7 @@ def get_documents():
                 ORDER BY f.fileid DESC
             """, (session['user_id'], category_filter))
 
+     
         rows = cur.fetchall()
         cur.close()
         conn.close()
@@ -1031,6 +1034,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
