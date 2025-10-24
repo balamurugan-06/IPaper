@@ -837,6 +837,7 @@
         Choose file or drag and drop here<br>
         <span style="font-size:12px;color:#888;">Supported formats: PDF & DOCX</span>
         <input type="file" id="fileInput" name="file" accept=".pdf,.docx" class="hidden" required>
+        <p id="fileNameDisplay" style="margin-top:10px; font-size:13px; color:#444;"></p>
       </div>
 
       <div style="text-align:right;">
@@ -892,7 +893,7 @@
   function createDocumentItem(doc) {
     const div = document.createElement('div');
     div.className = 'document-item';
-    div.textContent = doc.filename || doc.name || 'untitled';
+    div.textContent = doc.title || doc.filename || doc.name || 'untitled';
     div.dataset.docId = doc.id;
     div.dataset.fileName = doc.filename || doc.name || 'untitled';
     div.draggable = true;
@@ -1265,6 +1266,8 @@ const uploadModal = document.getElementById('uploadModal');
 const cancelUpload = document.getElementById('cancelUpload');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+  
 
 // 🟢 Open popup
 uploadBtn.addEventListener('click', () => {
@@ -1288,11 +1291,24 @@ dropZone.addEventListener('drop', e => {
   e.preventDefault();
   fileInput.files = e.dataTransfer.files;
   dropZone.classList.remove('active');
+  // ✅ Show dropped file name
+  if (fileInput.files.length > 0) {
+    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+  } else {
+    fileNameDisplay.textContent = '';
+  }
 });
   
 </script>
 </body>
 </html>
+
 
 
 
