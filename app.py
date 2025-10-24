@@ -248,6 +248,7 @@ def upload_document():
     files = request.files.getlist('file')
     folder_id_raw = request.form.get('folder_id')
     folder_id = int(folder_id_raw) if folder_id_raw and folder_id_raw.isdigit() else None
+    title = request.form.get('title')
 
     if not files or files[0].filename == '':
         flash("No file selected", "error")
@@ -277,9 +278,10 @@ def upload_document():
 
                 # ✅ Save only path and filename in DB
                 cur.execute("""
-                    INSERT INTO files (userid, folderid, filename, attachment)
-                    VALUES (%s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, save_path))
+                    INSERT INTO files (userid, folderid, filename, title, attachment)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (session['user_id'], folder_id, filename, title, save_path))
+
 
         conn.commit()
         flash("Files uploaded successfully!", "success")
@@ -1038,6 +1040,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
