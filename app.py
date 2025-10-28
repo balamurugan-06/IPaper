@@ -500,17 +500,19 @@ def delete_user(user_id):
         flash(f"Failed to delete user: {e}", "error")
     return redirect('/admin')
 
-@app.route('/admin/update_image', methods=['POST'])
-def update_image():
-    image_id = request.form['id']
-    new_path = request.form['path']
-    new_caption = request.form['caption']
-
-    cur = conn.cursor()
-    cur.execute("UPDATE media SET path=%s, caption=%s WHERE id=%s", (new_path, new_caption, image_id))
-    conn.commit()
-    cur.close()
-    return redirect('/admin')
+@app.route('/admin/media', methods=['GET', 'POST'])
+def admin_media():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        type_ = request.form['type']
+        path = request.form['path']
+        caption = request.form['caption']
+        conn.execute('INSERT INTO media (type, path, caption) VALUES (?, ?, ?)', (type_, path, caption))
+        conn.commit()
+        return redirect('/admin/media')
+    images = conn.execute('SELECT * FROM media').fetchall()
+    conn.close()
+    return render_template('admin_media.html', images=images)
 
 
 
@@ -1053,6 +1055,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
