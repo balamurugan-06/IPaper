@@ -162,7 +162,21 @@
       </div>
     </div>
 
+    <div class="card">
+  <h2>Update Homepage Images</h2>
+  <p>Edit image URLs and captions shown on the landing page.</p>
+  {% for img in images %}
+  <form action="/admin/update_image" method="POST" style="margin-bottom:20px;">
+    <input type="hidden" name="id" value="{{ img[0] }}">
+    <input type="text" name="path" value="{{ img[2] }}" style="width:100%;padding:8px;"><br><br>
+    <input type="text" name="caption" value="{{ img[3] }}" style="width:100%;padding:8px;"><br><br>
+    <button class="btn green" type="submit">Update</button>
+  </form>
+  {% endfor %}
+</div>
+
     
   </main>
 </body>
 </html>
+
