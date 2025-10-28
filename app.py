@@ -500,31 +500,57 @@ def delete_user(user_id):
         flash(f"Failed to delete user: {e}", "error")
     return redirect('/admin')
 
-@app.route('/admin/media', methods=['GET', 'POST'])
+@app.route('/admin/media', methods=['GET'])
 def admin_media():
     conn = get_db_connection()
     cur = conn.cursor()
-
-    if request.method == 'POST':
-        type_ = request.form['type']
-        path = request.form['path']
-        caption = request.form['caption']
-
-        cur.execute(
-            'INSERT INTO media (type, path, caption) VALUES (%s, %s, %s)',
-            (type_, path, caption)
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect('/admin/media')
-
-    cur.execute('SELECT * FROM media')
+    cur.execute('SELECT id, type, path, caption FROM media ORDER BY id')
     images = cur.fetchall()
     cur.close()
     conn.close()
-
     return render_template('admin_media.html', images=images)
+
+
+@app.route('/admin/media/update', methods=['POST'])
+def update_media():
+    id_ = request.form.get('id')
+    path = request.form.get('path', '').strip()
+    caption = request.form.get('caption', '').strip()
+
+    if not id_:
+        flash("Image ID is required.", "error")
+        return redirect('/admin/media')
+
+    # Build dynamic update only for fields provided
+    fields = []
+    values = []
+
+    if path:
+        fields.append("path = %s")
+        values.append(path)
+    if caption:
+        fields.append("caption = %s")
+        values.append(caption)
+
+    if not fields:
+        flash("Nothing to update. Provide a new path or caption.", "info")
+        return redirect('/admin/media')
+
+    values.append(id_)  # WHERE id = %s
+
+    query = f"UPDATE media SET {', '.join(fields)} WHERE id = %s"
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(query, tuple(values))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    flash("Image updated successfully.", "success")
+    return redirect('/admin/media')
+
+
 
 
 
@@ -1067,6 +1093,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
