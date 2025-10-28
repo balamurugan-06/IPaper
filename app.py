@@ -503,15 +503,27 @@ def delete_user(user_id):
 @app.route('/admin/media', methods=['GET', 'POST'])
 def admin_media():
     conn = get_db_connection()
+    cur = conn.cursor()
+
     if request.method == 'POST':
         type_ = request.form['type']
         path = request.form['path']
         caption = request.form['caption']
-        conn.execute('INSERT INTO media (type, path, caption) VALUES (?, ?, ?)', (type_, path, caption))
+
+        cur.execute(
+            'INSERT INTO media (type, path, caption) VALUES (%s, %s, %s)',
+            (type_, path, caption)
+        )
         conn.commit()
+        cur.close()
+        conn.close()
         return redirect('/admin/media')
-    images = conn.execute('SELECT * FROM media').fetchall()
+
+    cur.execute('SELECT * FROM media')
+    images = cur.fetchall()
+    cur.close()
     conn.close()
+
     return render_template('admin_media.html', images=images)
 
 
@@ -1055,6 +1067,7 @@ def debug_files():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
