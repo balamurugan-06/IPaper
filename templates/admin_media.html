@@ -1,69 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>Manage Homepage Images</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f7f8fa;
-      margin: 0;
-      padding: 40px;
-    }
-    h1 { color: #333; }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 500px;
-    }
-    input, textarea {
-      width: 100%;
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover { background: #0056b3; }
-    .images-list {
-      margin-top: 40px;
-    }
-    .image-item {
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    }
+    body{font-family:Segoe UI,Arial;background:#f7f8fa;padding:30px}
+    .container{max-width:1000px;margin:0 auto}
+    form{background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    input,textarea,button{display:block;width:100%;margin-bottom:12px;padding:10px;border-radius:6px;border:1px solid #ddd}
+    .images-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:22px}
+    .image-card{background:#fff;padding:12px;border-radius:8px;border:1px solid #eee}
+    .image-card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
+    .small{font-size:13px;color:#555}
   </style>
 </head>
 <body>
-  <h1>Manage Homepage Images</h1>
-  <form action="/admin/media" method="POST">
-    <input type="text" name="type" placeholder="Type (e.g., image)" required>
-    <input type="text" name="path" placeholder="Image URL" required>
-    <textarea name="caption" placeholder="Image caption"></textarea>
-    <button type="submit">Add Image</button>
-  </form>
+  <div class="container">
+    <h1>Manage Homepage Images</h1>
 
-  <div class="images-list">
-    <h2>Existing Images</h2>
-    {% for image in images %}
-    <div class="image-item">
-      <img src="{{ image[2] }}" alt="Image" style="width:100%; border-radius:8px;">
-      <p><strong>Type:</strong> {{ image[1] }}</p>
-      <p><strong>Caption:</strong> {{ image[3] }}</p>
+    <h3>Update existing image</h3>
+    <form action="/admin/media/update" method="POST">
+      <input type="number" name="id" placeholder="Image ID to update (required)" required>
+      <input type="text" name="path" placeholder="New image URL (leave blank to keep current)">
+      <textarea name="caption" placeholder="New caption (leave blank to keep current)"></textarea>
+      <button type="submit">Update Image</button>
+    </form>
+
+    <h3 style="margin-top:30px">Existing images (id shown)</h3>
+    <div class="images-grid">
+      {% for img in images %}
+      <div class="image-card">
+        <p class="small"><strong>ID:</strong> {{ img[0] }} &nbsp; <strong>Type:</strong> {{ img[1] }}</p>
+        <img src="{{ img[2] }}" alt="image-{{ img[0] }}">
+        <p class="small"><strong>Caption:</strong> {{ img[3] or '-' }}</p>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
 </body>
 </html>
