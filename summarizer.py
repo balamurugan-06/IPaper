@@ -4,6 +4,7 @@ from openai import OpenAI
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from textwrap import wrap
+import os
 
 # ========== CONFIG ==========
 
