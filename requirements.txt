@@ -5,4 +5,7 @@ Flask-Session
 python-dotenv
 werkzeug
 bcrypt
-
+PyMuPDF
+tqdm
+openai
+reportlab

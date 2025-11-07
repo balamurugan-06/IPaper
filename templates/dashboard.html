@@ -739,12 +739,54 @@
   border: 2px solid #4CAF50;
   background-color: #eaffea;
   transition: 0.2s ease;
-    
+}
+      #fullscreenLoader {
+  position: fixed;
+  inset: 0; /* top, right, bottom, left = 0 */
+  background: rgba(0,0,0,0.45);
+  display: none; /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* very high so it covers everything */
+  backdrop-filter: blur(2px);
+}
+
+#fullscreenLoader .loader-box {
+  background: white;
+  padding: 22px 30px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #3b82f6;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #cce5ff;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
   </style>
 </head>
 <body>
   
   <img src="/static/images/logo.jpeg" alt="Logo" class="top-right-logo">
+  <div id="fullscreenLoader">
+      <div class="loader-box">
+          <div class="spinner"></div>
+          <p>Generating summary... Please wait</p>
+      </div>
+  </div>
+
 
   <div id="app" class="app">
     <aside id="ls" class="sidebar ls">
@@ -804,6 +846,9 @@
       </div>
       <h1>Welcome back, {{ name }}</h1>
       <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
+        <div id="generatedText">
+
+        </div>
     </main>
   </div>
 
@@ -914,7 +959,10 @@
   // Highlight this one
   div.classList.add('selected');
   window.selectedDocId = doc.id; // store selected document ID globally
+  window.selectedDocName = doc.filename
   console.log('Selected document:', window.selectedDocId);
+  loadSummaryForSelectedDoc(doc.id);
+
 };
 
 
@@ -1237,15 +1285,51 @@ const modal = document.getElementById('templateModal');
     document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
   }
 
-  generateNowBtn.addEventListener('click', () => {
-    if (!selectedTemplateId) {
-      alert('Please select a template first.');
-      return;
+generateNowBtn.addEventListener('click', async () => {
+  if (!selectedTemplateId) {
+    alert("⚠️ Please select a template first.");
+    return;
+  }
+
+  const loader = document.getElementById("fullscreenLoader");
+  const outputDiv = document.getElementById("generatedText");
+
+  loader.style.display = "flex";
+  outputDiv.textContent = "";
+
+  const template = allTemplates.find(t => t.id == selectedTemplateId);
+
+  try {
+    const summaryRes = await fetch("/generateSummary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_name: window.selectedDocName,
+        document_id: window.selectedDocId,
+        template_prompt: template.prompt,
+        summaryTemplate:selectedTemplateId
+      })
+    });
+
+    const data = await summaryRes.json();
+
+    if (data.summary) {
+      outputDiv.textContent = data.summary;
+    } else {
+      outputDiv.textContent = "❌ Error: " + (data.error || "Unknown error");
     }
-    const selected = allTemplates.find(t => t.id == selectedTemplateId);
-    alert(`🧠 Generating with template: "${selected.name}"`);
-    closeTemplateModal();
-  });
+
+  } catch (err) {
+    outputDiv.textContent = "⚠️ Server error. Check console.";
+    console.error(err);
+
+  } finally {
+    loader.style.display = "none"; // ✅ HIDE POPUP OVERLAY
+  }
+
+  closeTemplateModal();
+});
+
 
   // Close modal when clicking outside
   window.addEventListener('click', (e) => {
@@ -1328,7 +1412,42 @@ fileInput.addEventListener('change', () => {
     fileNameDisplay.textContent = '';
   }
 });
-  
+document.getElementById("downloadBtn").addEventListener("click", () => {
+    const filename = "summary_"+window.selectedDocId+".pdf";
+    const summaryText = document.getElementById("generatedText").innerText.trim();
+
+    if (filename.includes("undefined")) {
+        alert("⚠️ Please select a document first.");
+        return;
+    }
+    if (!summaryText) {
+        alert("⚠️ No summary available. Please generate summary first.");
+        return;
+    }
+    window.location.href = `/download/${filename}`;
+});
+
+async function loadSummaryForSelectedDoc(docId) {
+  const outputDiv = document.getElementById("generatedText");
+  outputDiv.textContent = "⏳ Checking summary...";
+
+  try {
+    const res = await fetch(`/getSummary/${docId}`);
+    const data = await res.json();
+
+    if (data.summary) {
+      outputDiv.textContent = data.summary; // ✅ Display saved summary
+    } else {
+      outputDiv.textContent = "📄 No summary generated yet for this document.";
+    }
+
+  } catch (err) {
+    outputDiv.textContent = "⚠️ Error fetching summary.";
+    console.error(err);
+  }
+}
+
+
 </script>
 </body>
 </html>
