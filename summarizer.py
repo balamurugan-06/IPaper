@@ -6,7 +6,8 @@ from reportlab.pdfgen import canvas
 from textwrap import wrap
 
 # ========== CONFIG ==========
-OPENAI_API_KEY = "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"
+
+OPENAI_API_KEY = os.getenv("GEN_AI_KEY")
 MODEL_NAME = "gpt-4o-mini"
 CHUNK_SIZE = 6000
 # ============================
