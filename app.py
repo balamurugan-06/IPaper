@@ -16,8 +16,9 @@ from flask import url_for
 import uuid
 from datetime import datetime, timedelta
 import traceback
-
-
+from summarizer import summarizer
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -1088,8 +1089,77 @@ def debug_files():
     except Exception as e:
         return f"Error inspecting uploads: {e}", 500
         
+@app.route("/generateSummary", methods=["POST"])
+def generateSummary():
+    data = request.get_json()
+    doc_name = data.get("document_name")
+    doc_id = data.get("document_id")
+    tem_prompt = data.get("template_prompt") + " also "
+    summaryTemplateId = data.get("summaryTemplate")
+    docPath = "uploads/" + doc_name
 
+    try:
+        summary = summarizer(docPath, tem_prompt, doc_id)
+        modelName = "gpt-4o-mini"
+        now = datetime.now()
 
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # ✅ Check if row exists
+        cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
+        existing = cur.fetchone()
+
+        if existing:
+            # ✅ Update summary
+            cur.execute("""
+                UPDATE summarygenerate
+                SET summarytemplateid = %s,
+                    modelname = %s,
+                    summary = %s,
+                    createdat = %s
+                WHERE docid = %s
+            """, (summaryTemplateId, modelName, summary, now, doc_id))
+        else:
+            # ✅ Insert new summary
+            cur.execute("""
+                INSERT INTO summarygenerate (summarytemplateid, modelname, summary, createdat, docid)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (summaryTemplateId, modelName, summary, now, doc_id))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"summary": summary})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory("uploads", filename, as_attachment=True)
+@app.route("/getSummary/<doc_id>")
+def getSummary(doc_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT summary
+        FROM summarygenerate
+        WHERE docid = %s
+        ORDER BY createdat DESC
+        LIMIT 1
+    """, (doc_id,))
+
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if row:
+        return jsonify({"summary": row[0]})
+    else:
+        return jsonify({"summary": None})
 
 if __name__ == '__main__':
     app.run(debug=True)
