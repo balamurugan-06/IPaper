@@ -75,7 +75,7 @@ def index():
 def register():
     if request.method == 'POST':
         name = request.form['name']
-        email = request.form['email']
+        email = request.form['email'].strip().lower()
         password = request.form['password']
         confirm_password = request.form['confirmPassword']
         gender = request.form['gender']
@@ -1163,6 +1163,7 @@ def getSummary(doc_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
