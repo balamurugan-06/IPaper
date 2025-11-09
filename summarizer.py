@@ -96,40 +96,40 @@ def summarize_document(text, num_pages, promptFromFE):
     combined_summary_text = "\n\n".join(summaries)
     print("\nGenerating final summary...")
 
-    final_prompt = f"""
-You are to produce a final structured summary for the document. 
-Do not repeat or duplicate sentences from the partial summaries.
+final_prompt = f"""
+You are to create a well-structured, clean final summary.
 
-### Required Output Format (with Headings):
+### Output Format (Use these exact headings):
 
-**Introduction**  
-Describe the main purpose and context of the document.
+# Introduction
+Write a short overview of the document purpose and context.
 
-**Key Concepts / Themes**  
-Summarize the major concepts, main ideas, or central arguments.
+# Key Themes / Core Arguments
+Summarize the main points clearly in **short bullet points**:
+- Keep bullets brief
+- Focus on essential ideas
+- Avoid repetition
 
-**Methodology / Approach**  
-If the document explains methods or steps, summarize them clearly.  
-If not relevant, omit this section naturally.
+# Method / Approach (Skip if not relevant)
+Explain the methodology or process in **2–4 short bullet points**.
 
-**Findings / Main Insights**  
-Highlight the important results, insights, outcomes, or discussions.
+# Findings / Insights
+Present key insights as **clear bullet points**.
 
-**Conclusion**  
-State the overall significance, takeaways, recommendations, or implications.
+# Conclusion
+Summarize the final takeaway in **3–5 sentences.**
 
-### Writing Rules:
-- Use clear paragraphs.
-- Keep flow logical.
-- Do not use bullet points unless necessary.
-- Do not repeat sentences from chunk summaries.
+### Rules
+- No long paragraphs
+- Prefer bullet points where possible
+- Keep sentences short and direct
+- Do not repeat any lines from earlier summaries
 
-### Expected Length:
+### Target Length:
 {summary_instruction}
 
 ---
-
-Here are the partial summaries to merge:
+Here are the partial summaries to combine:
 {combined_summary_text}
 """
 
