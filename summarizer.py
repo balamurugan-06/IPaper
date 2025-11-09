@@ -104,7 +104,7 @@ Requirements (IMPORTANT):
 - Use <strong> tags for headings (e.g. <strong>Introduction</strong>).
 - For sub-points, produce an unordered list using <ul> and <li>.
   Each <li> text should begin with the bullet symbol "• " (U+2022) followed by the short point.
-  Example: <ul><li>• First sub-point</li><li>• Second sub-point</li></ul>
+  Example: <ul><li> First sub-point</li><li> Second sub-point</li></ul>
 - Keep paragraphs short. Prefer lists for Key Themes / Findings.
 - Do NOT include any <script> tags or inline event handlers.
 - Output only HTML markup (no surrounding backticks or text).
@@ -115,20 +115,20 @@ Structure to produce (as HTML, with headings wrapped in <strong>):
 
 <strong>Key Themes / Core Arguments</strong>
 <ul>
-<li>• Theme 1 summary (very short)</li>
-<li>• Theme 2 summary</li>
+<li> Theme 1 summary (very short)</li>
+<li> Theme 2 summary</li>
 </ul>
 
 <strong>Method / Approach</strong>
 <ul>
-<li>• Method point 1</li>
-<li>• Method point 2</li>
+<li> Method point 1</li>
+<li> Method point 2</li>
 </ul>
 
 <strong>Findings / Insights</strong>
 <ul>
-<li>• Finding 1</li>
-<li>• Finding 2</li>
+<li> Finding 1</li>
+<li> Finding 2</li>
 </ul>
 
 <strong>Conclusion</strong>
