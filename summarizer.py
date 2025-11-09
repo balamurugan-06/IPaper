@@ -56,7 +56,20 @@ def determine_summary_length(num_pages, word_count):
         return "Write a summary of about 1,200–1,800 words."
 
 def summarize_chunk(chunk,fePrompt):
-    final = f"{fePrompt}\n\n{chunk}"
+    final = f"""
+{fePrompt}
+
+Summarize the following text clearly and concisely.
+
+### Chunk Summary Format:
+**Key Ideas:**
+- Explain main concepts
+- Avoid unnecessary detail
+- No repetition
+
+Text:
+{chunk}
+"""
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": final}],
@@ -82,9 +95,40 @@ def summarize_document(text, num_pages,promptFromFE):
     print("\nGenerating final summary...")
 
     final_prompt = (
-        f"{fePrompt}\n\n"
-        f"Here are multiple partial summaries of a document. Combine them into a single, well-structured summary:\n\n"
-        f"{combined_summary_text}"
+        final_prompt = f"""
+You are to produce a final structured summary for the document. 
+Do not repeat or duplicate sentences from the partial summaries.
+
+### Required Output with Headings:
+**Introduction**
+Explain the purpose and context of the document.
+
+**Key Concepts / Themes**
+Summarize the major ideas and arguments.
+
+**Methodology or Approach**
+If the document describes methods, summarize them briefly. 
+If not relevant, skip this section naturally.
+
+**Findings or Main Insights**
+Describe the main outcomes, evidence, results, or discussions.
+
+**Conclusion**
+State the final takeaway and significance.
+
+### Writing Style:
+- Use clear, short paragraphs.
+- Avoid bullet points unless required to list major themes.
+- Maintain a smooth logical flow.
+
+### Target Length:
+{summary_instruction}
+
+---
+
+Here are the partial summaries to merge:
+{combined_summary_text}
+"""
     )
 
     response = client.chat.completions.create(
