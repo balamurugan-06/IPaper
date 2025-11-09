@@ -23,9 +23,10 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
 
-def add_emojis_based_on_prompt(summary_html, prompt):
-    """Adds relevant emojis to the summary HTML based on prompt keywords."""
-    emoji_map = {
+def add_emojis_to_summary(summary_html, prompt):
+    """Add contextual and section-based emojis to summary HTML."""
+    # Emoji by topic keywords in prompt
+    topic_emojis = {
         "business": "💼",
         "finance": "💰",
         "education": "🎓",
@@ -44,14 +45,40 @@ def add_emojis_based_on_prompt(summary_html, prompt):
     }
 
     prompt_lower = prompt.lower()
-    emojis = [emoji for keyword, emoji in emoji_map.items() if keyword in prompt_lower]
-    if not emojis:
-        emojis = ["✨"]
+    main_emoji = next((emoji for k, emoji in topic_emojis.items() if k in prompt_lower), "✨")
 
-    # Insert emojis next to headings (<strong> tags)
-    for emoji in emojis:
-        summary_html = summary_html.replace("<strong>", f"<strong>{emoji} ", 1)
+    # Section-specific emojis
+    section_emojis = {
+        "introduction": "📘",
+        "key themes": "💡",
+        "core arguments": "💡",
+        "method": "🧭",
+        "approach": "🧭",
+        "findings": "📊",
+        "insights": "🔍",
+        "conclusion": "🎯",
+        "summary": "📝"
+    }
+
+    def add_section_emoji(heading):
+        heading_lower = heading.lower()
+        for key, emoji in section_emojis.items():
+            if key in heading_lower:
+                return f"{emoji} {heading}"
+        # fallback to topic emoji
+        return f"{main_emoji} {heading}"
+
+    # Replace <strong> sections with emojis
+    import re
+    summary_html = re.sub(
+        r"<strong>(.*?)</strong>",
+        lambda m: f"<strong>{add_section_emoji(m.group(1))}</strong>",
+        summary_html,
+        flags=re.IGNORECASE
+    )
+
     return summary_html
+
 
 
 
@@ -235,6 +262,7 @@ def summarizer(pdfPath, promptFromFE,docId):
     summary = summarize_document(text, num_pages, promptFromFE)
 
     summary = add_emojis_based_on_prompt(summary, promptFromFE)
+    summary = add_emojis_to_summary(summary, promptFromFE)
 
     output_pdf = f"uploads/summary_{docId}.pdf"
     save_summary_to_pdf(summary, output_pdf)
