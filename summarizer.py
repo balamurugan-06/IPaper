@@ -5,9 +5,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from textwrap import wrap
 import os
+import re
 
 # ========== CONFIG ==========
-
 OPENAI_API_KEY = os.getenv("GEN_AI_KEY")
 MODEL_NAME = "gpt-4o-mini"
 CHUNK_SIZE = 6000
@@ -21,9 +21,20 @@ def save_summary_to_pdf(summary_text, output_path="summary.pdf"):
     margin = 40
     y_position = height - margin
     c.setFont("Helvetica", 11)
-    wrapped_text = wrap(summary_text, 90)
-
-    for line in wrapped_text:
+    
+    # Preserve line breaks from the original text
+    lines = []
+    for paragraph in summary_text.split('\n\n'):
+        if paragraph.strip():
+            wrapped_lines = wrap(paragraph, 90)
+            lines.extend(wrapped_lines)
+            lines.append('')  # Add empty line between paragraphs
+    
+    for line in lines:
+        if line == '':  # Empty line for paragraph spacing
+            y_position -= 8
+            continue
+            
         if y_position < margin:
             c.showPage()
             c.setFont("Helvetica", 11)
@@ -44,20 +55,49 @@ def extract_text_from_pdf(pdf_path):
     return text, num_pages
 
 def split_text_into_chunks(text, max_length=4000):
-    return [text[i:i + max_length] for i in range(0, len(text), max_length)]
+    # Split at paragraph boundaries when possible
+    paragraphs = text.split('\n\n')
+    chunks = []
+    current_chunk = ""
+    
+    for paragraph in paragraphs:
+        if len(current_chunk) + len(paragraph) + 2 <= max_length:
+            current_chunk += paragraph + "\n\n"
+        else:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            current_chunk = paragraph + "\n\n"
+    
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    
+    return chunks
 
 def determine_summary_length(num_pages, word_count):
     if num_pages <= 20 or word_count <= 5000:
-        return "Write a summary of about 300–500 words."
+        return "Write a summary of about 300–500 words. PRESERVE the original formatting, line breaks, and paragraph structure."
     elif num_pages <= 60 or word_count <= 20000:
-        return "Write a summary of about 600–900 words."
+        return "Write a summary of about 600–900 words. PRESERVE the original formatting, line breaks, and paragraph structure."
     elif num_pages <= 240 or word_count <= 80000:
-        return "Write a summary of about 900–1,200 words."
+        return "Write a summary of about 900–1,200 words. PRESERVE the original formatting, line breaks, and paragraph structure."
     else:
-        return "Write a summary of about 1,200–1,800 words."
+        return "Write a summary of about 1,200–1,800 words. PRESERVE the original formatting, line breaks, and paragraph structure."
 
 def summarize_chunk(chunk, fePrompt):
-    final = f"{fePrompt}\n\n{chunk}"
+    # Enhanced prompt to preserve formatting
+    formatting_instruction = """
+CRITICAL FORMATTING INSTRUCTIONS:
+- PRESERVE all line breaks and paragraph breaks
+- Use **bold** for section headers and important terms
+- Use bullet points with • for lists
+- Use --- for section dividers
+- Maintain proper spacing between sections
+- Keep emojis and labels properly spaced
+- DO NOT collapse everything into one paragraph
+- Structure the summary with clear sections and subsections
+"""
+    
+    final = f"{fePrompt}\n\n{formatting_instruction}\n\nText to summarize:\n{chunk}"
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": final}],
@@ -71,9 +111,17 @@ def summarize_document(text, num_pages, promptFromFE):
     word_count = len(text.split())
     summary_instruction = determine_summary_length(num_pages, word_count)
     
-    # 添加格式要求：使用段落和换行来组织内容
-    format_instruction = " 请使用段落和换行来组织内容，确保良好的可读性，不要写成一整段文字。"
-    fePrompt = promptFromFE + summary_instruction + format_instruction
+    # Enhanced prompt with formatting instructions
+    fePrompt = promptFromFE + summary_instruction + """
+    
+FORMATTING REQUIREMENTS:
+- Keep all original line breaks and paragraph structure
+- Use markdown-style formatting: **bold** for headers, • for bullets, --- for dividers
+- Maintain proper spacing between sections
+- Do not collapse multiple paragraphs into one
+- Preserve list structures with proper bullet points
+- Ensure emojis and labels have proper spacing
+"""
 
     for i, chunk in enumerate(tqdm(chunks, desc="Summarizing chunks")):
         try:
@@ -82,17 +130,16 @@ def summarize_document(text, num_pages, promptFromFE):
         except Exception as e:
             print(f"⚠️ Error summarizing chunk {i+1}: {e}")
 
-    combined_summary_text = " ".join(summaries)
+    combined_summary_text = "\n\n".join(summaries)  # Use double newline to preserve structure
     print("\nGenerating final summary...")
 
-    # 最终汇总时也强调格式要求
     final_prompt = (
         f"{fePrompt}\n\n"
-        f"以下是文档的部分总结，请将它们组合成一个格式良好的最终版本：\n"
-        f"- 使用段落分隔不同内容\n" 
-        f"- 重要观点之间使用换行\n"
-        f"- 确保良好的可读性结构\n\n"
-        f"部分总结内容：\n{combined_summary_text}"
+        f"Here are multiple partial summaries of a document. Combine them into a single, well-structured summary:\n\n"
+        f"IMPORTANT: PRESERVE ALL FORMATTING, LINE BREAKS, AND STRUCTURE from the partial summaries below.\n"
+        f"Keep sections, bullet points, bold headers, and dividers exactly as they appear.\n"
+        f"Do not collapse paragraphs or remove line breaks.\n\n"
+        f"Partial summaries:\n{combined_summary_text}"
     )
 
     response = client.chat.completions.create(
