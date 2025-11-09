@@ -5,6 +5,11 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from textwrap import wrap
 import os
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.enums import TA_LEFT
+
 
 # ========== CONFIG ==========
 
@@ -14,25 +19,60 @@ CHUNK_SIZE = 6000
 # ============================
 
 client = OpenAI(api_key=OPENAI_API_KEY)
-def save_summary_to_pdf(summary_text, output_path="summary.pdf"):
-    from reportlab.lib.pagesizes import A4
-    from reportlab.pdfgen import canvas
 
-    c = canvas.Canvas(output_path, pagesize=A4)
-    width, height = A4
-    margin = 40
-    y = height - margin
-    c.setFont("Helvetica", 11)
+def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
+    # Create PDF document
+    doc = SimpleDocTemplate(output_path, pagesize=A4,
+                            rightMargin=40, leftMargin=40,
+                            topMargin=40, bottomMargin=40)
 
-    for line in summary_text.split("\n"):
-        if y < margin:
-            c.showPage()
-            c.setFont("Helvetica", 11)
-            y = height - margin
-        c.drawString(margin, y, line)
-        y -= 14
+    styles = getSampleStyleSheet()
+    normal = styles["Normal"]
+    bold = ParagraphStyle("BoldHeading",
+                          parent=styles["Heading2"],
+                          fontName="Helvetica-Bold",
+                          fontSize=13,
+                          spaceBefore=12,
+                          spaceAfter=4)
 
-    c.save()
+    story = []
+
+    # Split HTML into lines to detect headings and bullet lists
+    lines = summary_html.split("\n")
+
+    bullet_buffer = []  # temporary list to store bullets
+
+    for line in lines:
+        line = line.strip()
+
+        # Detect headings: <strong>Heading</strong>
+        if line.startswith("<strong>") and line.endswith("</strong>"):
+            heading_text = line.replace("<strong>", "").replace("</strong>", "")
+            story.append(Paragraph(heading_text, bold))
+            continue
+
+        # Detect bullet lines inside <li>• text</li>
+        if line.startswith("<li>"):
+            bullet_text = line.replace("<li>", "").replace("</li>", "")
+            bullet_buffer.append(Paragraph(bullet_text, normal))
+            continue
+
+        # Closing list: </ul>
+        if line == "</ul>" and bullet_buffer:
+            story.append(ListFlowable(
+                [ListItem(item) for item in bullet_buffer],
+                bulletType="bullet",
+                bulletChar="•"
+            ))
+            bullet_buffer = []
+            continue
+
+        # Regular paragraphs
+        if line and not line.startswith("<ul>") and not line.startswith("</ul>"):
+            story.append(Paragraph(line, normal))
+            story.append(Spacer(1, 6))
+
+    doc.build(story)
     return output_path
 
 
