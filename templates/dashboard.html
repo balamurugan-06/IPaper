@@ -1314,7 +1314,7 @@ generateNowBtn.addEventListener('click', async () => {
     const data = await summaryRes.json();
 
     if (data.summary) {
-      outputDiv.textContent = data.summary;
+      outputDiv.innerHTML = data.summary.replace(/\n/g, "<br>");
     } else {
       outputDiv.textContent = "❌ Error: " + (data.error || "Unknown error");
     }
@@ -1436,7 +1436,7 @@ async function loadSummaryForSelectedDoc(docId) {
     const data = await res.json();
 
     if (data.summary) {
-      outputDiv.textContent = data.summary; // ✅ Display saved summary
+      outputDiv.innerHTML = data.summary.replace(/\n/g, "<br>");
     } else {
       outputDiv.textContent = "📄 No summary generated yet for this document.";
     }
@@ -1451,6 +1451,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
