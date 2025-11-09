@@ -97,36 +97,39 @@ def summarize_document(text, num_pages, promptFromFE):
     print("\nGenerating final summary...")
 
     final_prompt = f"""
-You are to create a well-structured final summary. Do not repeat or duplicate sentences from the partial summaries.
+You are to create a final structured summary using the format below. Do not repeat or duplicate sentences from the partial summaries.
 
-# Introduction
-Briefly describe the purpose and context of the document.
+**Introduction**
+Write 2–4 sentences describing the purpose and context of the document.
 
-# Key Themes / Core Arguments
-Summarize the major ideas in short bullet points:
-- Keep bullets concise
+**Key Themes / Core Arguments**
+Summarize the major ideas using bullet points:
+- Keep each point short
 - Avoid repetition
-- Capture the main message
+- Focus on meaning, not wording from the text
 
-# Method / Approach (If applicable)
-Summarize any methodology in 2–4 bullet points. If no methodology is present, skip this section naturally.
+**Method / Approach (If Applicable)**
+Use bullet points to describe any methodology or approach:
+- If there is no methodology, simply omit this section
 
-# Findings / Insights
-Present core findings as short bullet points.
+**Findings / Insights**
+Summarize the main findings using bullet points:
+- Prioritize clarity and accuracy
 
-# Conclusion
-Write a short concluding paragraph that summarizes the significance.
+**Conclusion**
+Write 2–4 sentences summarizing the significance and final takeaway.
 
-### Style Rules:
-- No long paragraphs (prefer short paragraphs or bullets)
-- Avoid repetitive language
-- Maintain a smooth logical flow
+**Style Rules:**
+- Headings must be **bold**
+- Sub-points must be in bullet points
+- Keep sentences clear, short, and organized
+- Avoid long paragraphs
 
 ### Target Length:
 {summary_instruction}
 
 ---
-Here are the partial chunk summaries to merge:
+Below are the partial chunk summaries to merge and rewrite cohesively:
 {combined_summary_text}
 """
 
