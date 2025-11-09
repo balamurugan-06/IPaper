@@ -2,12 +2,15 @@ import fitz
 from tqdm import tqdm
 from openai import OpenAI
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from textwrap import wrap
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY
 import os
 import re
 
 # ========== CONFIG ==========
+
 OPENAI_API_KEY = os.getenv("GEN_AI_KEY")
 MODEL_NAME = "gpt-4o-mini"
 CHUNK_SIZE = 6000
@@ -16,35 +19,144 @@ CHUNK_SIZE = 6000
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 def save_summary_to_pdf(summary_text, output_path="summary.pdf"):
-    c = canvas.Canvas(output_path, pagesize=A4)
-    width, height = A4
-    margin = 40
-    y_position = height - margin
-    c.setFont("Helvetica", 11)
+    """Convert markdown-formatted text to a properly styled PDF"""
+    doc = SimpleDocTemplate(output_path, pagesize=A4,
+                           topMargin=0.75*inch, bottomMargin=0.75*inch,
+                           leftMargin=0.75*inch, rightMargin=0.75*inch)
     
-    # Preserve line breaks from the original text
-    lines = []
-    for paragraph in summary_text.split('\n\n'):
-        if paragraph.strip():
-            wrapped_lines = wrap(paragraph, 90)
-            lines.extend(wrapped_lines)
-            lines.append('')  # Add empty line between paragraphs
+    styles = getSampleStyleSheet()
     
-    for line in lines:
-        if line == '':  # Empty line for paragraph spacing
-            y_position -= 8
+    # Create custom styles
+    styles.add(ParagraphStyle(
+        name='CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor='#1a1a1a',
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=13,
+        spaceAfter=8,
+        spaceBefore=12,
+        textColor='#2c3e50',
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='CustomBody',
+        parent=styles['BodyText'],
+        fontSize=10,
+        leading=14,
+        alignment=TA_JUSTIFY,
+        spaceAfter=6
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='BulletPoint',
+        parent=styles['BodyText'],
+        fontSize=10,
+        leading=14,
+        leftIndent=20,
+        bulletIndent=10,
+        spaceAfter=4
+    ))
+    
+    story = []
+    lines = summary_text.split('\n')
+    
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        if not line:
+            story.append(Spacer(1, 0.1*inch))
+            i += 1
             continue
-            
-        if y_position < margin:
-            c.showPage()
-            c.setFont("Helvetica", 11)
-            y_position = height - margin
-
-        c.drawString(margin, y_position, line)
-        y_position -= 14
-
-    c.save()
+        
+        # Horizontal rule
+        if line.startswith('---') or line == '---':
+            story.append(Spacer(1, 0.1*inch))
+            story.append(HRFlowable(width="100%", thickness=1, color='#cccccc'))
+            story.append(Spacer(1, 0.1*inch))
+            i += 1
+            continue
+        
+        # Main title (##)
+        if line.startswith('## '):
+            title_text = clean_markdown(line[3:])
+            story.append(Paragraph(title_text, styles['CustomTitle']))
+            i += 1
+            continue
+        
+        # Section headers (###)
+        if line.startswith('### '):
+            header_text = clean_markdown(line[4:])
+            story.append(Paragraph(header_text, styles['CustomHeading']))
+            i += 1
+            continue
+        
+        # Emoji headers (🔸, 📊, etc.)
+        if re.match(r'^[🔸📊✅⚠️🔬📈📝🎯💡⚡🌟]+\s*\*\*', line):
+            header_text = clean_markdown(line)
+            story.append(Paragraph(header_text, styles['CustomHeading']))
+            i += 1
+            continue
+        
+        # Bullet points (• or -)
+        if line.startswith('• ') or line.startswith('- '):
+            bullet_text = clean_markdown(line[2:])
+            story.append(Paragraph(f"• {bullet_text}", styles['BulletPoint']))
+            i += 1
+            continue
+        
+        # Numbered lists
+        if re.match(r'^\d+\.\s', line):
+            list_text = clean_markdown(line)
+            story.append(Paragraph(list_text, styles['BulletPoint']))
+            i += 1
+            continue
+        
+        # Regular paragraph
+        paragraph_lines = [line]
+        i += 1
+        
+        # Collect continuation lines
+        while i < len(lines) and lines[i].strip() and \
+              not lines[i].startswith(('##', '###', '• ', '- ', '---')) and \
+              not re.match(r'^[🔸📊✅⚠️🔬📈📝🎯💡⚡🌟]+\s*\*\*', lines[i]) and \
+              not re.match(r'^\d+\.\s', lines[i]):
+            paragraph_lines.append(lines[i].strip())
+            i += 1
+        
+        full_paragraph = ' '.join(paragraph_lines)
+        cleaned_text = clean_markdown(full_paragraph)
+        story.append(Paragraph(cleaned_text, styles['CustomBody']))
+    
+    doc.build(story)
     return output_path
+
+def clean_markdown(text):
+    """Convert markdown to reportlab HTML-like formatting"""
+    # Bold (**text** or __text__)
+    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'__(.+?)__', r'<b>\1</b>', text)
+    
+    # Italic (*text* or _text_)
+    text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
+    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
+    
+    # Escape special XML characters
+    text = text.replace('&', '&amp;')
+    text = text.replace('<', '&lt;').replace('>', '&gt;')
+    # Restore our formatting tags
+    text = text.replace('&lt;b&gt;', '<b>').replace('&lt;/b&gt;', '</b>')
+    text = text.replace('&lt;i&gt;', '<i>').replace('&lt;/i&gt;', '</i>')
+    
+    return text
 
 def extract_text_from_pdf(pdf_path):
     text = ""
@@ -55,49 +167,20 @@ def extract_text_from_pdf(pdf_path):
     return text, num_pages
 
 def split_text_into_chunks(text, max_length=4000):
-    # Split at paragraph boundaries when possible
-    paragraphs = text.split('\n\n')
-    chunks = []
-    current_chunk = ""
-    
-    for paragraph in paragraphs:
-        if len(current_chunk) + len(paragraph) + 2 <= max_length:
-            current_chunk += paragraph + "\n\n"
-        else:
-            if current_chunk:
-                chunks.append(current_chunk.strip())
-            current_chunk = paragraph + "\n\n"
-    
-    if current_chunk:
-        chunks.append(current_chunk.strip())
-    
-    return chunks
+    return [text[i:i + max_length] for i in range(0, len(text), max_length)]
 
 def determine_summary_length(num_pages, word_count):
     if num_pages <= 20 or word_count <= 5000:
-        return "Write a summary of about 300–500 words. PRESERVE the original formatting, line breaks, and paragraph structure."
+        return "Write a summary of about 300–500 words."
     elif num_pages <= 60 or word_count <= 20000:
-        return "Write a summary of about 600–900 words. PRESERVE the original formatting, line breaks, and paragraph structure."
+        return "Write a summary of about 600–900 words."
     elif num_pages <= 240 or word_count <= 80000:
-        return "Write a summary of about 900–1,200 words. PRESERVE the original formatting, line breaks, and paragraph structure."
+        return "Write a summary of about 900–1,200 words."
     else:
-        return "Write a summary of about 1,200–1,800 words. PRESERVE the original formatting, line breaks, and paragraph structure."
+        return "Write a summary of about 1,200–1,800 words."
 
 def summarize_chunk(chunk, fePrompt):
-    # Enhanced prompt to preserve formatting
-    formatting_instruction = """
-CRITICAL FORMATTING INSTRUCTIONS:
-- PRESERVE all line breaks and paragraph breaks
-- Use **bold** for section headers and important terms
-- Use bullet points with • for lists
-- Use --- for section dividers
-- Maintain proper spacing between sections
-- Keep emojis and labels properly spaced
-- DO NOT collapse everything into one paragraph
-- Structure the summary with clear sections and subsections
-"""
-    
-    final = f"{fePrompt}\n\n{formatting_instruction}\n\nText to summarize:\n{chunk}"
+    final = f"{fePrompt}\n\n{chunk}"
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": final}],
@@ -110,18 +193,7 @@ def summarize_document(text, num_pages, promptFromFE):
     summaries = []
     word_count = len(text.split())
     summary_instruction = determine_summary_length(num_pages, word_count)
-    
-    # Enhanced prompt with formatting instructions
-    fePrompt = promptFromFE + summary_instruction + """
-    
-FORMATTING REQUIREMENTS:
-- Keep all original line breaks and paragraph structure
-- Use markdown-style formatting: **bold** for headers, • for bullets, --- for dividers
-- Maintain proper spacing between sections
-- Do not collapse multiple paragraphs into one
-- Preserve list structures with proper bullet points
-- Ensure emojis and labels have proper spacing
-"""
+    fePrompt = promptFromFE + summary_instruction
 
     for i, chunk in enumerate(tqdm(chunks, desc="Summarizing chunks")):
         try:
@@ -130,16 +202,15 @@ FORMATTING REQUIREMENTS:
         except Exception as e:
             print(f"⚠️ Error summarizing chunk {i+1}: {e}")
 
-    combined_summary_text = "\n\n".join(summaries)  # Use double newline to preserve structure
+    # Preserve newlines when combining summaries
+    combined_summary_text = "\n\n".join(summaries)
     print("\nGenerating final summary...")
 
     final_prompt = (
         f"{fePrompt}\n\n"
-        f"Here are multiple partial summaries of a document. Combine them into a single, well-structured summary:\n\n"
-        f"IMPORTANT: PRESERVE ALL FORMATTING, LINE BREAKS, AND STRUCTURE from the partial summaries below.\n"
-        f"Keep sections, bullet points, bold headers, and dividers exactly as they appear.\n"
-        f"Do not collapse paragraphs or remove line breaks.\n\n"
-        f"Partial summaries:\n{combined_summary_text}"
+        f"Here are multiple partial summaries of a document. Combine them into a single, well-structured summary "
+        f"using markdown formatting (headers with ##, bullet points with •, bold with **, etc.):\n\n"
+        f"{combined_summary_text}"
     )
 
     response = client.chat.completions.create(
