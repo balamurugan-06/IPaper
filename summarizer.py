@@ -25,7 +25,6 @@ if not os.path.exists("uploads"):
 
 def add_emojis_to_summary(summary_html, prompt):
     """Add contextual and section-based emojis to summary HTML."""
-    # Emoji by topic keywords in prompt
     topic_emojis = {
         "business": "💼",
         "finance": "💰",
@@ -47,7 +46,6 @@ def add_emojis_to_summary(summary_html, prompt):
     prompt_lower = prompt.lower()
     main_emoji = next((emoji for k, emoji in topic_emojis.items() if k in prompt_lower), "✨")
 
-    # Section-specific emojis
     section_emojis = {
         "introduction": "📘",
         "key themes": "💡",
@@ -65,10 +63,8 @@ def add_emojis_to_summary(summary_html, prompt):
         for key, emoji in section_emojis.items():
             if key in heading_lower:
                 return f"{emoji} {heading}"
-        # fallback to topic emoji
         return f"{main_emoji} {heading}"
 
-    # Replace <strong> sections with emojis
     import re
     summary_html = re.sub(
         r"<strong>(.*?)</strong>",
@@ -261,7 +257,6 @@ def summarizer(pdfPath, promptFromFE,docId):
     print("\nSummarizing document... (this may take several minutes for long PDFs)")
     summary = summarize_document(text, num_pages, promptFromFE)
 
-    summary = add_emojis_based_on_prompt(summary, promptFromFE)
     summary = add_emojis_to_summary(summary, promptFromFE)
 
     output_pdf = f"uploads/summary_{docId}.pdf"
