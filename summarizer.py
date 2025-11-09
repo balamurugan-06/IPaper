@@ -96,49 +96,57 @@ def summarize_document(text, num_pages, promptFromFE):
     combined_summary_text = "\n\n".join(summaries)
     print("\nGenerating final summary...")
 
+    # Ask the model to return HTML. Headings in <strong>, sub-points in <ul><li> with '• ' prefix.
     final_prompt = f"""
-You are to create a final structured summary using the format below. Do not repeat or duplicate sentences from the partial summaries.
+You will combine partial summaries into a single, well-structured final summary and return the output AS VALID HTML ONLY (no extra commentary, no markdown).
 
-**Introduction**
-Write 2–4 sentences describing the purpose and context of the document.
+Requirements (IMPORTANT):
+- Use <strong> tags for headings (e.g. <strong>Introduction</strong>).
+- For sub-points, produce an unordered list using <ul> and <li>.
+  Each <li> text should begin with the bullet symbol "• " (U+2022) followed by the short point.
+  Example: <ul><li>• First sub-point</li><li>• Second sub-point</li></ul>
+- Keep paragraphs short. Prefer lists for Key Themes / Findings.
+- Do NOT include any <script> tags or inline event handlers.
+- Output only HTML markup (no surrounding backticks or text).
 
-**Key Themes / Core Arguments**
-Summarize the major ideas using bullet points:
-- Keep each point short
-- Avoid repetition
-- Focus on meaning, not wording from the text
+Structure to produce (as HTML, with headings wrapped in <strong>):
+<strong>Introduction</strong>
+<p>Short sentence(s) about purpose/context.</p>
 
-**Method / Approach (If Applicable)**
-Use bullet points to describe any methodology or approach:
-- If there is no methodology, simply omit this section
+<strong>Key Themes / Core Arguments</strong>
+<ul>
+<li>• Theme 1 summary (very short)</li>
+<li>• Theme 2 summary</li>
+</ul>
 
-**Findings / Insights**
-Summarize the main findings using bullet points:
-- Prioritize clarity and accuracy
+<strong>Method / Approach</strong>
+<ul>
+<li>• Method point 1</li>
+<li>• Method point 2</li>
+</ul>
 
-**Conclusion**
-Write 2–4 sentences summarizing the significance and final takeaway.
+<strong>Findings / Insights</strong>
+<ul>
+<li>• Finding 1</li>
+<li>• Finding 2</li>
+</ul>
 
-**Style Rules:**
-- Headings must be **bold**
-- Sub-points must be in bullet points
-- Keep sentences clear, short, and organized
-- Avoid long paragraphs
+<strong>Conclusion</strong>
+<p>One short concluding paragraph.</p>
 
-### Target Length:
-{summary_instruction}
+Target length guidance (human-readable): {summary_instruction}
 
----
-Below are the partial chunk summaries to merge and rewrite cohesively:
+-- BELOW are the partial chunk summaries to merge. Combine them, remove duplicates, and produce concise bullets & short paragraphs as described. --
 {combined_summary_text}
 """
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": final_prompt}],
-        temperature=0.3
+        temperature=0.2
     )
 
+    # The model output should be HTML. Return it verbatim.
     return response.choices[0].message.content.strip()
 
 
