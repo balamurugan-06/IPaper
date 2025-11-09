@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <title>User Dashboard Document Upload</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     :root{
@@ -1314,10 +1316,13 @@ generateNowBtn.addEventListener('click', async () => {
     const data = await summaryRes.json();
 
     if (data.summary) {
-      outputDiv.innerHTML = data.summary.replace(/\n/g, "<br>");
-    } else {
-      outputDiv.textContent = "❌ Error: " + (data.error || "Unknown error");
-    }
+  // sanitize then render HTML
+  const clean = DOMPurify.sanitize(data.summary);
+  outputDiv.innerHTML = clean;
+} else {
+  outputDiv.textContent = "❌ Error: " + (data.error || "Unknown error");
+}
+
 
   } catch (err) {
     outputDiv.textContent = "⚠️ Server error. Check console.";
@@ -1436,10 +1441,12 @@ async function loadSummaryForSelectedDoc(docId) {
     const data = await res.json();
 
     if (data.summary) {
-      outputDiv.innerHTML = data.summary.replace(/\n/g, "<br>");
-    } else {
-      outputDiv.textContent = "📄 No summary generated yet for this document.";
-    }
+  const clean = DOMPurify.sanitize(data.summary);
+  outputDiv.innerHTML = clean;
+} else {
+  outputDiv.textContent = "📄 No summary generated yet for this document.";
+}
+
 
   } catch (err) {
     outputDiv.textContent = "⚠️ Error fetching summary.";
@@ -1451,28 +1458,3 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
