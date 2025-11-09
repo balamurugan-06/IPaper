@@ -97,50 +97,46 @@ def summarize_document(text, num_pages, promptFromFE):
     print("\nGenerating final summary...")
 
 final_prompt = f"""
-You are to create a well-structured, clean final summary.
-
-### Output Format (Use these exact headings):
+You are to create a well-structured final summary. Do not repeat or duplicate sentences from the partial summaries.
 
 # Introduction
-Write a short overview of the document purpose and context.
+Briefly describe the purpose and context of the document.
 
 # Key Themes / Core Arguments
-Summarize the main points clearly in **short bullet points**:
-- Keep bullets brief
-- Focus on essential ideas
+Summarize the major ideas in short bullet points:
+- Keep bullets concise
 - Avoid repetition
+- Capture the main message
 
-# Method / Approach (Skip if not relevant)
-Explain the methodology or process in **2–4 short bullet points**.
+# Method / Approach (If applicable)
+Summarize any methodology in 2–4 bullet points. If no methodology is present, skip this section naturally.
 
 # Findings / Insights
-Present key insights as **clear bullet points**.
+Present core findings as short bullet points.
 
 # Conclusion
-Summarize the final takeaway in **3–5 sentences.**
+Write a short concluding paragraph that summarizes the significance.
 
-### Rules
-- No long paragraphs
-- Prefer bullet points where possible
-- Keep sentences short and direct
-- Do not repeat any lines from earlier summaries
+### Style Rules:
+- No long paragraphs (prefer short grouped paragraphs or bullets)
+- Avoid wordy or repetitive language
+- Maintain clear logical flow
 
 ### Target Length:
 {summary_instruction}
 
 ---
-Here are the partial summaries to combine:
+Here are the partial chunk summaries to merge:
 {combined_summary_text}
 """
 
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": final_prompt}],
-        temperature=0.3
-    )
+response = client.chat.completions.create(
+    model=MODEL_NAME,
+    messages=[{"role": "user", "content": final_prompt}],
+    temperature=0.3
+)
 
-    return response.choices[0].message.content.strip()
-
+return response.choices[0].message.content.strip()
 
 def summarizer(pdfPath, promptFromFE,docId):
     pdf_path = pdfPath.strip()
