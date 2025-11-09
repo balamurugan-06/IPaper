@@ -15,24 +15,26 @@ CHUNK_SIZE = 6000
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 def save_summary_to_pdf(summary_text, output_path="summary.pdf"):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+
     c = canvas.Canvas(output_path, pagesize=A4)
     width, height = A4
     margin = 40
-    y_position = height - margin
+    y = height - margin
     c.setFont("Helvetica", 11)
-    wrapped_text = wrap(summary_text, 90)
 
-    for line in wrapped_text:
-        if y_position < margin:
+    for line in summary_text.split("\n"):
+        if y < margin:
             c.showPage()
             c.setFont("Helvetica", 11)
-            y_position = height - margin
-
-        c.drawString(margin, y_position, line)
-        y_position -= 14
+            y = height - margin
+        c.drawString(margin, y, line)
+        y -= 14
 
     c.save()
     return output_path
+
 
 def extract_text_from_pdf(pdf_path):
     text = ""
@@ -77,51 +79,52 @@ Text:
     )
     return response.choices[0].message.content.strip()
 
-def summarize_document(text, num_pages,promptFromFE):
+def summarize_document(text, num_pages, promptFromFE):
     chunks = split_text_into_chunks(text, CHUNK_SIZE)
     summaries = []
     word_count = len(text.split())
     summary_instruction = determine_summary_length(num_pages, word_count)
-    fePrompt = promptFromFE + summary_instruction
+    fePrompt = promptFromFE + " " + summary_instruction
 
     for i, chunk in enumerate(tqdm(chunks, desc="Summarizing chunks")):
         try:
-            summary = summarize_chunk(chunk,fePrompt)
+            summary = summarize_chunk(chunk, fePrompt)
             summaries.append(summary)
         except Exception as e:
             print(f"⚠️ Error summarizing chunk {i+1}: {e}")
 
-    combined_summary_text = " ".join(summaries)
+    combined_summary_text = "\n\n".join(summaries)
     print("\nGenerating final summary...")
 
-    final_prompt = (
-        final_prompt = f"""
+    final_prompt = f"""
 You are to produce a final structured summary for the document. 
 Do not repeat or duplicate sentences from the partial summaries.
 
-### Required Output with Headings:
-**Introduction**
-Explain the purpose and context of the document.
+### Required Output Format (with Headings):
 
-**Key Concepts / Themes**
-Summarize the major ideas and arguments.
+**Introduction**  
+Describe the main purpose and context of the document.
 
-**Methodology or Approach**
-If the document describes methods, summarize them briefly. 
-If not relevant, skip this section naturally.
+**Key Concepts / Themes**  
+Summarize the major concepts, main ideas, or central arguments.
 
-**Findings or Main Insights**
-Describe the main outcomes, evidence, results, or discussions.
+**Methodology / Approach**  
+If the document explains methods or steps, summarize them clearly.  
+If not relevant, omit this section naturally.
 
-**Conclusion**
-State the final takeaway and significance.
+**Findings / Main Insights**  
+Highlight the important results, insights, outcomes, or discussions.
 
-### Writing Style:
-- Use clear, short paragraphs.
-- Avoid bullet points unless required to list major themes.
-- Maintain a smooth logical flow.
+**Conclusion**  
+State the overall significance, takeaways, recommendations, or implications.
 
-### Target Length:
+### Writing Rules:
+- Use clear paragraphs.
+- Keep flow logical.
+- Do not use bullet points unless necessary.
+- Do not repeat sentences from chunk summaries.
+
+### Expected Length:
 {summary_instruction}
 
 ---
@@ -129,7 +132,6 @@ State the final takeaway and significance.
 Here are the partial summaries to merge:
 {combined_summary_text}
 """
-    )
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
@@ -138,6 +140,7 @@ Here are the partial summaries to merge:
     )
 
     return response.choices[0].message.content.strip()
+
 
 def summarizer(pdfPath, promptFromFE,docId):
     pdf_path = pdfPath.strip()
