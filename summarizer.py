@@ -23,6 +23,38 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
 
+def add_emojis_based_on_prompt(summary_html, prompt):
+    """Adds relevant emojis to the summary HTML based on prompt keywords."""
+    emoji_map = {
+        "business": "💼",
+        "finance": "💰",
+        "education": "🎓",
+        "medical": "🩺",
+        "health": "💪",
+        "technology": "💻",
+        "research": "🔬",
+        "marketing": "📈",
+        "environment": "🌱",
+        "law": "⚖️",
+        "history": "📜",
+        "travel": "✈️",
+        "science": "🧠",
+        "art": "🎨",
+        "engineering": "🧰",
+    }
+
+    prompt_lower = prompt.lower()
+    emojis = [emoji for keyword, emoji in emoji_map.items() if keyword in prompt_lower]
+    if not emojis:
+        emojis = ["✨"]
+
+    # Insert emojis next to headings (<strong> tags)
+    for emoji in emojis:
+        summary_html = summary_html.replace("<strong>", f"<strong>{emoji} ", 1)
+    return summary_html
+
+
+
 def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
     # Create the PDF document
     doc = SimpleDocTemplate(output_path, pagesize=A4,
@@ -201,6 +233,8 @@ def summarizer(pdfPath, promptFromFE,docId):
 
     print("\nSummarizing document... (this may take several minutes for long PDFs)")
     summary = summarize_document(text, num_pages, promptFromFE)
+
+    summary = add_emojis_based_on_prompt(summary, promptFromFE)
 
     output_pdf = f"uploads/summary_{docId}.pdf"
     save_summary_to_pdf(summary, output_pdf)
