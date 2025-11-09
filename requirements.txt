@@ -9,3 +9,4 @@ PyMuPDF
 tqdm
 openai
 reportlab
+weasyprint[full]
