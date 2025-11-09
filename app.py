@@ -20,6 +20,7 @@ from summarizer import summarizer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -1161,110 +1162,13 @@ def getSummary(doc_id):
     else:
         return jsonify({"summary": None})
 
+@app.route('/download_summary/<docId>')
+def download_summary(docId):
+    return send_from_directory("uploads", f"summary_{docId}.pdf", as_attachment=True)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
