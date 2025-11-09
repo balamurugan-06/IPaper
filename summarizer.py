@@ -96,7 +96,7 @@ def summarize_document(text, num_pages, promptFromFE):
     combined_summary_text = "\n\n".join(summaries)
     print("\nGenerating final summary...")
 
-final_prompt = f"""
+    final_prompt = f"""
 You are to create a well-structured final summary. Do not repeat or duplicate sentences from the partial summaries.
 
 # Introduction
@@ -118,9 +118,9 @@ Present core findings as short bullet points.
 Write a short concluding paragraph that summarizes the significance.
 
 ### Style Rules:
-- No long paragraphs (prefer short grouped paragraphs or bullets)
-- Avoid wordy or repetitive language
-- Maintain clear logical flow
+- No long paragraphs (prefer short paragraphs or bullets)
+- Avoid repetitive language
+- Maintain a smooth logical flow
 
 ### Target Length:
 {summary_instruction}
@@ -130,13 +130,14 @@ Here are the partial chunk summaries to merge:
 {combined_summary_text}
 """
 
-response = client.chat.completions.create(
-    model=MODEL_NAME,
-    messages=[{"role": "user", "content": final_prompt}],
-    temperature=0.3
-)
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": final_prompt}],
+        temperature=0.3
+    )
 
-return response.choices[0].message.content.strip()
+    return response.choices[0].message.content.strip()
+
 
 def summarizer(pdfPath, promptFromFE,docId):
     pdf_path = pdfPath.strip()
