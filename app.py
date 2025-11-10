@@ -34,7 +34,7 @@ PERSISTENT_FOLDER = "/var/data/uploads"
 os.makedirs(FAST_UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PERSISTENT_FOLDER, exist_ok=True)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = PERSISTENT_FOLDER
 Session(app)
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -269,31 +269,28 @@ def upload_document():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
 
-                # 🟢 Save to /uploads folder
-                save_path_fast = os.path.join(FAST_UPLOAD_FOLDER, filename)
-                file.save(save_path_fast)
+                # ---- Save to fast local storage ----
+                fast_path = os.path.join(FAST_UPLOAD_FOLDER, filename)
+                file.save(fast_path)
 
-
+                # ---- Copy to persistent disk ----
+                persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
                 import shutil
-                shutil.copy(save_path_fast, os.path.join(PERSISTENT_FOLDER, filename))
+                shutil.copy(fast_path, persistent_path)
 
-                # Prevent overwriting same file name
+                # ---- Avoid duplicate filenames ----
                 base, ext = os.path.splitext(filename)
                 counter = 1
-                while os.path.exists(save_path):
+                while os.path.exists(os.path.join(PERSISTENT_FOLDER, filename)):
                     filename = f"{base}_{counter}{ext}"
-                    save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
                     counter += 1
 
-                # ✅ Save file to disk (not DB)
-                file.save(save_path)
-
-                # ✅ Save only path and filename in DB
+                # ---- Save filename only in DB ----
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, title, attachment)
                     VALUES (%s, %s, %s, %s, %s)
                 """, (session['user_id'], folder_id, filename, title, filename))
-
 
         conn.commit()
         flash("Files uploaded successfully!", "success")
@@ -307,6 +304,7 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
+
 
 
     
@@ -349,22 +347,31 @@ def view_document(doc_id):
 def delete_document(doc_id):
     if 'user_id' not in session:
         return redirect('/login')
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
+        cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s",
+                    (doc_id, session['user_id']))
         row = cur.fetchone()
 
         if row:
-            attachment = row[0]
+            filename = row[0]
 
-            # Remove record from DB
-            cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
+            # Remove DB row
+            cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s",
+                        (doc_id, session['user_id']))
             conn.commit()
 
-            # 🟢 Delete actual file from disk
-            if attachment and isinstance(attachment, str) and os.path.exists(attachment):
-                os.remove(attachment)
+            # Fast + persistent delete
+            fast_path = os.path.join(FAST_UPLOAD_FOLDER, filename)
+            persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
+
+            if os.path.exists(fast_path):
+                os.remove(fast_path)
+
+            if os.path.exists(persistent_path):
+                os.remove(persistent_path)
 
             flash("Document deleted successfully!", "success")
 
@@ -375,6 +382,8 @@ def delete_document(doc_id):
         flash(f"Delete failed: {e}", "error")
 
     return redirect('/dashboard')
+
+
 
 
 
@@ -1180,6 +1189,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
