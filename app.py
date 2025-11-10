@@ -19,7 +19,6 @@ import traceback
 from summarizer import summarizer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from threading import Thread
 
 
 load_dotenv()
@@ -28,14 +27,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-
-FAST_UPLOAD_FOLDER = "/tmp/uploads"
-PERSISTENT_FOLDER = "/var/data/uploads"
-
-os.makedirs(FAST_UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(PERSISTENT_FOLDER, exist_ok=True)
-
-app.config['UPLOAD_FOLDER'] = PERSISTENT_FOLDER
+UPLOAD_FOLDER = "/var/data/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Session(app)
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -270,29 +264,26 @@ def upload_document():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
 
-                # ---- Save to fast local storage for low latency ----
-                fast_path = os.path.join(FAST_UPLOAD_FOLDER, filename)
-                file.save(fast_path)
+                # 🟢 Save to /uploads folder
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-                # ---- Determine final persistent filename to avoid duplicates ----
+                # Prevent overwriting same file name
                 base, ext = os.path.splitext(filename)
                 counter = 1
-                final_filename = filename
-                persistent_path = os.path.join(PERSISTENT_FOLDER, final_filename)
-                while os.path.exists(persistent_path):
-                    final_filename = f"{base}_{counter}{ext}"
-                    persistent_path = os.path.join(PERSISTENT_FOLDER, final_filename)
+                while os.path.exists(save_path):
+                    filename = f"{base}_{counter}{ext}"
+                    save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     counter += 1
 
-                # ---- Copy file to persistent folder using final filename ----
-                import shutil
-                shutil.copy(fast_path, persistent_path)
+                # ✅ Save file to disk (not DB)
+                file.save(save_path)
 
-                # ---- Save the final filename in DB ----
+                # ✅ Save only path and filename in DB
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, title, attachment)
                     VALUES (%s, %s, %s, %s, %s)
-                """, (session['user_id'], folder_id, final_filename, title, final_filename))
+                """, (session['user_id'], folder_id, filename, title, filename))
+
 
         conn.commit()
         flash("Files uploaded successfully!", "success")
@@ -306,8 +297,6 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
-
-
 
 
     
@@ -350,31 +339,22 @@ def view_document(doc_id):
 def delete_document(doc_id):
     if 'user_id' not in session:
         return redirect('/login')
-
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s",
-                    (doc_id, session['user_id']))
+        cur.execute("SELECT attachment FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
         row = cur.fetchone()
 
         if row:
-            filename = row[0]
+            attachment = row[0]
 
-            # Remove DB row
-            cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s",
-                        (doc_id, session['user_id']))
+            # Remove record from DB
+            cur.execute("DELETE FROM files WHERE fileid = %s AND userid = %s", (doc_id, session['user_id']))
             conn.commit()
 
-            # Fast + persistent delete
-            fast_path = os.path.join(FAST_UPLOAD_FOLDER, filename)
-            persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
-
-            if os.path.exists(fast_path):
-                os.remove(fast_path)
-
-            if os.path.exists(persistent_path):
-                os.remove(persistent_path)
+            # 🟢 Delete actual file from disk
+            if attachment and isinstance(attachment, str) and os.path.exists(attachment):
+                os.remove(attachment)
 
             flash("Document deleted successfully!", "success")
 
@@ -385,8 +365,6 @@ def delete_document(doc_id):
         flash(f"Delete failed: {e}", "error")
 
     return redirect('/dashboard')
-
-
 
 
 
@@ -1114,93 +1092,54 @@ def debug_files():
         
 @app.route("/generateSummary", methods=["POST"])
 def generateSummary():
-    if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
+    doc_name = data.get("document_name")
     doc_id = data.get("document_id")
     tem_prompt = data.get("template_prompt") + " also "
     summaryTemplateId = data.get("summaryTemplate")
+    docPath = "uploads/" + doc_name
 
-    # ✅ Get filename from DB
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT filename 
-        FROM files
-        WHERE fileid = %s AND userid = %s
-    """, (doc_id, session['user_id']))
-    row = cur.fetchone()
-    cur.close()
-    conn.close()
+    try:
+        summary = summarizer(docPath, tem_prompt, doc_id)
+        modelName = "gpt-4o-mini"
+        now = datetime.now()
 
-    if not row:
-        return jsonify({"error": "File not found in DB"}), 400
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    filename = row[0]  # ✅ real filename stored in DB
-    pdf_path = os.path.join(PERSISTENT_FOLDER, filename)
+        # ✅ Check if row exists
+        cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
+        existing = cur.fetchone()
 
-    if not os.path.exists(pdf_path):
-        return jsonify({"error": f"File missing on server: {pdf_path}"}), 400
+        if existing:
+            # ✅ Update summary
+            cur.execute("""
+                UPDATE summarygenerate
+                SET summarytemplateid = %s,
+                    modelname = %s,
+                    summary = %s,
+                    createdat = %s
+                WHERE docid = %s
+            """, (summaryTemplateId, modelName, summary, now, doc_id))
+        else:
+            # ✅ Insert new summary
+            cur.execute("""
+                INSERT INTO summarygenerate (summarytemplateid, modelname, summary, createdat, docid)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (summaryTemplateId, modelName, summary, now, doc_id))
 
-    # ---- Background worker to reduce latency ----
-    def generate_and_store_summary(pdf_path, doc_id, tem_prompt, summaryTemplateId):
-        try:
-            from summarizer import summarizer  # use your existing summarizer
+        conn.commit()
+        cur.close()
+        conn.close()
 
-            # ✅ Generate summary
-            summary = summarizer(pdf_path, tem_prompt, doc_id)
+        return jsonify({"summary": summary})
 
-            # ✅ Store summary in DB
-            conn = get_db_connection()
-            cur = conn.cursor()
-
-            # Check if summary already exists
-            cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
-            existing = cur.fetchone()
-
-            now = datetime.now()
-
-            if existing:
-                cur.execute("""
-                    UPDATE summarygenerate
-                    SET summarytemplateid = %s,
-                        modelname = %s,
-                        summary = %s,
-                        createdat = %s
-                    WHERE docid = %s
-                """, (summaryTemplateId, "gpt-4o-mini", summary, now, doc_id))
-            else:
-                cur.execute("""
-                    INSERT INTO summarygenerate 
-                    (summarytemplateid, modelname, summary, createdat, docid)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, (summaryTemplateId, "gpt-4o-mini", summary, now, doc_id))
-
-            conn.commit()
-            cur.close()
-            conn.close()
-
-        except Exception as e:
-            print("⚠️ Summary generation failed:", e)
-
-    # Start background thread
-    thread = threading.Thread(target=generate_and_store_summary, args=(pdf_path, doc_id, tem_prompt, summaryTemplateId))
-    thread.start()
-
-    # Immediately return response to reduce wait time
-    return jsonify({"message": "Summary generation started. It may take a few minutes to complete."})
-
-
-
-
-
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/download/<filename>")
 def download_file(filename):
-    return send_from_directory(PERSISTENT_FOLDER, filename, as_attachment=True)
-
+    return send_from_directory("uploads", filename, as_attachment=True)
 @app.route("/getSummary/<doc_id>")
 def getSummary(doc_id):
     conn = get_db_connection()
@@ -1225,18 +1164,12 @@ def getSummary(doc_id):
 
 @app.route('/download_summary/<docId>')
 def download_summary(docId):
-    return send_from_directory(PERSISTENT_FOLDER, f"summary_{docId}.pdf", as_attachment=True)
-
+    return send_from_directory("uploads", f"summary_{docId}.pdf", as_attachment=True)
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
 
 
 
