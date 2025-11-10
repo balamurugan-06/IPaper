@@ -8,9 +8,7 @@ import os
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
-from weasyprint import HTML, CSS
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
+from weasyprint import HTML
 
 pdfmetrics.registerFont(TTFont("NotoEmoji", "fonts/NotoColorEmoji.ttf"))
 
@@ -82,50 +80,44 @@ def add_emojis_to_summary(summary_html, prompt):
 
 
 def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
+    # HTML template with emoji-supporting fonts
     html_template = f"""
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    @font-face {{
-      font-family: 'NotoEmoji';
-      src: url('fonts/NotoColorEmoji.ttf') format('truetype');
-    }}
-
-    body {{
-      font-family: 'NotoEmoji', 'DejaVu Sans', sans-serif;
-      line-height: 1.6;
-      color: #222;
-      padding: 40px;
-    }}
-
-    strong {{
-      display: block;
-      margin-top: 18px;
-      margin-bottom: 6px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #222;
-    }}
-
-    ul {{
-      margin: 4px 0 8px 24px;
-      padding: 0;
-      list-style-type: disc;
-    }}
-
-    li {{
-      font-family: 'NotoEmoji', 'DejaVu Sans', sans-serif;
-      margin-bottom: 4px;
-    }}
-  </style>
-</head>
-<body>
-  {summary_html}
-</body>
-</html>
-"""
-
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{
+          font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'DejaVu Sans', sans-serif;
+          line-height: 1.6;
+          color: #222;
+          padding: 40px;
+        }}
+        strong {{
+          display: block;
+          margin-top: 18px;
+          margin-bottom: 6px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #222;
+        }}
+        p {{
+          margin: 0 0 8px 0;
+        }}
+        ul {{
+          margin: 4px 0 8px 24px;
+          padding: 0;
+        }}
+        li {{
+          margin-bottom: 4px;
+        }}
+      </style>
+    </head>
+    <body>
+      {summary_html}
+    </body>
+    </html>
+    """
+    # Generate PDF
     HTML(string=html_template).write_pdf(output_path)
     return output_path
 
