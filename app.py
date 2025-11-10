@@ -1111,27 +1111,52 @@ def debug_files():
         
 @app.route("/generateSummary", methods=["POST"])
 def generateSummary():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
     data = request.get_json()
-    doc_name = data.get("document_name")
     doc_id = data.get("document_id")
     tem_prompt = data.get("template_prompt") + " also "
     summaryTemplateId = data.get("summaryTemplate")
-    docPath = "uploads/" + doc_name
+
+    # ✅ Get filename from DB
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT filename 
+        FROM files
+        WHERE fileid = %s AND userid = %s
+    """, (doc_id, session['user_id']))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not row:
+        return jsonify({"error": "File not found in DB"}), 400
+
+    filename = row[0]  # ✅ real filename stored in DB
+
+    # ✅ Build full path
+    pdf_path = os.path.join(PERSISTENT_FOLDER, filename)
+
+    if not os.path.exists(pdf_path):
+        return jsonify({"error": f"File missing on server: {pdf_path}"}), 400
 
     try:
-        summary = summarizer(docPath, tem_prompt, doc_id)
+        # ✅ Correct summarizer call
+        summary = summarizer(pdf_path, tem_prompt, doc_id)
+
         modelName = "gpt-4o-mini"
         now = datetime.now()
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # ✅ Check if row exists
+        # ✅ Check if summary exists
         cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
         existing = cur.fetchone()
 
         if existing:
-            # ✅ Update summary
             cur.execute("""
                 UPDATE summarygenerate
                 SET summarytemplateid = %s,
@@ -1141,9 +1166,9 @@ def generateSummary():
                 WHERE docid = %s
             """, (summaryTemplateId, modelName, summary, now, doc_id))
         else:
-            # ✅ Insert new summary
             cur.execute("""
-                INSERT INTO summarygenerate (summarytemplateid, modelname, summary, createdat, docid)
+                INSERT INTO summarygenerate 
+                (summarytemplateid, modelname, summary, createdat, docid)
                 VALUES (%s, %s, %s, %s, %s)
             """, (summaryTemplateId, modelName, summary, now, doc_id))
 
@@ -1155,6 +1180,7 @@ def generateSummary():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/download/<filename>")
 def download_file(filename):
@@ -1189,6 +1215,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
