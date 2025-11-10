@@ -27,8 +27,13 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-UPLOAD_FOLDER = "/var/data/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+FAST_UPLOAD_FOLDER = "/tmp/uploads"
+PERSISTENT_FOLDER = "/var/data/uploads"
+
+os.makedirs(FAST_UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(PERSISTENT_FOLDER, exist_ok=True)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Session(app)
 
@@ -265,7 +270,12 @@ def upload_document():
                 filename = secure_filename(file.filename)
 
                 # 🟢 Save to /uploads folder
-                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                save_path_fast = os.path.join(FAST_UPLOAD_FOLDER, filename)
+                file.save(save_path_fast)
+
+
+                import shutil
+                shutil.copy(save_path_fast, os.path.join(PERSISTENT_FOLDER, filename))
 
                 # Prevent overwriting same file name
                 base, ext = os.path.splitext(filename)
@@ -1170,6 +1180,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
