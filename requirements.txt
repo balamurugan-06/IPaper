@@ -9,4 +9,5 @@ PyMuPDF
 tqdm
 openai
 reportlab
-weasyprint[full]
+weasyprint>=59.0
+
