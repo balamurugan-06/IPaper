@@ -20,8 +20,14 @@ CHUNK_SIZE = 6000
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+
+PERSISTENT_FOLDER = "/var/data/uploads"
+
+# Create folder if it doesn't exist
 if not os.path.exists(PERSISTENT_FOLDER):
     os.makedirs(PERSISTENT_FOLDER)
+
+
 
 def add_emojis_to_summary(summary_html, prompt):
     """Add contextual and section-based emojis to summary HTML."""
