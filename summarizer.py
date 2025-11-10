@@ -12,7 +12,7 @@ from weasyprint import HTML, CSS
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 
-pdfmetrics.registerFont(TTFont("DejaVu", "fonts/DejaVuSans.ttf"))
+pdfmetrics.registerFont(TTFont("NotoEmoji", "fonts/NotoColorEmoji.ttf"))
 
 # ========== CONFIG ==========
 
