@@ -8,11 +8,7 @@ import os
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
-from weasyprint import HTML, CSS
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
 
-pdfmetrics.registerFont(TTFont("DejaVu", "fonts/DejaVuSans.ttf"))
 
 # ========== CONFIG ==========
 
