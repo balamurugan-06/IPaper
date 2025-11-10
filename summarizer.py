@@ -20,8 +20,8 @@ CHUNK_SIZE = 6000
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-if not os.path.exists("uploads"):
-    os.makedirs("uploads")
+if not os.path.exists(PERSISTENT_FOLDER):
+    os.makedirs(PERSISTENT_FOLDER)
 
 def add_emojis_to_summary(summary_html, prompt):
     """Add contextual and section-based emojis to summary HTML."""
@@ -235,17 +235,18 @@ Target length guidance (human-readable): {summary_instruction}
     return response.choices[0].message.content.strip()
 
 
-def summarizer(pdfPath, promptFromFE,docId):
-    pdf_path = os.path.join("/tmp/uploads", filename)
-    print("\nExtracting text from PDF...")
+def summarizer(pdf_path, promptFromFE, docId):
+    if not os.path.exists(pdf_path):
+        raise FileNotFoundError(f"❌ File missing on server: {pdf_path}")
+
+    print(f"\nExtracting text from PDF at {pdf_path}...")
     text, num_pages = extract_text_from_pdf(pdf_path)
-    print(f"\n✅ Extracted {len(text)} characters from {num_pages} pages.")
+    print(f"\n✅ Extracted {len(text)} characters from {num_pages} words.")
 
-    print("\nSummarizing document... (this may take several minutes for long PDFs)")
     summary = summarize_document(text, num_pages, promptFromFE)
-
     summary = add_emojis_to_summary(summary, promptFromFE)
 
-    output_pdf = f"uploads/summary_{docId}.pdf"
+    output_pdf = os.path.join(PERSISTENT_FOLDER, f"summary_{docId}.pdf")
     save_summary_to_pdf(summary, output_pdf)
+    print(f"\n✅ Summary PDF saved: {output_pdf}")
     return summary
