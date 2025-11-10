@@ -27,7 +27,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+UPLOAD_FOLDER = "/var/data/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Session(app)
@@ -282,7 +282,7 @@ def upload_document():
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, title, attachment)
                     VALUES (%s, %s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, title, save_path))
+                """, (session['user_id'], folder_id, filename, title, filename))
 
 
         conn.commit()
@@ -1170,5 +1170,6 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
