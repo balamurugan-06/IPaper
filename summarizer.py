@@ -8,11 +8,11 @@ import os
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
-from weasyprint import HTML
-from reportlab.pdfbase import pdfmetrics
+from weasyprint import HTML, CSS
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
 
-pdfmetrics.registerFont(TTFont("NotoEmoji", "fonts/NotoColorEmoji.ttf"))
+pdfmetrics.registerFont(TTFont("DejaVu", "fonts/DejaVuSans.ttf"))
 
 # ========== CONFIG ==========
 
@@ -82,7 +82,6 @@ def add_emojis_to_summary(summary_html, prompt):
 
 
 def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
-    # HTML template with emoji-supporting fonts
     html_template = f"""
     <html>
     <head>
@@ -119,7 +118,7 @@ def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
     </body>
     </html>
     """
-    # Generate PDF
+
     HTML(string=html_template).write_pdf(output_path)
     return output_path
 
