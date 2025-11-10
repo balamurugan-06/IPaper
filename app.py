@@ -19,6 +19,7 @@ import traceback
 from summarizer import summarizer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+from threading import Thread
 
 
 load_dotenv()
@@ -1137,51 +1138,63 @@ def generateSummary():
         return jsonify({"error": "File not found in DB"}), 400
 
     filename = row[0]  # ✅ real filename stored in DB
-
-    # ✅ Build full path
     pdf_path = os.path.join(PERSISTENT_FOLDER, filename)
 
     if not os.path.exists(pdf_path):
         return jsonify({"error": f"File missing on server: {pdf_path}"}), 400
 
-    try:
-        # ✅ Correct summarizer call
-        summary = summarizer(pdf_path, tem_prompt, doc_id)
+    # ---- Background worker to reduce latency ----
+    def generate_and_store_summary(pdf_path, doc_id, tem_prompt, summaryTemplateId):
+        try:
+            from summarizer import summarizer  # use your existing summarizer
 
-        modelName = "gpt-4o-mini"
-        now = datetime.now()
+            # ✅ Generate summary
+            summary = summarizer(pdf_path, tem_prompt, doc_id)
 
-        conn = get_db_connection()
-        cur = conn.cursor()
+            # ✅ Store summary in DB
+            conn = get_db_connection()
+            cur = conn.cursor()
 
-        # ✅ Check if summary exists
-        cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
-        existing = cur.fetchone()
+            # Check if summary already exists
+            cur.execute("SELECT summaryid FROM summarygenerate WHERE docid = %s LIMIT 1", (doc_id,))
+            existing = cur.fetchone()
 
-        if existing:
-            cur.execute("""
-                UPDATE summarygenerate
-                SET summarytemplateid = %s,
-                    modelname = %s,
-                    summary = %s,
-                    createdat = %s
-                WHERE docid = %s
-            """, (summaryTemplateId, modelName, summary, now, doc_id))
-        else:
-            cur.execute("""
-                INSERT INTO summarygenerate 
-                (summarytemplateid, modelname, summary, createdat, docid)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (summaryTemplateId, modelName, summary, now, doc_id))
+            now = datetime.now()
 
-        conn.commit()
-        cur.close()
-        conn.close()
+            if existing:
+                cur.execute("""
+                    UPDATE summarygenerate
+                    SET summarytemplateid = %s,
+                        modelname = %s,
+                        summary = %s,
+                        createdat = %s
+                    WHERE docid = %s
+                """, (summaryTemplateId, "gpt-4o-mini", summary, now, doc_id))
+            else:
+                cur.execute("""
+                    INSERT INTO summarygenerate 
+                    (summarytemplateid, modelname, summary, createdat, docid)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (summaryTemplateId, "gpt-4o-mini", summary, now, doc_id))
 
-        return jsonify({"summary": summary})
+            conn.commit()
+            cur.close()
+            conn.close()
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            print("⚠️ Summary generation failed:", e)
+
+    # Start background thread
+    thread = threading.Thread(target=generate_and_store_summary, args=(pdf_path, doc_id, tem_prompt, summaryTemplateId))
+    thread.start()
+
+    # Immediately return response to reduce wait time
+    return jsonify({"message": "Summary generation started. It may take a few minutes to complete."})
+
+
+
+
+
 
 
 @app.route("/download/<filename>")
@@ -1219,6 +1232,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
