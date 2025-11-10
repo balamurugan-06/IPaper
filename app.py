@@ -269,28 +269,29 @@ def upload_document():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
 
-                # ---- Save to fast local storage ----
+                # ---- Save to fast local storage for low latency ----
                 fast_path = os.path.join(FAST_UPLOAD_FOLDER, filename)
                 file.save(fast_path)
 
-                # ---- Copy to persistent disk ----
-                persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
+                # ---- Determine final persistent filename to avoid duplicates ----
+                base, ext = os.path.splitext(filename)
+                counter = 1
+                final_filename = filename
+                persistent_path = os.path.join(PERSISTENT_FOLDER, final_filename)
+                while os.path.exists(persistent_path):
+                    final_filename = f"{base}_{counter}{ext}"
+                    persistent_path = os.path.join(PERSISTENT_FOLDER, final_filename)
+                    counter += 1
+
+                # ---- Copy file to persistent folder using final filename ----
                 import shutil
                 shutil.copy(fast_path, persistent_path)
 
-                # ---- Avoid duplicate filenames ----
-                base, ext = os.path.splitext(filename)
-                counter = 1
-                while os.path.exists(os.path.join(PERSISTENT_FOLDER, filename)):
-                    filename = f"{base}_{counter}{ext}"
-                    persistent_path = os.path.join(PERSISTENT_FOLDER, filename)
-                    counter += 1
-
-                # ---- Save filename only in DB ----
+                # ---- Save the final filename in DB ----
                 cur.execute("""
                     INSERT INTO files (userid, folderid, filename, title, attachment)
                     VALUES (%s, %s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, title, filename))
+                """, (session['user_id'], folder_id, final_filename, title, final_filename))
 
         conn.commit()
         flash("Files uploaded successfully!", "success")
@@ -304,6 +305,7 @@ def upload_document():
         conn.close()
 
     return redirect('/dashboard')
+
 
 
 
@@ -1217,6 +1219,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
