@@ -1184,7 +1184,8 @@ def generateSummary():
 
 @app.route("/download/<filename>")
 def download_file(filename):
-    return send_from_directory("uploads", filename, as_attachment=True)
+    return send_from_directory(PERSISTENT_FOLDER, filename, as_attachment=True)
+
 @app.route("/getSummary/<doc_id>")
 def getSummary(doc_id):
     conn = get_db_connection()
@@ -1209,12 +1210,14 @@ def getSummary(doc_id):
 
 @app.route('/download_summary/<docId>')
 def download_summary(docId):
-    return send_from_directory("uploads", f"summary_{docId}.pdf", as_attachment=True)
+    return send_from_directory(PERSISTENT_FOLDER, f"summary_{docId}.pdf", as_attachment=True)
+
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
