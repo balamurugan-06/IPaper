@@ -236,7 +236,7 @@ Target length guidance (human-readable): {summary_instruction}
 
 
 def summarizer(pdfPath, promptFromFE,docId):
-    pdf_path = os.path.join("/var/data/uploads", os.path.basename(pdfPath.strip()))
+    pdf_path = os.path.join("/tmp/uploads", filename)
     print("\nExtracting text from PDF...")
     text, num_pages = extract_text_from_pdf(pdf_path)
     print(f"\n✅ Extracted {len(text)} characters from {num_pages} pages.")
