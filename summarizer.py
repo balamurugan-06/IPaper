@@ -8,6 +8,7 @@ import os
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
+from weasyprint import HTML, CSS
 
 
 # ========== CONFIG ==========
@@ -84,7 +85,7 @@ def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
       <meta charset="utf-8">
       <style>
         body {{
-          font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', 'Symbola', 'DejaVu Sans', sans-serif;
+          font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'DejaVu Sans', sans-serif;
           line-height: 1.6;
           color: #222;
           padding: 40px;
