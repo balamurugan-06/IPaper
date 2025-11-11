@@ -57,10 +57,40 @@ def release_db_connection(conn):
     if db_pool:
         db_pool.putconn(conn)
 
+_executor = ThreadPoolExecutor(max_workers=int(os.getenv("BG_MAX_WORKERS", "6")))
+
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
+
+def _insert_file_record(user_id, folder_id, filename, title, attachment_path):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO files (userid, folderid, filename, title, attachment)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, folder_id, filename, title, attachment_path))
+        conn.commit()
+    except Exception as e:
+        print("Background insert error:", e)
+    finally:
+        cur.close()
+        release_db_connection(conn)
+
+@lru_cache(maxsize=50)
+def get_summary_templates_cached():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT summarytemplateid, templatename, promptinstructions, category FROM uploadsummarytemplates")
+    rows = cur.fetchall()
+    cur.close()
+    release_db_connection(conn)
+    return rows
+
+
 
 
 @app.route('/')
@@ -84,7 +114,8 @@ def index():
         """)
         feedbacks = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         
         return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
@@ -127,7 +158,8 @@ def register():
             if cur.fetchone():
                 flash("Email already exists.", 'error')
                 cur.close()
-                conn.close()
+                release_db_connection(conn)
+
                 return render_template('register.html')
 
             hashed_password = generate_password_hash(password)
@@ -138,7 +170,8 @@ def register():
 
             conn.commit()
             cur.close()
-            conn.close()
+            release_db_connection(conn)
+
 
             flash("Registered successfully! Please log in.", "success")
             return redirect('/login')
@@ -165,7 +198,8 @@ def login():
             """, (email,))
             row = cur.fetchone()
             cur.close()
-            conn.close()
+            release_db_connection(conn)
+
             if not row:
                 flash("Email not registered.", "error")
                 return render_template('login.html')
@@ -247,7 +281,8 @@ def dashboard():
         session['membership'] = membership
 
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         return render_template(
             'dashboard.html',
@@ -299,10 +334,7 @@ def upload_document():
                 file.save(save_path)
 
                 # ✅ Save only path and filename in DB
-                cur.execute("""
-                    INSERT INTO files (userid, folderid, filename, title, attachment)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, (session['user_id'], folder_id, filename, title, filename))
+                _executor.submit(_insert_file_record, session['user_id'], folder_id, filename, title, save_path)
 
 
         conn.commit()
@@ -314,7 +346,8 @@ def upload_document():
 
     finally:
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
     return redirect('/dashboard')
 
@@ -331,7 +364,8 @@ def view_document(doc_id):
     cur.execute("SELECT attachment, filename, userid FROM files WHERE fileid = %s", (doc_id,))
     row = cur.fetchone()
     cur.close()
-    conn.close()
+    release_db_connection(conn)
+
 
     if not row:
         return "File not found", 404
@@ -373,13 +407,21 @@ def delete_document(doc_id):
             conn.commit()
 
             # 🟢 Delete actual file from disk
-            if attachment and isinstance(attachment, str) and os.path.exists(attachment):
-                os.remove(attachment)
+            if attachment and isinstance(attachment, str):
+                def _delete_file(path):
+                    try:
+                        if os.path.exists(path):
+                            os.remove(path)
+                    except Exception as e:
+                        print("Async delete error:", e)
+                threading.Thread(target=_delete_file, args=(attachment,), daemon=True).start()
+
 
             flash("Document deleted successfully!", "success")
 
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
     except Exception as e:
         flash(f"Delete failed: {e}", "error")
@@ -425,7 +467,8 @@ def forgot_password():
             cur.execute("UPDATE users SET password = %s WHERE email = %s", (hashed_pw, email))
             conn.commit()
             cur.close()
-            conn.close()
+            release_db_connection(conn)
+
 
             flash("Password has been reset successfully. Please log in.", "success")
             return redirect('/login')
@@ -475,7 +518,8 @@ def admin_login():
             if cur:
                 cur.close()
             if conn:
-                conn.close()
+                release_db_connection(conn)
+
 
     return render_template('admin_login.html')
 
@@ -499,7 +543,8 @@ def admin_users():
         cur.execute("SELECT userid, name, email, gender, age, profession FROM users")
         users = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         return render_template('admin_users.html', users=users)
     except Exception as e:
         flash(f"Error loading user data: {e}", "error")
@@ -516,7 +561,8 @@ def delete_user(user_id):
         cur.execute("DELETE FROM users WHERE userid = %s", (user_id,))
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         flash("User deleted successfully", "success")
     except Exception as e:
         flash(f"Failed to delete user: {e}", "error")
@@ -529,7 +575,7 @@ def admin_media():
     cur.execute('SELECT id, type, path, caption FROM media ORDER BY id')
     images = cur.fetchall()
     cur.close()
-    conn.close()
+    release_db_connection(conn)
     return render_template('admin_media.html', images=images)
 
 
@@ -567,7 +613,8 @@ def update_media():
     cur.execute(query, tuple(values))
     conn.commit()
     cur.close()
-    conn.close()
+    release_db_connection(conn)
+
 
     flash("Image updated successfully.", "success")
     return redirect('/admin/media')
@@ -586,7 +633,7 @@ def membership():
         cur.execute("SELECT planid, code, name, pricecents, currency, features FROM plans ORDER BY planid")
         plans = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
     except Exception as e:
         plans = []
     return render_template('payment.html', plans=plans)
@@ -626,7 +673,8 @@ def payment_success():
         """, (user_id, selected_plan))
         payment = cur.fetchone()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         if payment:
             amount, start_date, end_date = payment
@@ -714,7 +762,8 @@ def payment_process():
 
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         session['last_payment_plan'] = selected_plan
         flash("Payment successful!", "success")
@@ -742,7 +791,8 @@ def payment_page():
         cur.execute("SELECT planid, code, name, pricecents, currency FROM plans WHERE planid = %s", (plan_id,))
         plan = cur.fetchone()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
     except Exception:
         plan = None
     return render_template('payment.html', plan=plan)
@@ -779,7 +829,8 @@ def pay():
 
     conn.commit()
     cur.close()
-    conn.close()
+    release_db_connection(conn)
+
 
     session['membership'] = membership_plan
     
@@ -807,7 +858,7 @@ def inject_membership():
             """, (session['user_name'],))
             row = cur.fetchone()
             cur.close()
-            conn.close()
+            release_db_connection(conn)
             membership = row[0] if row and row[0] else 'Free'
             session['membership'] = membership  # cache it
         except Exception:
@@ -816,87 +867,66 @@ def inject_membership():
 
 
 @app.route('/admin/templates')
-def manage_templates():
-    if not session.get('admin_logged_in'):
-        return redirect('/admin-login')
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT * FROM uploadsummarytemplates
-            ORDER BY summarytemplateid DESC
-        """)
-        templates = cur.fetchall()
-        cur.close()
-        conn.close()
-        return render_template('template_management.html', templates=templates)
-    except Exception as e:
-        return f"Error loading templates: {e}"
+cur.close()
+release_db_connection(conn)
 
 
+# Invalidate template cache
+get_summary_templates_cached.cache_clear()
+return redirect('/admin/templates')
+except Exception as e:
+return f"Error creating template: {e}"
 
-@app.route('/create_template', methods=['POST'])
-def create_template():
-    if not session.get('admin_logged_in'):
-        return redirect('/admin-login')
-    name = request.form.get('template_name')
-    prompt = request.form.get('template_prompt')
-    category = request.form.get('template_category') or None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO uploadsummarytemplates (templatename, promptinstructions, category, createdby)
-            VALUES (%s, %s, %s, %s)
-        """, (name, prompt, category, session.get('user_id')))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect('/admin/templates')
-    except Exception as e:
-        return f"Error creating template: {e}"
 
 
 
 @app.route('/edit_template/<int:id>', methods=['POST'])
 def edit_template(id):
-    if not session.get('admin_logged_in'):
-        return redirect('/admin-login')
-    name = request.form.get('edit_template_name')
-    prompt = request.form.get('edit_template_prompt')
-    category = request.form.get('edit_template_category') or None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            UPDATE uploadsummarytemplates
-            SET templatename = %s, promptinstructions = %s, category = %s
-            WHERE summarytemplateid = %s
-        """, (name, prompt, category, id))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect('/admin/templates')
-    except Exception as e:
-        return f"Error editing template: {e}"
-        
+if not session.get('admin_logged_in'):
+return redirect('/admin-login')
+name = request.form.get('edit_template_name')
+prompt = request.form.get('edit_template_prompt')
+category = request.form.get('edit_template_category') or None
+try:
+conn = get_db_connection()
+cur = conn.cursor()
+cur.execute("""
+UPDATE uploadsummarytemplates
+SET templatename = %s, promptinstructions = %s, category = %s
+WHERE summarytemplateid = %s
+""", (name, prompt, category, id))
+conn.commit()
+cur.close()
+release_db_connection(conn)
+
+
+# Invalidate template cache
+get_summary_templates_cached.cache_clear()
+return redirect('/admin/templates')
+except Exception as e:
+return f"Error editing template: {e}"
+
 
 
 
 @app.route('/delete_template/<int:id>', methods=['POST'])
 def delete_template(id):
-    if not session.get('admin_logged_in'):
-        return redirect('/admin-login')
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM uploadsummarytemplates WHERE summarytemplateid = %s", (id,))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect('/admin/templates')
-    except Exception as e:
-        return f"Error deleting template: {e}"
+if not session.get('admin_logged_in'):
+return redirect('/admin-login')
+try:
+conn = get_db_connection()
+cur = conn.cursor()
+cur.execute("DELETE FROM uploadsummarytemplates WHERE summarytemplateid = %s", (id,))
+conn.commit()
+cur.close()
+release_db_connection(conn)
+
+
+# Invalidate template cache
+get_summary_templates_cached.cache_clear()
+return redirect('/admin/templates')
+except Exception as e:
+return f"Error deleting template: {e}"
 
 
 
@@ -933,7 +963,8 @@ def get_documents():
 
         rows = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         docs = [
             {"id": r[0], "filename": r[1], "title": r[2], "category": r[3], "category_name": r[4]}
@@ -963,7 +994,8 @@ def add_category():
         folderid = cur.fetchone()[0]
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         return jsonify({"success": True, "id": folderid, "name": name})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -992,7 +1024,8 @@ def update_document_category():
                 return jsonify({"success": False, "error": "Invalid folder id"}), 400
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -1010,7 +1043,8 @@ def get_categories():
                     (session['user_id'],))
         rows = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         cats = [{"id": r[0], "name": r[1]} for r in rows]
         return jsonify(cats)
     except Exception as e:
@@ -1029,7 +1063,8 @@ def delete_category(category_id):
         cur.execute("DELETE FROM folders WHERE folderid = %s AND userid = %s", (category_id, session['user_id']))
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -1055,7 +1090,8 @@ def feedback():
             """, (session['user_id'], name, profession, feedback_type, feedback_text, rating))
             conn.commit()
             cur.close()
-            conn.close()
+            release_db_connection(conn)
+
             flash("Thanks for your feedback!", "success")
             return redirect('/dashboard')
         except Exception as e:
@@ -1076,7 +1112,8 @@ def get_templates():
         """)
         rows = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         templates = []
         for row in rows:
@@ -1102,7 +1139,8 @@ def debug_files():
         cur.execute("SELECT fileid, filename, attachment, userid FROM files ORDER BY fileid DESC LIMIT 50")
         rows = cur.fetchall()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         html = "<h3>Files on disk:</h3><pre>{}</pre>".format("\n".join(files))
         html += "<h3>Latest DB file rows:</h3><pre>{}</pre>".format("\n".join(str(r) for r in rows))
@@ -1150,7 +1188,8 @@ def generateSummary():
 
         conn.commit()
         cur.close()
-        conn.close()
+        release_db_connection(conn)
+
 
         return jsonify({"summary": summary})
 
@@ -1175,7 +1214,8 @@ def getSummary(doc_id):
 
     row = cur.fetchone()
     cur.close()
-    conn.close()
+    release_db_connection(conn)
+
 
     if row:
         return jsonify({"summary": row[0]})
@@ -1190,6 +1230,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
