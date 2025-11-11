@@ -9,6 +9,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from weasyprint import HTML, CSS
+from concurrent.futures import ThreadPoolExecutor
 
 
 # ========== CONFIG ==========
@@ -22,6 +23,8 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
+
+_executor_pdf = ThreadPoolExecutor(max_workers=int(os.getenv("PDF_BG_WORKERS", "2")))
 
 def add_emojis_to_summary(summary_html, prompt):
     """Add contextual and section-based emojis to summary HTML."""
@@ -119,6 +122,9 @@ def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
     HTML(string=html_template).write_pdf(output_path)
     return output_path
 
+def save_summary_to_pdf_async(summary_html, output_path="summary.pdf"):
+# Submit to executor and return future
+return _executor_pdf.submit(save_summary_to_pdf, summary_html, output_path)
 
 
 def extract_text_from_pdf(pdf_path):
@@ -247,5 +253,5 @@ def summarizer(pdfPath, promptFromFE,docId):
     summary = add_emojis_to_summary(summary, promptFromFE)
 
     output_pdf = f"uploads/summary_{docId}.pdf"
-    save_summary_to_pdf(summary, output_pdf)
+    save_summary_to_pdf_async(summary, output_pdf)
     return summary
