@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -51,8 +50,12 @@
     .resizer:hover::after{background: var(--brand);}
 
     .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
-    .user-info {display: flex;gap: 12px;align-items: center;}
-    .topbar-actions {display: flex;gap: 8px;margin-top: 25px;} /* 增加上边距，使按钮下移 */
+    .user-info {display: flex;gap: 24px;align-items: center;}
+    .user-info .muted {
+        font-size: 16px; 
+        font-weight: 500;
+    }
+    .topbar-actions {display: flex;gap: 8px;margin-top: 0px;} /* 增加上边距，使按钮下移 */
     
     /* 调整上传区域尺寸 */
     .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:16px;transition: all 0.3s ease;margin-bottom: 16px;}    
@@ -413,11 +416,34 @@
     
     /* Enhanced topbar styling */
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
       background: white;
-      border-radius: 8px;
-      padding: 12px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      border-radius: 0 0 16px 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .topbar-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 0; 
+    }
+    .top-right-logo {
+        position: fixed;
+        top: 12px; /* 调整logo位置，避免与顶部栏重叠 */
+        right: 20px;
+        width: 80px;
+        height: auto;
+        z-index: 1000;
     }
     
     .topbar .muted {
@@ -466,13 +492,34 @@
     /* 固定右上角 logo 样式 */
     .top-right-logo {
      position: fixed;
-     top: 0px;
+     top: 12px;
      right: 20px;
      width: 80px;          /* logo 大小可自行调整 */
      height: auto;
      z-index: 1000;
 }
-
+    .membership-badge {
+    display: inline-block;
+    background: rgb(197, 196, 196);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    transition: none;
+    cursor: default;
+  }
+  
+    .membership-badge:hover {
+    transform: none;
+    background: rgb(197, 196, 196);
+    box-shadow: var(--shadow-sm);
+  }
     
     .profession-badge {
       display: inline-block;
@@ -798,8 +845,9 @@
       </div>
       <div class="account-section">
         <div class="pane-title">Account</div>
+        <div class="membership-badge">{{ latest_membership }}</div>
+        <button class="btn" onclick="window.location.href='/forum'">Forum</button>
         <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
-        <button class="btn">{{ latest_membership }}</button>
         <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
         <a class="logout" href="/logout">Logout</a>
       </div>
@@ -841,9 +889,9 @@
           {% if latest_membership != "Free" %}
             <button id="generateBtn" class="action-btn">Generate</button>
           {% else %}
-            <button id="generateBtn" class="action-btn" onclick="alert('Upgrade your plan to unlock the Generate feature!')" title="Upgrade to use Generate">Generate</button>
+            <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
           {% endif %}
-          <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
+          <button id="foreignerBtn" class="action-btn tertiary">Share</button> <!-- 新增Foreigner按钮 -->
         </div>
       </div>
       <h1>Welcome back, {{ name }}</h1>
@@ -973,8 +1021,8 @@
     delBtn.textContent = '🗑';
     delBtn.onclick = async (e) => {
       e.stopPropagation();
-      if (confirm(`Delete "${div.dataset.fileName}"?`)) {
-        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
+      if (confirm(Delete "${div.dataset.fileName}"?)) {
+        await fetch(/delete-document/${doc.id}, { method: 'GET' });
         await loadDocuments();
       }
     };
@@ -1058,7 +1106,7 @@
   async function deleteCategory(categoryId) {
     if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
     try {
-      const res = await fetch(`/delete_category/${categoryId}`, { method: 'DELETE' });
+      const res = await fetch(/delete_category/${categoryId}, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         categories = categories.filter(cat => String(cat.id) !== String(categoryId));
@@ -1107,7 +1155,7 @@
           }
           saveCategories();
           loadDocuments();
-          console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
+          console.log(Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent});
         } else {
           alert('Failed to update document category');
         }
@@ -1156,7 +1204,7 @@
   }
 
   // ✅ Maintain active highlight
-  const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
+  const activeEl = container.querySelector(.category[data-category="${currentCategory}"]);
   container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
   if (activeEl) activeEl.classList.add('active-category');
 }
@@ -1168,14 +1216,14 @@
 
   // Highlight active folder
   document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
-  const el = document.querySelector(`.category[data-category="${categoryId}"]`);
+  const el = document.querySelector(.category[data-category="${categoryId}"]);
   if (el) el.classList.add('active-category');
 
   // Update display text
   const categoryName = categoryId === 'all'
     ? 'All Documents'
     : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
-  $('#current-category').textContent = `Showing: ${categoryName}`;
+  $('#current-category').textContent = Showing: ${categoryName};
 
   // ✅ Update hidden folder_id input before upload
   const folderInput = document.getElementById('folder_id');
@@ -1191,7 +1239,7 @@
 
  async function filterDocuments() {
   try {
-    const res = await fetch(`/get-documents?category=${currentCategory}`);
+    const res = await fetch(/get-documents?category=${currentCategory});
     if (!res.ok) throw new Error('Failed to fetch documents');
 
     const docs = await res.json();
@@ -1227,7 +1275,7 @@ const modal = document.getElementById('templateModal');
   if (generateBtn) {
   generateBtn.addEventListener('click', async () => {
     if (!window.selectedDocId) {
-      alert('⚠️ Please select a document first before generating.');
+      alert('⚠ Please select a document first before generating.');
       return;
     }
 
@@ -1289,7 +1337,7 @@ const modal = document.getElementById('templateModal');
 
 generateNowBtn.addEventListener('click', async () => {
   if (!selectedTemplateId) {
-    alert("⚠️ Please select a template first.");
+    alert("⚠ Please select a template first.");
     return;
   }
 
@@ -1325,7 +1373,7 @@ generateNowBtn.addEventListener('click', async () => {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠️ Server error. Check console.";
+    outputDiv.textContent = "⚠ Server error. Check console.";
     console.error(err);
 
   } finally {
@@ -1406,13 +1454,13 @@ dropZone.addEventListener('drop', e => {
   dropZone.classList.remove('active');
   // ✅ Show dropped file name
   if (fileInput.files.length > 0) {
-    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+    fileNameDisplay.textContent = Selected: ${fileInput.files[0].name};
   }
 });
 
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length > 0) {
-    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
+    fileNameDisplay.textContent = Selected: ${fileInput.files[0].name};
   } else {
     fileNameDisplay.textContent = '';
   }
@@ -1422,14 +1470,14 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     const summaryText = document.getElementById("generatedText").innerText.trim();
 
     if (filename.includes("undefined")) {
-        alert("⚠️ Please select a document first.");
+        alert("⚠ Please select a document first.");
         return;
     }
     if (!summaryText) {
-        alert("⚠️ No summary available. Please generate summary first.");
+        alert("⚠ No summary available. Please generate summary first.");
         return;
     }
-    window.location.href = `/download/${filename}`;
+    window.location.href = /download/${filename};
 });
 
 async function loadSummaryForSelectedDoc(docId) {
@@ -1437,7 +1485,7 @@ async function loadSummaryForSelectedDoc(docId) {
   outputDiv.textContent = "⏳ Checking summary...";
 
   try {
-    const res = await fetch(`/getSummary/${docId}`);
+    const res = await fetch(/getSummary/${docId});
     const data = await res.json();
 
     if (data.summary) {
@@ -1449,7 +1497,7 @@ async function loadSummaryForSelectedDoc(docId) {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠️ Error fetching summary.";
+    outputDiv.textContent = "⚠ Error fetching summary.";
     console.error(err);
   }
 }
@@ -1458,4 +1506,3 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
-
