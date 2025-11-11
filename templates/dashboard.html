@@ -41,7 +41,7 @@
     .us{padding:24px 20px;position:relative;overflow:auto;border-right: 1px solid var(--border);} 
     .main{
   background:transparent;
-  padding:0 32px 32px 32px;
+  padding:0;
   overflow:auto;
 }
     .pane-title{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;}
@@ -61,7 +61,7 @@
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px 32px;
+  padding:12px 24px;
   background:rgba(255,255,255,0.95);
   border-bottom:1px solid var(--border);
   backdrop-filter: blur(10px);
@@ -140,11 +140,11 @@
     .template-selector-container {width: 75%;height: 75%;max-width: 900px;max-height: 650px;background: white;border-radius: 16px;display: flex;position: relative;box-shadow: var(--shadow-lg);overflow: hidden;}    
     .hidden {display: none;}    
     .categories-container {flex: 1;overflow-y: auto;margin-bottom: 16px;}    
-   .main h1 {
+.main h1 {
   font-size: 32px;
   font-weight: 700;
   color: var(--text);
-  margin-top: 24px;
+  margin-top: 0;
   margin-bottom: 8px;
   background: var(--gradient);
   -webkit-background-clip: text;
@@ -527,14 +527,15 @@
       color: var(--accent);
       margin-bottom: 5px;
     }
-    /* 固定右上角 logo 样式 */
-   .top-right-logo {
-  position: absolute;
-  top: 16px;
-  right: 32px;
-  width: 60px;
+
+
+    .top-right-logo {
+  position: fixed;
+  top: 8px;
+  right: 24px;
+  width: 70px;
   height: auto;
-  z-index: 1000;
+  z-index: 1001;
 }
     
     .profession-badge {
@@ -914,9 +915,10 @@
           <button id="foreignerBtn" class="action-btn tertiary">Share</button> <!-- 新增Foreigner按钮 -->
         </div>
       </div>
+      <div style="padding: 24px 32px;">
       <h1>Welcome back, {{ name }}</h1>
       <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
-        <div id="generatedText">
+        <div id="generatedText"></div>
 
         </div>
     </main>
@@ -1533,6 +1535,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
