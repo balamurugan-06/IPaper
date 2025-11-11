@@ -841,7 +841,7 @@
           {% if latest_membership != "Free" %}
             <button id="generateBtn" class="action-btn">Generate</button>
           {% else %}
-            <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
+            <button id="generateBtn" class="action-btn" onclick="alert('Upgrade your plan to unlock the Generate feature!')" title="Upgrade to use Generate">Generate</button>
           {% endif %}
           <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
         </div>
@@ -1458,3 +1458,4 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
