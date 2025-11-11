@@ -20,6 +20,12 @@ from summarizer import summarizer
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+from psycopg2 import pool
+from functools import lru_cache
+from concurrent.futures import ThreadPoolExecutor
+import threading
+from flask_compress import Compress
+
 
 load_dotenv()
 
@@ -31,17 +37,31 @@ UPLOAD_FOLDER = "/var/data/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Session(app)
+Compress(app) # enable gzip/brotli compression for responses
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 # Admin credentials from environment (instead of hardcoded)
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+db_pool = psycopg2.pool.SimpleConnectionPool(
+    1, int(os.getenv("DB_MAX_CONN", "20")),
+    DATABASE_URL, sslmode="require"
+)
+
+def get_db_connection():
+    return db_pool.getconn()
+
+def release_db_connection(conn):
+    if db_pool:
+        db_pool.putconn(conn)
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
-def get_db_connection():
-    return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+
 
 @app.route('/')
 def index():
@@ -1170,6 +1190,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
