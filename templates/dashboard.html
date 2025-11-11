@@ -773,6 +773,43 @@
   animation: spin 0.9s linear infinite;
 }
 
+    .user-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 220px;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.user-profession {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+/* === Membership label === */
+.membership-label {
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #c7d2fe;
+  font-size: 13px;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -799,7 +836,7 @@
       <div class="account-section">
         <div class="pane-title">Account</div>
         <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
-        <button class="btn">{{ latest_membership }}</button>
+        <div class="membership-label">Plan: {{ latest_membership }}</div>
         <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
         <a class="logout" href="/logout">Logout</a>
       </div>
@@ -833,8 +870,10 @@
     <main class="main">
       <div class="topbar">
         <div class="user-info">
-          <div class="muted">{{ name }}</div>
-          <div class="muted">{{ profession }}</div>
+        <div class="user-banner">
+          <div class="user-name">{{ name }}</div>
+          <div class="user-profession">{{ profession }}</div>
+        </div>
         </div>
         <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
@@ -1469,4 +1508,5 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
