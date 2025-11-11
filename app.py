@@ -869,7 +869,7 @@ def inject_membership():
 @app.route('/admin/templates')
 def manage_templates():
     if not session.get('admin_logged_in'):
-    return redirect('/admin-login')
+        return redirect('/admin-login')
     try:
         templates = get_summary_templates_cached()
         return render_template('template_management.html', templates=templates)
@@ -1248,6 +1248,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
