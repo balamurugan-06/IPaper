@@ -867,66 +867,84 @@ def inject_membership():
 
 
 @app.route('/admin/templates')
-cur.close()
-release_db_connection(conn)
+def manage_templates():
+    if not session.get('admin_logged_in'):
+    return redirect('/admin-login')
+    try:
+        templates = get_summary_templates_cached()
+        return render_template('template_management.html', templates=templates)
+    except Exception as e:
+        return f"Error loading templates: {e}"
+
+@app.route('/create_template', methods=['POST'])
+def create_template():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    name = request.form.get('template_name')
+    prompt = request.form.get('template_prompt')
+    category = request.form.get('template_category') or None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO uploadsummarytemplates (templatename, promptinstructions, category, createdby)
+            VALUES (%s, %s, %s, %s)
+            """, (name, prompt, category, session.get('user_id')))
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
 
 
-# Invalidate template cache
-get_summary_templates_cached.cache_clear()
-return redirect('/admin/templates')
-except Exception as e:
-return f"Error creating template: {e}"
-
-
-
+        # Invalidate template cache
+        get_summary_templates_cached.cache_clear()
+        return redirect('/admin/templates')
+    except Exception as e:
+        return f"Error creating template: {e}"
 
 @app.route('/edit_template/<int:id>', methods=['POST'])
 def edit_template(id):
-if not session.get('admin_logged_in'):
-return redirect('/admin-login')
-name = request.form.get('edit_template_name')
-prompt = request.form.get('edit_template_prompt')
-category = request.form.get('edit_template_category') or None
-try:
-conn = get_db_connection()
-cur = conn.cursor()
-cur.execute("""
-UPDATE uploadsummarytemplates
-SET templatename = %s, promptinstructions = %s, category = %s
-WHERE summarytemplateid = %s
-""", (name, prompt, category, id))
-conn.commit()
-cur.close()
-release_db_connection(conn)
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    name = request.form.get('edit_template_name')
+    prompt = request.form.get('edit_template_prompt')
+    category = request.form.get('edit_template_category') or None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE uploadsummarytemplates
+            SET templatename = %s, promptinstructions = %s, category = %s
+            WHERE summarytemplateid = %s
+            """, (name, prompt, category, id))
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
 
 
-# Invalidate template cache
-get_summary_templates_cached.cache_clear()
-return redirect('/admin/templates')
-except Exception as e:
-return f"Error editing template: {e}"
-
-
-
+        # Invalidate template cache
+        get_summary_templates_cached.cache_clear()
+        return redirect('/admin/templates')
+    except Exception as e:
+        return f"Error editing template: {e}"
 
 @app.route('/delete_template/<int:id>', methods=['POST'])
 def delete_template(id):
-if not session.get('admin_logged_in'):
-return redirect('/admin-login')
-try:
-conn = get_db_connection()
-cur = conn.cursor()
-cur.execute("DELETE FROM uploadsummarytemplates WHERE summarytemplateid = %s", (id,))
-conn.commit()
-cur.close()
-release_db_connection(conn)
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM uploadsummarytemplates WHERE summarytemplateid = %s", (id,))
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
 
 
-# Invalidate template cache
-get_summary_templates_cached.cache_clear()
-return redirect('/admin/templates')
-except Exception as e:
-return f"Error deleting template: {e}"
+        # Invalidate template cache
+        get_summary_templates_cached.cache_clear()
+        return redirect('/admin/templates')
+    except Exception as e:
+        return f"Error deleting template: {e}"
 
 
 
@@ -1230,6 +1248,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
