@@ -106,7 +106,7 @@ def index():
         videos = [item for item in media_items if item[0] == 'video']
 
         cur.execute("""
-        SELECT name, profession, rating, comment, createdat
+        SELECT name, profession, rating, comment, feedbacktype
         FROM userfeedback
         WHERE rating >= 3
         ORDER BY CreatedAt DESC
@@ -1248,6 +1248,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
