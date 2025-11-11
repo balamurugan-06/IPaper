@@ -65,10 +65,15 @@
         box-shadow: none;
       }    
     .user-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+}
 
    .topbar-actions {
       display: flex;
@@ -815,15 +820,20 @@
 }
 
 .user-name {
-  font-size: 20px;
-  font-weight: 700;
   color: #1e293b;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+    .divider {
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .user-profession {
-  font-size: 13px;
   color: #64748b;
-  margin-top: 2px;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 /* === Membership label === */
@@ -899,12 +909,11 @@
     <main class="main">
       <div class="topbar">
         <div class="user-info">
-        <div class="user-banner">
-          <div class="user-name">{{ name }}</div>
-          <div class="user-profession">{{ profession }}</div>
+          <span class="user-name">{{ name }}</span>
+          <span class="divider">·</span>
+          <span class="user-profession">{{ profession }}</span>
         </div>
-        </div>
-        <div class="topbar-actions">
+                <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
           {% if latest_membership == "Professional Plus" %}
             <button id="generateBtn" class="action-btn">Generate</button>
@@ -1537,6 +1546,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
