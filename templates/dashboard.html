@@ -1295,6 +1295,13 @@ const modal = document.getElementById('templateModal');
       const res = await fetch('/get_templates');
       allTemplates = await res.json();
 
+      const membership = "{{ latest_membership }}";
+      if (membership === "Professional") {
+        allTemplates = allTemplates.filter(t =>
+          t.name.toLowerCase().includes("general")
+        );
+      }
+
       const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
       categoryList.innerHTML = '';
       categories.forEach(cat => {
@@ -1510,4 +1517,5 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
