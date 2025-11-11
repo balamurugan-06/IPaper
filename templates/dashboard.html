@@ -39,7 +39,7 @@
     .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;backdrop-filter: blur(10px);} 
     .ls{padding:24px 20px;position:relative;overflow-y:visible;border-right: 1px solid var(--border);} 
     .us{padding:24px 20px;position:relative;overflow:auto;border-right: 1px solid var(--border);} 
-    .main{background:transparent;padding:32px;overflow:auto;}
+    .main{background:transparent;padding-top: 100px;overflow:auto;}
     .pane-title{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;}
     .btn{border:0;border-radius:8px;padding:12px 16px;font-weight:500;cursor:pointer;background:var(--hover);color:var(--text);width:100%;text-align:left;margin-bottom:8px;transition: all 0.2s ease;font-size: 13px;border: 1px solid transparent;}
     .btn:hover{background:#e2e8f0;transform: translateY(-1px);box-shadow: var(--shadow-sm);}    
@@ -49,11 +49,32 @@
     .resizer{position:relative;background:transparent;width:var(--bar-w);cursor: col-resize;}
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
     .resizer:hover::after{background: var(--brand);}
+     .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: transparent;
+        padding: 0 40px;
+        z-index: 1000;
+        border: none;
+        box-shadow: none;
+      }    
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-    .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
-    .user-info {display: flex;gap: 12px;align-items: center;}
-    .topbar-actions {display: flex;gap: 8px;margin-top: 25px;} /* 增加上边距，使按钮下移 */
-    
+   .topbar-actions {
+      display: flex;
+      gap: 10px;
+    }
+        
     /* 调整上传区域尺寸 */
     .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:16px;transition: all 0.3s ease;margin-bottom: 16px;}    
     input[type="file"]{width:100%;margin:8px 0;padding: 8px;border: 1px solid var(--border);border-radius: 6px;background: white;font-size: 12px;cursor: pointer;}    
@@ -72,7 +93,7 @@
     .active-category {background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;border-color: var(--brand) !important;box-shadow: var(--shadow-sm);}    
     .delete-category {position: absolute;top: 10px;right: 10px;width: 24px;height: 24px;border: none;background: #fee2e2;border-radius: 6px;cursor: pointer;color: var(--danger);font-size: 13px;display: flex;align-items: center;justify-content: center;opacity: 0;transition: all 0.2s ease;}    
     .category:hover .delete-category {opacity: 1;}    
-    .action-btn {background: var(--brand);color: white;border: none;border-radius: 8px;padding: 10px 20px;cursor: pointer;font-weight: 600;margin-left: 8px;transition: all 0.2s ease;font-size: 13px;box-shadow: var(--shadow-sm);}    
+    .action-btn {background: var(--brand);color: white;border: none;border-radius: 6px;padding: 8px 16px;cursor: pointer;font-weight: 600;margin-left: 8px;transition: all 0.2s ease;font-size: 13px;box-shadow: var(--shadow-sm);}    
     .action-btn.secondary {background: var(--success);}    
     .action-btn.tertiary {background: var(--accent);} /* 新增Foreigner按钮样式 */
     .template-selector-modal {position: fixed;top: 0;left: 0;right: 0;bottom: 0;background: rgba(0,0,0,0.6);z-index: 1001;display: flex;justify-content: center;align-items: center;backdrop-filter: blur(4px);}    
@@ -465,13 +486,12 @@
     }
     /* 固定右上角 logo 样式 */
     .top-right-logo {
-     position: fixed;
-     top: 0px;
-     right: 20px;
-     width: 80px;          /* logo 大小可自行调整 */
-     height: auto;
-     z-index: 1000;
-}
+      position: absolute;
+      top: 14px;
+      right: 40px;
+      width: 70px;
+      height: auto;
+    }
 
     
     .profession-badge {
@@ -786,14 +806,14 @@
 }
 
 .user-name {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .user-profession {
   font-size: 13px;
-  opacity: 0.9;
+  color: #64748b;
   margin-top: 2px;
 }
 
@@ -835,8 +855,8 @@
       </div>
       <div class="account-section">
         <div class="pane-title">Account</div>
+        <div class="plan-text">Plan: <span>{{ latest_membership }}</span></div>
         <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
-        <div class="membership-label">Plan: {{ latest_membership }}</div>
         <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
         <a class="logout" href="/logout">Logout</a>
       </div>
@@ -1508,5 +1528,6 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
