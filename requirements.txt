@@ -10,4 +10,5 @@ tqdm
 openai
 reportlab
 weasyprint>=59.0
+Flask-Compress==1.15
 
