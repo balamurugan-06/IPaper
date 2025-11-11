@@ -64,15 +64,14 @@
         border: none;
         box-shadow: none;
       }    
-    .user-info {
+ .user-info {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 8px;
   font-size: 18px;
   font-weight: 600;
   color: #1e293b;
-  margin: 0;
-  padding: 0;
 }
 
    .topbar-actions {
@@ -98,9 +97,13 @@
     .active-category {background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;border-color: var(--brand) !important;box-shadow: var(--shadow-sm);}    
     .delete-category {position: absolute;top: 10px;right: 10px;width: 24px;height: 24px;border: none;background: #fee2e2;border-radius: 6px;cursor: pointer;color: var(--danger);font-size: 13px;display: flex;align-items: center;justify-content: center;opacity: 0;transition: all 0.2s ease;}    
     .category:hover .delete-category {opacity: 1;}    
-    .action-btn {background: var(--brand);color: white;border: none;border-radius: 6px;padding: 8px 16px;cursor: pointer;font-weight: 600;margin-left: 8px;transition: all 0.2s ease;font-size: 13px;box-shadow: var(--shadow-sm);}    
-    .action-btn.secondary {background: var(--success);}    
-    .action-btn.tertiary {background: var(--accent);} /* 新增Foreigner按钮样式 */
+   .action-btn {
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
     .template-selector-modal {position: fixed;top: 0;left: 0;right: 0;bottom: 0;background: rgba(0,0,0,0.6);z-index: 1001;display: flex;justify-content: center;align-items: center;backdrop-filter: blur(4px);}    
     .template-selector-container {width: 75%;height: 75%;max-width: 900px;max-height: 650px;background: white;border-radius: 16px;display: flex;position: relative;box-shadow: var(--shadow-lg);overflow: hidden;}    
     .hidden {display: none;}    
@@ -490,13 +493,14 @@
       margin-bottom: 5px;
     }
     /* 固定右上角 logo 样式 */
-    .top-right-logo {
-      position: absolute;
-      top: 14px;
-      right: 40px;
-      width: 70px;
-      height: auto;
-    }
+   .top-right-logo {
+  position: fixed;
+  top: 12px;
+  right: 20px;
+  width: 60px;
+  height: auto;
+  z-index: 1000;
+}}
 
     
     .profession-badge {
@@ -822,7 +826,6 @@
 .user-name {
   color: #1e293b;
   font-weight: 700;
-  font-size: 18px;
 }
 
     .divider {
@@ -830,6 +833,14 @@
   font-weight: 400;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+
+    
 .user-profession {
   color: #64748b;
   font-weight: 500;
@@ -905,28 +916,31 @@
     </aside>
 
     <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn">«</button></div>
+<main class="main">
+  <!-- 🔹 Name + Profession -->
+  <div class="user-info">
+    <span class="user-name">{{ name }}</span>
+    <span class="divider">·</span>
+    <span class="user-profession">{{ profession }}</span>
+  </div>
 
-    <main class="main">
-      <div class="topbar">
-        <div class="user-info">
-          <span class="user-name">{{ name }}</span>
-          <span class="divider">·</span>
-          <span class="user-profession">{{ profession }}</span>
-        </div>
-                <div class="topbar-actions">
-          <button id="downloadBtn" class="action-btn secondary">Download</button>
-          {% if latest_membership == "Professional Plus" %}
-            <button id="generateBtn" class="action-btn">Generate</button>
-          
-          {% elif latest_membership == "Professional" %}
-            <button id="generateBtn" class="action-btn">Generate</button>
-          
-          {% else %}
-            <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
-          {% endif %}
-          <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
-        </div>
-      </div>
+  <!-- 🔹 Welcome Title -->
+  <h1>Welcome back, {{ name }}</h1>
+  <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
+
+  <!-- 🔹 Buttons moved here -->
+  <div class="action-buttons">
+    <button id="downloadBtn" class="action-btn secondary">Download</button>
+    {% if latest_membership == "Professional Plus" %}
+      <button id="generateBtn" class="action-btn">Generate</button>
+    {% elif latest_membership == "Professional" %}
+      <button id="generateBtn" class="action-btn">Generate</button>
+    {% else %}
+      <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
+    {% endif %}
+    <button id="foreignerBtn" class="action-btn tertiary">Share</button>
+  </div>
+  
       <h1>Welcome back, {{ name }}</h1>
       <p class="welcome-subtitle muted">Manage your documents and generate summaries with ease</p>
         <div id="generatedText">
@@ -1546,6 +1560,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
