@@ -123,8 +123,7 @@ def save_summary_to_pdf(summary_html, output_path="summary.pdf"):
     return output_path
 
 def save_summary_to_pdf_async(summary_html, output_path="summary.pdf"):
-# Submit to executor and return future
-return _executor_pdf.submit(save_summary_to_pdf, summary_html, output_path)
+    return _executor_pdf.submit(save_summary_to_pdf, summary_html, output_path)
 
 
 def extract_text_from_pdf(pdf_path):
