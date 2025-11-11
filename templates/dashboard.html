@@ -886,10 +886,14 @@
         </div>
         <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
-          {% if latest_membership != "Free" %}
+          {% if latest_membership == "Professional Plus" %}
             <button id="generateBtn" class="action-btn">Generate</button>
+          
+          {% elif latest_membership == "Professional" %}
+            <button id="generateBtn" class="action-btn">Generate</button>
+          
           {% else %}
-            <button id="generateBtn" class="action-btn" disabled title="Upgrade to use Generate">Generate</button>
+            <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
           {% endif %}
           <button id="foreignerBtn" class="action-btn tertiary">Share</button> <!-- 新增Foreigner按钮 -->
         </div>
@@ -1506,3 +1510,4 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
