@@ -169,7 +169,7 @@
         <p class="small">Recommended: 1600×900 or 4:3. JPG/PNG.</p>
 
         <div class="photos">
-          {% for img in images %}
+          {% for img in images[:3] %}
           <div class="photo-slot">
             {% if img[2] %}
               <img src="{{ img[2] }}" alt="photo">
