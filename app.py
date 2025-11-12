@@ -622,17 +622,14 @@ def update_media():
 
 @app.route('/admin/media/upload', methods=['POST'])
 def upload_media():
-    # Check admin login first
     if not session.get('admin_logged_in'):
         flash("Please log in as admin", "error")
         return redirect('/admin-login')
     
-    # Get form data
     media_id = request.form.get('id', '').strip()
     media_type = request.form.get('type', 'image').strip()
     file = request.files.get('file')
     
-    # Validate file
     if not file or file.filename == '':
         flash("No file selected", "error")
         return redirect('/admin/media')
@@ -647,7 +644,6 @@ def upload_media():
     cur = None
     
     try:
-        # Secure filename
         filename = secure_filename(file.filename)
         if not filename:
             flash("Invalid filename", "error")
@@ -657,38 +653,41 @@ def upload_media():
         MEDIA_FOLDER = os.path.join('static', 'media')
         os.makedirs(MEDIA_FOLDER, exist_ok=True)
         
-        # Save file
+        # Save file to disk
         file_path = os.path.join(MEDIA_FOLDER, filename)
         file.save(file_path)
+        
+        # IMPORTANT: Ensure file is fully written to disk
+        import time
+        time.sleep(0.2)  # 200ms delay to ensure file write completes
+        
+        # Verify file was saved
+        if not os.path.exists(file_path):
+            flash("File save failed - file not found on disk", "error")
+            return redirect('/admin/media')
         
         # Web path
         web_path = f"/static/media/{filename}"
         
-        # Database operation
+        # Update database
         conn = get_db_connection()
         cur = conn.cursor()
         
         if media_id:
-            # Update existing
             cur.execute("UPDATE media SET path = %s WHERE id = %s", (web_path, media_id))
-            affected = cur.rowcount
-            if affected == 0:
-                flash("Media ID not found, created new entry", "info")
+            if cur.rowcount == 0:
                 cur.execute("INSERT INTO media (type, path) VALUES (%s, %s)", (media_type, web_path))
         else:
-            # Insert new
             cur.execute("INSERT INTO media (type, path) VALUES (%s, %s)", (media_type, web_path))
         
         conn.commit()
         flash(f"✅ {media_type.capitalize()} uploaded successfully!", "success")
         
     except Exception as e:
-        # Log error details
         error_msg = str(e)
         print(f"❌ Upload error: {error_msg}")
         print(traceback.format_exc())
         
-        # Rollback database
         if conn:
             try:
                 conn.rollback()
@@ -698,7 +697,6 @@ def upload_media():
         flash(f"Upload failed: {error_msg}", "error")
         
     finally:
-        # Always close connections
         if cur:
             try:
                 cur.close()
@@ -710,7 +708,6 @@ def upload_media():
             except:
                 pass
     
-    # Always return redirect
     return redirect('/admin/media')
     
 
@@ -1340,6 +1337,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
