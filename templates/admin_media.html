@@ -105,39 +105,6 @@
       background: #5849c2;
     }
 
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 25px;
-    }
-
-    .reset-btn {
-      background: #ddd;
-      color: #333;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .reset-btn:hover {
-      background: #ccc;
-    }
-
-    .save-btn {
-      background: #6c5ce7;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .save-btn:hover {
-      background: #5849c2;
-    }
-
     .video-section {
       text-align: center;
       background: #f3f4f6;
@@ -151,64 +118,161 @@
       border-radius: 8px;
       margin-bottom: 10px;
     }
+
+    .input-group {
+      margin-top: 10px;
+    }
+
+    .input-group input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+
+    .flash-message {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+
+    .flash-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .flash-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .file-name {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h2>Welcome, Admin</h2>
-      <button class="logout-btn" onclick="window.location.href='/logout'>Log out</button>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Log out</button>
     </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <p style="margin-bottom: 25px;">Quick actions to keep iPaper humming. Choose what you need below.</p>
 
     <div class="content">
       <!-- Photos Section -->
       <div class="card">
-        <h3>Photos (3)</h3>
+        <h3>Photos ({{ images|length if images else 0 }})</h3>
         <p class="small">Recommended: 1600×900 or 4:3. JPG/PNG.</p>
 
         <div class="photos">
-          {% for img in images[:3] %}
-          <div class="photo-slot">
-            {% if img[2] %}
-              <img src="{{ img[2] }}" alt="photo">
-            {% else %}
-              <p>Empty</p>
+          {% for img in images %}
+            {% if img[1] == 'image' %}
+            <div class="photo-slot">
+              {% if img[2] %}
+                <img src="{{ img[2] }}" alt="photo" id="preview-{{ img[0] }}">
+              {% else %}
+                <p>Empty</p>
+              {% endif %}
+              
+              <form action="/admin/media/upload" method="POST" enctype="multipart/form-data" id="form-{{ img[0] }}">
+                <input type="hidden" name="id" value="{{ img[0] }}">
+                <input type="hidden" name="type" value="image">
+                
+                <input 
+                  type="file" 
+                  name="file" 
+                  accept="image/*" 
+                  style="display:none;" 
+                  id="file-{{ img[0] }}"
+                  onchange="previewAndSubmit({{ img[0] }})">
+                
+                <label for="file-{{ img[0] }}" class="replace-btn">Replace</label>
+                <div class="file-name" id="filename-{{ img[0] }}"></div>
+              </form>
+            </div>
             {% endif %}
-            <form action="/admin/media/update" method="POST" enctype="multipart/form-data">
-              <input type="hidden" name="id" value="{{ img[0] }}">
-              <input type="file" name="photo" accept="image/*" style="display:none;" id="file{{ img[0] }}">
-              <label for="file{{ img[0] }}" class="replace-btn">Replace</label>
-            </form>
-          </div>
           {% endfor %}
         </div>
       </div>
 
       <!-- Intro Video Section -->
       <div class="card">
-        <h3>Intro Video (1)</h3>
-        <p class="small">Recommended: MP4/H.264 or WebM, &lt; 50MB (preview does not enforce size).</p>
+        <h3>Intro Video</h3>
+        <p class="small">Upload MP4/WebM video file.</p>
 
         <div class="video-section">
-          {% if video %}
-            <video controls src="{{ video }}"></video>
+          {% set video = None %}
+          {% for item in images %}
+            {% if item[1] == 'video' %}
+              {% set video = item %}
+            {% endif %}
+          {% endfor %}
+
+          {% if video and video[2] %}
+            <video controls src="{{ video[2] }}" id="video-preview"></video>
           {% else %}
             <p>No video selected</p>
           {% endif %}
-          <form action="/admin/media/upload_video" method="POST" enctype="multipart/form-data">
-            <input type="file" name="video" accept="video/*" style="display:none;" id="videoFile">
-            <label for="videoFile" class="upload-btn">Upload</label>
+          
+          <form action="/admin/media/upload" method="POST" enctype="multipart/form-data" id="video-form">
+            <input type="hidden" name="id" value="{{ video[0] if video else '' }}">
+            <input type="hidden" name="type" value="video">
+            
+            <input 
+              type="file" 
+              name="file" 
+              accept="video/*" 
+              style="display:none;" 
+              id="video-file"
+              onchange="document.getElementById('video-form').submit()">
+            
+            <label for="video-file" class="upload-btn">Upload Video</label>
           </form>
         </div>
       </div>
     </div>
-
-    <div class="actions">
-      <button class="reset-btn" type="button">Reset</button>
-      <button class="save-btn" type="submit">Save Changes</button>
-    </div>
   </div>
+
+  <script>
+    function previewAndSubmit(imgId) {
+      const fileInput = document.getElementById('file-' + imgId);
+      const file = fileInput.files[0];
+      
+      if (file) {
+        // Show filename
+        document.getElementById('filename-' + imgId).textContent = file.name;
+        
+        // Preview image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('preview-' + imgId);
+          if (preview) {
+            preview.src = e.target.result;
+          }
+        };
+        reader.readAsDataURL(file);
+        
+        // Auto-submit form
+        document.getElementById('form-' + imgId).submit();
+      }
+    }
+  </script>
 </body>
 </html>
