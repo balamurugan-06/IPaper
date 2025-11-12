@@ -836,8 +836,9 @@
       </div>
       <div class="account-section">
         <div class="pane-title">Account</div>
-        <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
         <button class="btn">{{ latest_membership }}</button>
+        <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
+        <button class="btn" onclick="window.location.href='/forum'">Community Forum</button>
         <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
         <a class="logout" href="/logout">Logout</a>
       </div>
@@ -885,7 +886,7 @@
           {% else %}
             <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
           {% endif %}
-          <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
+          <button id="foreignerBtn" class="action-btn tertiary">Share</button> 
         </div>
       </div>
       <h1>Welcome back, {{ name }}</h1>
@@ -1515,9 +1516,49 @@ async function loadSummaryForSelectedDoc(docId) {
 }
 
 
+// Share to Forum functionality
+document.getElementById('foreignerBtn').addEventListener('click', async () => {
+  if (!window.selectedDocId) {
+    alert('⚠️ Please select a document first.');
+    return;
+  }
+
+  const outputDiv = document.getElementById('generatedText');
+  const summaryText = outputDiv.textContent.trim();
+  
+  if (!summaryText || summaryText.includes('No summary generated yet')) {
+    alert('⚠️ Please generate a summary first before sharing.');
+    return;
+  }
+
+  const confirmed = confirm('📤 Share this summary to Community Forum?\n\nThis will make your summary visible to all users (anonymously).');
+  
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch('/forum/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doc_id: window.selectedDocId })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert('✅ Summary shared successfully!\n\nVisit Community Forum to see your post.');
+    } else {
+      alert('❌ Failed to share: ' + (data.error || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Share error:', error);
+    alert('❌ Error sharing summary. Please try again.');
+  }
+});
+
 </script>
 </body>
 </html>
+
 
 
 
