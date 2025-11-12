@@ -1334,17 +1334,110 @@ def download_summary(docId):
     return send_from_directory("uploads", f"summary_{docId}.pdf", as_attachment=True)
 
 
+@app.route('/forum')
+def forum():
+    if 'user_id' not in session:
+        return redirect('/login')
+    return render_template('forum.html')
+
+@app.route('/forum/summaries', methods=['GET'])
+def get_forum_summaries():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT forumid, documenttitle, summarycontent, views, sharedat
+            FROM forum
+            ORDER BY sharedat DESC
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        release_db_connection(conn)
+        
+        summaries = [{
+            'forumid': r[0],
+            'documenttitle': r[1],
+            'summarycontent': r[2],
+            'views': r[3],
+            'sharedat': r[4].isoformat() if r[4] else None
+        } for r in rows]
+        
+        return jsonify({'success': True, 'summaries': summaries})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/forum/share', methods=['POST'])
+def share_to_forum():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    try:
+        data = request.get_json()
+        doc_id = data.get('doc_id')
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get document title
+        cur.execute("SELECT title, filename FROM files WHERE fileid = %s AND userid = %s", 
+                   (doc_id, session['user_id']))
+        file_row = cur.fetchone()
+        if not file_row:
+            cur.close()
+            release_db_connection(conn)
+            return jsonify({'success': False, 'error': 'Document not found'}), 404
+        
+        doc_title = file_row[0] or file_row[1] or 'Untitled Document'
+        
+        # Get latest summary
+        cur.execute("SELECT summary FROM summarygenerate WHERE docid = %s ORDER BY createdat DESC LIMIT 1", 
+                   (doc_id,))
+        summary_row = cur.fetchone()
+        if not summary_row:
+            cur.close()
+            release_db_connection(conn)
+            return jsonify({'success': False, 'error': 'No summary found'}), 404
+        
+        # Check if already shared
+        cur.execute("SELECT forumid FROM forum WHERE docid = %s AND userid = %s", 
+                   (doc_id, session['user_id']))
+        existing = cur.fetchone()
+        
+        if existing:
+            cur.execute("""
+                UPDATE forum SET summarycontent = %s, documenttitle = %s, sharedat = CURRENT_TIMESTAMP
+                WHERE forumid = %s
+            """, (summary_row[0], doc_title, existing[0]))
+        else:
+            cur.execute("""
+                INSERT INTO forum (userid, docid, documenttitle, summarycontent)
+                VALUES (%s, %s, %s, %s)
+            """, (session['user_id'], doc_id, doc_title, summary_row[0]))
+        
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/forum/view/<int:forum_id>', methods=['POST'])
+def increment_forum_view(forum_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE forum SET views = views + 1 WHERE forumid = %s", (forum_id,))
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
-
-
-
 
 
 
