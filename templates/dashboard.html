@@ -50,10 +50,10 @@
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
     .resizer:hover::after{background: var(--brand);}
 
-     .topbar {
+ .topbar {
   position: fixed;
   top: 0;
-  left: 0;
+  left: calc(var(--ls-w) + var(--bar-w) + var(--us-w) + var(--bar-w));
   right: 0;
   z-index: 1000;
   display: flex;
@@ -66,29 +66,31 @@
   margin: 0;
   box-shadow: none;
   border-bottom: 1px solid #e2e8f0;
-}    
-  .user-info {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapse-ls .topbar {
+  left: calc(var(--bar-w) + var(--us-w) + var(--bar-w));
+}
+
+.collapse-us .topbar {
+  left: calc(var(--ls-w) + var(--bar-w) + var(--bar-w));
+}
+
+.collapse-both .topbar {
+  left: 0;
+}
+
+/* Fixed User Info */
+.user-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
-  margin-left: calc(var(--ls-w) + var(--bar-w) + var(--us-w) + var(--bar-w) + 32px); /* positioned after all sidebars + padding */
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
 }
     
-    .collapse-ls .user-info {
-      margin-left: calc(var(--bar-w) + var(--us-w) + var(--bar-w) + 32px);
-    }
-    
-    .collapse-us .user-info {
-      margin-left: calc(var(--ls-w) + var(--bar-w) + var(--bar-w) + 32px);
-    }
-    
-    .collapse-both .user-info {
-      margin-left: 32px;
-    }
-    
-    .topbar-actions {display: flex;gap: 10px;align-items: center;}
+  
     
     /* 调整上传区域尺寸 */
     .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:16px;transition: all 0.3s ease;margin-bottom: 16px;}    
@@ -493,12 +495,13 @@
     .top-right-logo {
   position: fixed;
   top: 8px;
-  right: 24px;
-  width: 70px;
-  height: auto;
+  right: 16px;
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
   z-index: 1100;
+  border-radius: 6px;
 }
-
     
     .profession-badge {
       display: inline-block;
@@ -1515,6 +1518,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
