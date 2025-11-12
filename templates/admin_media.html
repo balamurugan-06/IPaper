@@ -251,13 +251,19 @@
   </div>
 
   <script>
+    let isSubmitting = false;
+
     function previewAndSubmit(imgId) {
+      if (isSubmitting) return; // Prevent double submission
+      
       const fileInput = document.getElementById('file-' + imgId);
       const file = fileInput.files[0];
       
       if (file) {
+        isSubmitting = true;
+        
         // Show filename
-        document.getElementById('filename-' + imgId).textContent = file.name;
+        document.getElementById('filename-' + imgId).textContent = 'Uploading ' + file.name + '...';
         
         // Preview image
         const reader = new FileReader();
@@ -269,8 +275,10 @@
         };
         reader.readAsDataURL(file);
         
-        // Auto-submit form
-        document.getElementById('form-' + imgId).submit();
+        // Delay submit slightly to allow preview to render
+        setTimeout(function() {
+          document.getElementById('form-' + imgId).submit();
+        }, 100);
       }
     }
   </script>
