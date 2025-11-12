@@ -861,9 +861,8 @@
       </div>
       <div class="account-section">
         <div class="pane-title">Account</div>
-        <button class="btn">{{ latest_membership }}</button>
-        <button class="btn" onclick="window.location.href='/forum'">ipaper forum</button>
         <button class="btn" onclick="window.location.href='/feedback'">User Feedback</button>
+        <button class="btn">{{ latest_membership }}</button>
         <button class="btn" onclick="window.location.href='/membership'">Purchase Plan</button>
         <a class="logout" href="/logout">Logout</a>
       </div>
@@ -1297,7 +1296,7 @@ const modal = document.getElementById('templateModal');
   if (generateBtn) {
   generateBtn.addEventListener('click', async () => {
     if (!window.selectedDocId) {
-      alert('⚠ Please select a document first before generating.');
+      alert('⚠️ Please select a document first before generating.');
       return;
     }
 
@@ -1366,7 +1365,7 @@ const modal = document.getElementById('templateModal');
 
 generateNowBtn.addEventListener('click', async () => {
   if (!selectedTemplateId) {
-    alert("⚠ Please select a template first.");
+    alert("⚠️ Please select a template first.");
     return;
   }
 
@@ -1402,7 +1401,7 @@ generateNowBtn.addEventListener('click', async () => {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠ Server error. Check console.";
+    outputDiv.textContent = "⚠️ Server error. Check console.";
     console.error(err);
 
   } finally {
@@ -1499,11 +1498,11 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     const summaryText = document.getElementById("generatedText").innerText.trim();
 
     if (filename.includes("undefined")) {
-        alert("⚠ Please select a document first.");
+        alert("⚠️ Please select a document first.");
         return;
     }
     if (!summaryText) {
-        alert("⚠ No summary available. Please generate summary first.");
+        alert("⚠️ No summary available. Please generate summary first.");
         return;
     }
     window.location.href = /download/${filename};
@@ -1526,7 +1525,7 @@ async function loadSummaryForSelectedDoc(docId) {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠ Error fetching summary.";
+    outputDiv.textContent = "⚠️ Error fetching summary.";
     console.error(err);
   }
 }
