@@ -39,7 +39,7 @@
     .sidebar{background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;backdrop-filter: blur(10px);} 
     .ls{padding:24px 20px;position:relative;overflow-y:visible;border-right: 1px solid var(--border);} 
     .us{padding:24px 20px;position:relative;overflow:auto;border-right: 1px solid var(--border);} 
-    .main{background:transparent;padding:32px;overflow:auto;}
+    .main{background:transparent;padding: 80px 32px 32px;overflow:auto;}
     .pane-title{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;}
     .btn{border:0;border-radius:8px;padding:12px 16px;font-weight:500;cursor:pointer;background:var(--hover);color:var(--text);width:100%;text-align:left;margin-bottom:8px;transition: all 0.2s ease;font-size: 13px;border: 1px solid transparent;}
     .btn:hover{background:#e2e8f0;transform: translateY(-1px);box-shadow: var(--shadow-sm);}    
@@ -50,7 +50,23 @@
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
     .resizer:hover::after{background: var(--brand);}
 
-    .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#ffffff;border:none;border-radius:0;margin-bottom: 0;box-shadow: none;border-bottom: 2px solid #e2e8f0;}    
+     .topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+  border-bottom: 1px solid #e2e8f0;
+}    
     .user-info {display: flex;flex-direction: column;gap: 4px;align-items: flex-start;}
     .user-info .user-name {font-size: 16px;font-weight: 600;color: var(--text);}
     .user-info .user-profession {font-size: 14px;color: var(--muted);font-weight: 400;}
@@ -455,14 +471,14 @@
       color: var(--accent);
       margin-bottom: 5px;
     }
-    /* 固定右上角 logo 样式 */
+    
     .top-right-logo {
-     position: fixed;
-     top: 0px;
-     right: 20px;
-     width: 80px;          /* logo 大小可自行调整 */
-     height: auto;
-     z-index: 1000;
+  position: fixed;
+  top: 8px;
+  right: 24px;
+  width: 70px;
+  height: auto;
+  z-index: 1100;
 }
 
     
@@ -1481,6 +1497,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
