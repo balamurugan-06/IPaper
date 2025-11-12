@@ -620,7 +620,54 @@ def update_media():
     return redirect('/admin/media')
 
 
-
+@app.route('/admin/media/upload', methods=['POST'])
+def upload_media():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    
+    media_id = request.form.get('id')
+    media_type = request.form.get('type')  # 'image' or 'video'
+    file = request.files.get('file')
+    
+    if not file or file.filename == '':
+        flash("No file selected", "error")
+        return redirect('/admin/media')
+    
+    try:
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        
+        # Create media directory if it doesn't exist
+        MEDIA_FOLDER = os.path.join('static', 'media')
+        os.makedirs(MEDIA_FOLDER, exist_ok=True)
+        
+        # Save file to static/media folder
+        file_path = os.path.join(MEDIA_FOLDER, filename)
+        file.save(file_path)
+        
+        # Store web-accessible path (relative to static)
+        web_path = f"/static/media/{filename}"
+        
+        # Update database
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        if media_id:
+            # Update existing media
+            cur.execute("UPDATE media SET path = %s WHERE id = %s", (web_path, media_id))
+        else:
+            # Insert new media
+            cur.execute("INSERT INTO media (type, path) VALUES (%s, %s)", (media_type, web_path))
+        
+        conn.commit()
+        cur.close()
+        release_db_connection(conn)
+        
+        flash(f"{media_type.capitalize()} uploaded successfully!", "success")
+        
+    except Exception as e:
+        flash(f"Upload failed: {str(e)}", "error")
+    
 
 
 @app.route('/membership')
@@ -1248,6 +1295,7 @@ def download_summary(docId):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
