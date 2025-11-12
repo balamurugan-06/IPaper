@@ -50,9 +50,11 @@
     .resizer::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:1px;background:var(--border);transition: background 0.2s ease;}
     .resizer:hover::after{background: var(--brand);}
 
-    .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;background:rgba(255,255,255,0.9);border-bottom:1px solid var(--border);backdrop-filter: blur(10px);border-radius: 16px;margin-bottom: 24px;box-shadow: var(--shadow-sm);}    
-    .user-info {display: flex;gap: 12px;align-items: center;}
-    .topbar-actions {display: flex;gap: 8px;margin-top: 25px;} /* 增加上边距，使按钮下移 */
+    .topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#ffffff;border:none;border-radius:0;margin-bottom: 0;box-shadow: none;border-bottom: 2px solid #e2e8f0;}    
+    .user-info {display: flex;flex-direction: column;gap: 4px;align-items: flex-start;}
+    .user-info .user-name {font-size: 16px;font-weight: 600;color: var(--text);}
+    .user-info .user-profession {font-size: 14px;color: var(--muted);font-weight: 400;}
+    .topbar-actions {display: flex;gap: 10px;align-items: center;}
     
     /* 调整上传区域尺寸 */
     .upload-card{background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);border:2px dashed var(--border);border-radius:12px;padding:16px;transition: all 0.3s ease;margin-bottom: 16px;}    
@@ -412,17 +414,7 @@
     }
     
     /* Enhanced topbar styling */
-    .topbar {
-      background: white;
-      border-radius: 8px;
-      padding: 12px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
     
-    .topbar .muted {
-      font-weight: 500;
-    }
     
     /* Enhanced upload card */
     .upload-card {
@@ -1489,6 +1481,7 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
 
