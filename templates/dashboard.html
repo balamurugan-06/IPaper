@@ -773,6 +773,15 @@
   animation: spin 0.9s linear infinite;
 }
 
+.disabled-upload {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  background: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -1187,6 +1196,17 @@
     folderInput.value = (categoryId === 'all') ? '' : categoryId;
   }
 
+  const uploadBtn = document.getElementById('uploadBtn');
+  if (uploadBtn) {
+    if (categoryId === 'all') {
+      uploadBtn.disabled = false;
+      uploadBtn.classList.remove('disabled-upload');
+    } else {
+      uploadBtn.disabled = true;
+      uploadBtn.classList.add('disabled-upload');
+    }
+  }
+
   // Refresh file list for selected folder
   filterDocuments();
 }
@@ -1469,5 +1489,6 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
 
