@@ -838,10 +838,14 @@
         </div>
         <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
-          {% if latest_membership != "Free" %}
+          {% if latest_membership == "Professional Plus" %}
             <button id="generateBtn" class="action-btn">Generate</button>
+          
+          {% elif latest_membership == "Professional" %}
+            <button id="generateBtn" class="action-btn">Generate</button>
+          
           {% else %}
-            <button id="generateBtn" class="action-btn" onclick="alert('Upgrade your plan to unlock the Generate feature!')" title="Upgrade to use Generate">Generate</button>
+            <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
           {% endif %}
           <button id="foreignerBtn" class="action-btn tertiary">share</button> <!-- 新增Foreigner按钮 -->
         </div>
@@ -1243,6 +1247,13 @@ const modal = document.getElementById('templateModal');
       const res = await fetch('/get_templates');
       allTemplates = await res.json();
 
+      const membership = "{{ latest_membership }}";
+      if (membership === "Professional") {
+        allTemplates = allTemplates.filter(t =>
+          t.name.toLowerCase().includes("general")
+        );
+      }
+
       const categories = [...new Set(allTemplates.map(t => t.category || 'Uncategorized'))];
       categoryList.innerHTML = '';
       categories.forEach(cat => {
@@ -1458,4 +1469,5 @@ async function loadSummaryForSelectedDoc(docId) {
 </script>
 </body>
 </html>
+
 
