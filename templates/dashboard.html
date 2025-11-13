@@ -492,15 +492,20 @@
       margin-bottom: 5px;
     }
     
-    .top-right-logo {
+ .top-right-logo {
   position: fixed;
-  top: 8px;
-  right: 16px;
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
+  top: 12px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
   z-index: 1100;
-  border-radius: 6px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.topbar-actions {
+  margin-right: 60px; /* Prevents buttons from overlapping logo */
 }
     
     .profession-badge {
@@ -1558,6 +1563,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
