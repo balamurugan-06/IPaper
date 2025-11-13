@@ -140,6 +140,14 @@ def index():
         images = [row for row in rows if row[0] == 'image']
         videos = [row for row in rows if row[0] == 'video']
 
+        cur.execute("""
+            SELECT name, profession, rating, comment, feedbacktype
+            FROM userfeedback
+            ORDER BY feedbackid DESC
+            LIMIT 6
+        """)
+        feedbacks = cur.fetchall()
+        
         print(f"📸 Total media items: {len(rows)}")
         print(f"📸 Images found: {len(images)}")
         for img in images:
@@ -1497,6 +1505,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
