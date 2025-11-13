@@ -124,37 +124,38 @@ def index():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT type, path, caption FROM media ORDER BY id")
-        media_items = cur.fetchall()
-        
-        images = [item for item in media_items if item[0] == 'image']
-        videos = [item for item in media_items if item[0] == 'video']
-        
-        # 🔹 Debug logging
-        print(f"📸 Total media items: {len(media_items)}")
+        try:
+            cur.execute("SELECT type, path, caption FROM media ORDER BY id")
+        except psycopg2.OperationalError as e:
+            # Handle first query failure due to stale connection
+            print(f"⚠️ Query failed ({e}), resetting pool and retrying once...")
+            reset_db_pool()
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT type, path, caption FROM media ORDER BY id")
+        rows = cur.fetchall()
+
+        images = [row for row in rows if row[0] == 'image']
+        videos = [row for row in rows if row[0] == 'video']
+
+        print(f"📸 Total media items: {len(rows)}")
         print(f"📸 Images found: {len(images)}")
         for img in images:
             print(f"  - Type: {img[0]}, Path: {img[1]}, Caption: {img[2]}")
         print(f"🎥 Videos found: {len(videos)}")
         for vid in videos:
             print(f"  - Type: {vid[0]}, Path: {vid[1]}, Caption: {vid[2]}")
-        
-        cur.execute("""
-            SELECT name, profession, rating, comment, feedbacktype
-            FROM userfeedback
-            WHERE rating >= 3
-            ORDER BY CreatedAt DESC
-            LIMIT 3
-        """)
-        feedbacks = cur.fetchall()
-        cur.close()
-        release_db_connection(conn)
-        
-        return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
+
+        return render_template('index.html', images=images, videos=videos)
     except Exception as e:
         print(f"❌ Error loading media: {e}")
-        print(traceback.format_exc())
-        return f"Error loading media: {e}"
+        return render_template('index.html', images=[], videos=[])
+    finally:
+        try:
+            release_db_connection(conn)
+        except:
+            pass
+
 
 
 
@@ -1494,6 +1495,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
