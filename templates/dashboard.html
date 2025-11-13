@@ -1296,8 +1296,16 @@ const modal = document.getElementById('templateModal');
   let selectedTemplateId = null;
 
   // Open modal when "Generate" is clicked
-  if (generateBtn) {
+  // Open modal when "Generate" is clicked
+if (generateBtn) {
   generateBtn.addEventListener('click', async () => {
+    // Check membership level first
+    const membership = "{{ latest_membership }}";
+    if (membership === "Free") {
+      alert('⚠️ Please upgrade your plan to access the Generate feature.\n\nVisit "Purchase Plan" to unlock this feature.');
+      return;
+    }
+
     if (!window.selectedDocId) {
       alert('⚠️ Please select a document first before generating.');
       return;
@@ -1308,7 +1316,6 @@ const modal = document.getElementById('templateModal');
     await loadTemplates();
   });
 }
-
   // Load templates
   async function loadTemplates() {
     try {
@@ -1576,6 +1583,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
