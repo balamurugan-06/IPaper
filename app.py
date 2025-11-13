@@ -27,6 +27,8 @@ import threading
 from flask_compress import Compress
 
 
+_executor = ThreadPoolExecutor(max_workers=4)
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -1495,6 +1497,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
