@@ -123,23 +123,27 @@ def get_summary_templates_cached():
 
 @app.route('/')
 def index():
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+        
+        # Fetch media
         try:
             cur.execute("SELECT type, path, caption FROM media ORDER BY id")
         except psycopg2.OperationalError as e:
-            # Handle first query failure due to stale connection
             print(f"⚠️ Query failed ({e}), resetting pool and retrying once...")
             reset_db_pool()
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("SELECT type, path, caption FROM media ORDER BY id")
+        
         rows = cur.fetchall()
-
         images = [row for row in rows if row[0] == 'image']
         videos = [row for row in rows if row[0] == 'video']
 
+        # Fetch feedbacks
         cur.execute("""
             SELECT name, profession, rating, comment, feedbacktype
             FROM userfeedback
@@ -147,24 +151,19 @@ def index():
             LIMIT 6
         """)
         feedbacks = cur.fetchall()
-        
-        print(f"📸 Total media items: {len(rows)}")
-        print(f"📸 Images found: {len(images)}")
-        for img in images:
-            print(f"  - Type: {img[0]}, Path: {img[1]}, Caption: {img[2]}")
-        print(f"🎥 Videos found: {len(videos)}")
-        for vid in videos:
-            print(f"  - Type: {vid[0]}, Path: {vid[1]}, Caption: {vid[2]}")
 
-        return render_template('index.html', images=images, videos=videos)
+        print(f"📸 Images: {len(images)}, 🎥 Videos: {len(videos)}, 💬 Feedbacks: {len(feedbacks)}")
+
+        return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
+        
     except Exception as e:
-        print(f"❌ Error loading media: {e}")
-        return render_template('index.html', images=[], videos=[])
+        print(f"❌ Error loading index: {e}")
+        return render_template('index.html', images=[], videos=[], feedbacks=[])
     finally:
-        try:
+        if cur:
+            cur.close()
+        if conn:
             release_db_connection(conn)
-        except:
-            pass
 
 
 
@@ -1505,6 +1504,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
