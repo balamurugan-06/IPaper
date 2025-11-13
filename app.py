@@ -147,11 +147,14 @@ def index():
         cur.execute("""
             SELECT name, profession, rating, comment, feedbacktype
             FROM userfeedback
-            ORDER BY feedbackid DESC
-            LIMIT 6
+            WHERE rating >= 3
+            ORDER BY CreatedAt DESC
+            LIMIT 3
         """)
         feedbacks = cur.fetchall()
-
+        cur.close()
+        release_db_connection(conn)
+        
         print(f"📸 Images: {len(images)}, 🎥 Videos: {len(videos)}, 💬 Feedbacks: {len(feedbacks)}")
 
         return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
@@ -1504,6 +1507,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
