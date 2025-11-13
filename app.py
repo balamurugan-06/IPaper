@@ -45,13 +45,15 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Create the initial pool
 db_pool = psycopg2.pool.SimpleConnectionPool(
     1, int(os.getenv("DB_MAX_CONN", "20")),
     DATABASE_URL, sslmode="require"
 )
 
 def reset_db_pool():
-    """Try to recreate the DB pool (used when a pooled connection is closed by the server)."""
+    """Recreate the DB pool when an idle or closed connection is detected."""
     global db_pool
     try:
         print("🔁 Resetting DB pool...")
@@ -64,26 +66,23 @@ def reset_db_pool():
         print("❌ Failed to reset DB pool:", e)
 
 def get_db_connection():
-    """Return a connection from the pool; attempt to recreate pool once if getconn() fails."""
+    """Get a DB connection and rebuild pool if previous one was closed."""
     global db_pool
     try:
         return db_pool.getconn()
     except Exception as e:
-        # If pool has stale/closed connections, recreate pool and try once more
         print("⚠️ DB pool getconn failed:", e)
-        try:
-            reset_db_pool()
-            return db_pool.getconn()
-        except Exception as e2:
-            print("❌ DB reconnect failed:", e2)
-            raise
+        # try to recreate pool once
+        reset_db_pool()
+        return db_pool.getconn()
 
 def release_db_connection(conn):
     if db_pool:
         try:
             db_pool.putconn(conn)
         except Exception as e:
-            print("⚠️ Failed to putconn back to pool:", e)
+            print("⚠️ Failed to return connection to pool:", e)
+
 
 
 
@@ -1495,6 +1494,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
