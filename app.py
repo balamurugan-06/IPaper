@@ -50,14 +50,41 @@ db_pool = psycopg2.pool.SimpleConnectionPool(
     DATABASE_URL, sslmode="require"
 )
 
+def reset_db_pool():
+    """Try to recreate the DB pool (used when a pooled connection is closed by the server)."""
+    global db_pool
+    try:
+        print("🔁 Resetting DB pool...")
+        db_pool = psycopg2.pool.SimpleConnectionPool(
+            1, int(os.getenv("DB_MAX_CONN", "20")),
+            DATABASE_URL, sslmode="require"
+        )
+        print("✅ DB pool reset")
+    except Exception as e:
+        print("❌ Failed to reset DB pool:", e)
+
 def get_db_connection():
-    return db_pool.getconn()
+    """Return a connection from the pool; attempt to recreate pool once if getconn() fails."""
+    global db_pool
+    try:
+        return db_pool.getconn()
+    except Exception as e:
+        # If pool has stale/closed connections, recreate pool and try once more
+        print("⚠️ DB pool getconn failed:", e)
+        try:
+            reset_db_pool()
+            return db_pool.getconn()
+        except Exception as e2:
+            print("❌ DB reconnect failed:", e2)
+            raise
 
 def release_db_connection(conn):
     if db_pool:
-        db_pool.putconn(conn)
+        try:
+            db_pool.putconn(conn)
+        except Exception as e:
+            print("⚠️ Failed to putconn back to pool:", e)
 
-_executor = ThreadPoolExecutor(max_workers=int(os.getenv("BG_MAX_WORKERS", "6")))
 
 
 
@@ -731,7 +758,16 @@ def serve_media(filename):
         print(f"❌ Error serving media {filename}: {e}")
         return "Media not found", 404
     
-
+@app.route('/static/media/<path:filename>')
+def legacy_static_media(filename):
+    """Compatibility shim: serve old /static/media/... links from the persistent folder."""
+    MEDIA_FOLDER = "/var/data/media"
+    try:
+        return send_from_directory(MEDIA_FOLDER, filename)
+    except Exception as e:
+        print(f"❌ Error serving legacy static media {filename}: {e}")
+        return "Media not found", 404
+        
 
 @app.route('/membership')
 def membership():
@@ -1459,6 +1495,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
