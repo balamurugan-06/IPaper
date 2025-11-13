@@ -638,7 +638,7 @@ def upload_media():
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'mov'}
     ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
     if ext not in allowed_extensions:
-        flash("Invalid file type. Allowed: JPG, PNG, GIF, WEBP, MP4, WEBM", "error")
+        flash("Invalid file type", "error")
         return redirect('/admin/media')
     
     conn = None
@@ -647,31 +647,28 @@ def upload_media():
     try:
         from datetime import datetime
         
-        # Create unique filename with timestamp
+        # Create unique filename
         filename = secure_filename(file.filename)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         name, extension = os.path.splitext(filename)
         unique_filename = f"{name}_{timestamp}{extension}"
         
-        # Define media folder path relative to app root
-        # Flask serves static/ folder automatically
-        media_folder = os.path.join('static', 'media')
-        os.makedirs(media_folder, exist_ok=True)
+        # 🔹 Use same persistent storage as uploads (parallel folder)
+        MEDIA_FOLDER = "/var/data/media"
+        os.makedirs(MEDIA_FOLDER, exist_ok=True)
         
-        # Full file path on disk
-        file_path = os.path.join(media_folder, unique_filename)
-        
-        # Save file
+        # Save to persistent disk
+        file_path = os.path.join(MEDIA_FOLDER, unique_filename)
         file.save(file_path)
         print(f"✅ File saved to: {file_path}")
         
         # Verify file exists
         if not os.path.exists(file_path):
-            flash("File save verification failed", "error")
+            flash("File save failed", "error")
             return redirect('/admin/media')
         
-        # Web-accessible URL path (Flask automatically serves /static/)
-        web_path = f"/static/media/{unique_filename}"
+        # Store web-accessible path
+        web_path = f"/media/{unique_filename}"
         print(f"✅ Web path: {web_path}")
         
         # Update database
@@ -679,13 +676,10 @@ def upload_media():
         cur = conn.cursor()
         
         if media_id:
-            # Update existing
             cur.execute("UPDATE media SET path = %s WHERE id = %s", (web_path, media_id))
             if cur.rowcount == 0:
-                # Insert if update failed
                 cur.execute("INSERT INTO media (type, path) VALUES (%s, %s)", (media_type, web_path))
         else:
-            # Insert new
             cur.execute("INSERT INTO media (type, path) VALUES (%s, %s)", (media_type, web_path))
         
         conn.commit()
@@ -716,6 +710,12 @@ def upload_media():
                 pass
     
     return redirect('/admin/media')
+
+@app.route('/media/<filename>')
+def serve_media(filename):
+    """Serve media files (images/videos) from persistent disk"""
+    MEDIA_FOLDER = "/var/data/media"
+    return send_from_directory(MEDIA_FOLDER, filename)
     
 
 
@@ -1445,6 +1445,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
