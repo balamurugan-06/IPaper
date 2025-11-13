@@ -98,29 +98,39 @@ def index():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT type, path, caption FROM media")
+        cur.execute("SELECT type, path, caption FROM media ORDER BY id")
         media_items = cur.fetchall()
         
-
         images = [item for item in media_items if item[0] == 'image']
         videos = [item for item in media_items if item[0] == 'video']
-
+        
+        # 🔹 Debug logging
+        print(f"📸 Total media items: {len(media_items)}")
+        print(f"📸 Images found: {len(images)}")
+        for img in images:
+            print(f"  - Type: {img[0]}, Path: {img[1]}, Caption: {img[2]}")
+        print(f"🎥 Videos found: {len(videos)}")
+        for vid in videos:
+            print(f"  - Type: {vid[0]}, Path: {vid[1]}, Caption: {vid[2]}")
+        
         cur.execute("""
-        SELECT name, profession, rating, comment, feedbacktype
-        FROM userfeedback
-        WHERE rating >= 3
-        ORDER BY CreatedAt DESC
-        LIMIT 3
+            SELECT name, profession, rating, comment, feedbacktype
+            FROM userfeedback
+            WHERE rating >= 3
+            ORDER BY CreatedAt DESC
+            LIMIT 3
         """)
         feedbacks = cur.fetchall()
         cur.close()
         release_db_connection(conn)
-
-
         
         return render_template('index.html', images=images, videos=videos, feedbacks=feedbacks)
     except Exception as e:
+        print(f"❌ Error loading media: {e}")
+        print(traceback.format_exc())
         return f"Error loading media: {e}"
+
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -713,9 +723,13 @@ def upload_media():
 
 @app.route('/media/<filename>')
 def serve_media(filename):
-    """Serve media files (images/videos) from persistent disk"""
+    """Serve media files from persistent disk - PUBLIC ACCESS"""
     MEDIA_FOLDER = "/var/data/media"
-    return send_from_directory(MEDIA_FOLDER, filename)
+    try:
+        return send_from_directory(MEDIA_FOLDER, filename)
+    except Exception as e:
+        print(f"❌ Error serving media {filename}: {e}")
+        return "Media not found", 404
     
 
 
@@ -1445,6 +1459,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
