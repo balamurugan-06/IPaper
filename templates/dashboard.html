@@ -831,6 +831,21 @@
   to { transform: rotate(360deg); }
 }
 
+
+.model-label {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  font-size: 13px;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  pointer-events: none;
+}
+
+
   </style>
 </head>
 <body>
@@ -928,6 +943,7 @@
     </div>
     <button class="close-popup" onclick="closeTemplateModal()">×</button>
     <button id="generateNowBtn" class="generate-now-btn">Generate Now</button>
+    <div class="model-label">AI Model: GPT-4.1</div>
   </div>
   
 </div>
@@ -1583,6 +1599,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
