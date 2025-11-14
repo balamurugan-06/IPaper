@@ -1531,7 +1531,7 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
         alert("⚠️ No summary available. Please generate summary first.");
         return;
     }
-    window.location.href = `/download/${filename}`;
+    window.location.href = `/download_summary/${window.selectedDocId}`;
 });
 
 async function loadSummaryForSelectedDoc(docId) {
@@ -1599,6 +1599,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
