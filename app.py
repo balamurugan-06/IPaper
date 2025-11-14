@@ -190,6 +190,10 @@ def register():
         if '@' not in email:
             flash("Email must contain '@'", 'error')
             return render_template('register.html')
+            
+        if len(password) < 8 or len(password) > 12:
+            flash("Password must be 8–12 characters long.", 'error')
+            return render_template('register.html')
 
         pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()?/.>,<\'";:\[\]{}\\|]).+$'
         if not re.match(pattern, password):
@@ -1507,6 +1511,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
