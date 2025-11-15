@@ -1404,7 +1404,7 @@ def getSummary(doc_id):
 
 @app.route('/download_summary/<docId>')
 def download_summary(docId):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], f"summary_{docId}.pdf", as_attachment=True)
+    return send_from_directory("uploads", f"summary_{docId}.pdf", as_attachment=True)
 
 
 
@@ -1512,6 +1512,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
