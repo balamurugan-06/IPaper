@@ -497,14 +497,23 @@
 .top-right-logo {
   width: 70px;
   height: 70px;
-  object-fit: contain;
-  background: white;
-  padding: 10px;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  border: 1px solid #e2e8f0;
-}
 
+  /* This ensures logo is centered and fills space */
+  object-fit: scale-down; 
+  object-position: center;
+
+  /* Box styling */
+  background: white;
+  padding: 8px;              /* adjust padding to fit your logo */
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+    
 .topbar-actions {
   display: flex;
   align-items: center;
@@ -873,7 +882,7 @@
   align-items: center;
   justify-content: flex-start;   /* aligns properly */
   flex-direction: row;           /* horizontal */
-  gap: 14px;                     /* spacing between name & profession */
+  gap: 250px;                     /* spacing between name & profession */
   margin-left: 0;
 }
 
@@ -1649,6 +1658,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
