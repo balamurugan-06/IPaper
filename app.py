@@ -141,7 +141,8 @@ def index():
         
         rows = cur.fetchall()
         images = [row for row in rows if row[0] == 'image']
-        videos = [row for row in rows if row[0] == 'video']
+        videos = [row for row in rows if row[0] == 'video' and not row[1].startswith('/static')]
+        videos = videos[::-1]
 
         # Fetch feedbacks
         cur.execute("""
@@ -1512,6 +1513,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
