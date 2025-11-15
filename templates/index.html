@@ -849,7 +849,7 @@
     {% if videos %}
     <div class="video-container">
       <video autoplay muted loop playsinline>
-        <source src="/media/{{ videos[0][1] }}" type="video/mp4">
+        <source src="/media/{{ videos[-1][1] }}" type="video/mp4">
         Your browser does not support the video tag.
       </video>
     </div>
@@ -990,6 +990,7 @@
 
 </body>
 </html>
+
 
 
 
