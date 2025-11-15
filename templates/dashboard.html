@@ -56,17 +56,19 @@
   left: calc(var(--ls-w) + var(--bar-w) + var(--us-w) + var(--bar-w));
   right: 0;
   z-index: 1000;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto; /* Name | Profession | Buttons+Logo */
   align-items: center;
   background: #ffffff;
   padding: 10px 24px;
-  border: none;
-  border-radius: 0;
-  margin: 0;
-  box-shadow: none;
   border-bottom: 1px solid #e2e8f0;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 60px;
+}
+
+    .user-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .collapse-ls .topbar {
@@ -492,27 +494,26 @@
       margin-bottom: 5px;
     }
     
- .top-right-logo {
-  position: fixed;
-  top: 12px;
-  right: 24px;
-
-  width: 42px;      /* smaller, clean */
-  height: 42px;
-
-  object-fit: contain;  
+.top-right-logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
   background: white;
-  padding: 6px;     /* better spacing */
-  border-radius: 12px;
-
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-  border: 1px solid #f1f5f9;
-
-  z-index: 2000;
+  padding: 10px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  border: 1px solid #e2e8f0;
 }
 
 .topbar-actions {
-  margin-right: 60px; /* Prevents buttons from overlapping logo */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+    .topbar-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Space between buttons and logo */
 }
     
     .profession-badge {
@@ -852,11 +853,20 @@
   pointer-events: none;
 }
 .user-profession {
-    font-size: 17px;
-    opacity: 0.8;          /* softer look */
+  justify-self: center; /* Moves to the center column */
+  background: #eef4ff;
+  color: #3b82f6;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
 }
-
-
+    
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
    
     .user-info {
   display: flex;
@@ -887,7 +897,7 @@
 </head>
 <body>
   
-  <img src="/static/images/logo.png" alt="Logo" class="top-right-logo">
+  
   <div id="fullscreenLoader">
       <div class="loader-box">
           <div class="spinner"></div>
@@ -945,6 +955,7 @@
           <div class="name-text">{{ name }}</div>
           <div class="profession-badge">{{ profession }}</div>
         </div>
+        <div class="topbar-actions-wrapper">
         <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
           {% if latest_membership == "Professional Plus" %}
@@ -957,6 +968,8 @@
             <button id="generateBtn" class="action-btn" onclick="alert('Please upgrade your plan to access the Generate feature.')" title="Upgrade to use Generate">Generate</button>
           {% endif %}
           <button id="foreignerBtn" class="action-btn tertiary">Share</button> 
+        </div>
+          <img src="/static/images/logo.png" alt="Logo" class="top-right-logo">
         </div>
       </div>
       <h1>Welcome back, {{ name }}</h1>
@@ -1636,6 +1649,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
