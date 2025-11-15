@@ -843,13 +843,13 @@
   </section>
 
   <!-- Video Section -->
-  <section class="video-section">
+   <section class="video-section">
     <h2>See IPaper in Action</h2>
     <p>Discover how IPaper transforms your research workflow</p>
     {% if videos %}
     <div class="video-container">
       <video autoplay muted loop playsinline>
-        <source src="{{ videos[-1][2] }}" type="video/mp4">
+        <source src="{{ videos[0][1] }}" type="video/mp4">
         Your browser does not support the video tag.
       </video>
     </div>
@@ -990,6 +990,7 @@
 
 </body>
 </html>
+
 
 
 
