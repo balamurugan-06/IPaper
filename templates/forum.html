@@ -337,6 +337,40 @@
         height: 80px;
       }
     }
+
+    /* 搜索建议样式 */
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .search-suggestion {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--hover);
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .search-suggestion:hover {
+      background: var(--hover);
+    }
+
+    .search-suggestion.highlighted {
+      background: var(--reddit-blue);
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -356,6 +390,9 @@
           placeholder="Search summaries..."
         >
         <span class="search-icon">🔍</span>
+        
+        <!-- 添加搜索建议容器 -->
+        <div class="search-suggestions" id="searchSuggestions"></div>
       </div>
       
       <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
@@ -396,7 +433,7 @@
         console.error('Error loading summaries:', error);
         document.getElementById('summariesContainer').innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">⚠️</div>
+            <div class="empty-state-icon">⚠</div>
             <h2>Failed to load summaries</h2>
             <p>Please try again later</p>
           </div>
@@ -432,7 +469,7 @@
               <div class="card-title">${escapeHtml(summary.documenttitle || 'Untitled Document')}</div>
               <div class="card-meta">
                 <div class="meta-item">
-                  <span>👁️</span>
+                  <span>👁</span>
                   <span>${summary.views || 0}</span>
                 </div>
                 <div class="meta-item">
@@ -454,8 +491,8 @@
 
     // Toggle read more/less
     function toggleContent(index) {
-      const content = document.getElementById(`content-${index}`);
-      const toggle = document.getElementById(`toggle-${index}`);
+      const content = document.getElementById('content-' + index);
+      const toggle = document.getElementById('toggle-' + index);
       
       if (content.classList.contains('expanded')) {
         content.classList.remove('expanded');
@@ -493,8 +530,80 @@
 
     // Load summaries on page load
     document.addEventListener('DOMContentLoaded', loadSummaries);
+
+    // 搜索建议功能
+    let currentSuggestions = [];
+    let selectedSuggestionIndex = -1;
+
+    // 搜索框事件监听增强
+    const searchInput = document.getElementById('searchInput');
+    const originalInputHandler = searchInput.oninput;
+
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      
+      // 调用原有搜索逻辑
+      if (originalInputHandler) {
+        originalInputHandler(e);
+      }
+      
+      // 显示搜索建议
+      if (query.length > 0) {
+        showSearchSuggestions(query);
+      } else {
+        hideSearchSuggestions();
+      }
+    });
+
+    // 显示搜索建议
+    function showSearchSuggestions(query) {
+      currentSuggestions = allSummaries.filter(summary => {
+        const title = (summary.documenttitle || '').toLowerCase();
+        return title.includes(query);
+      }).slice(0, 5);
+
+      const suggestionsContainer = document.getElementById('searchSuggestions');
+      
+      if (currentSuggestions.length > 0) {
+        suggestionsContainer.innerHTML = currentSuggestions.map((summary, index) => {
+          const title = summary.documenttitle || 'Untitled Document';
+          return `<div class="search-suggestion" data-index="${index}">${escapeHtml(title)}</div>`;
+        }).join('');
+        suggestionsContainer.style.display = 'block';
+        selectedSuggestionIndex = -1;
+      } else {
+        suggestionsContainer.style.display = 'none';
+      }
+    }
+
+    // 隐藏搜索建议
+    function hideSearchSuggestions() {
+      document.getElementById('searchSuggestions').style.display = 'none';
+      selectedSuggestionIndex = -1;
+    }
+
+    // 点击建议项
+    document.getElementById('searchSuggestions').addEventListener('click', function(e) {
+      if (e.target.classList.contains('search-suggestion')) {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        if (!isNaN(index) && currentSuggestions[index]) {
+          const selectedTitle = currentSuggestions[index].documenttitle;
+          searchInput.value = selectedTitle;
+          hideSearchSuggestions();
+          
+          // 触发搜索
+          const event = new Event('input');
+          searchInput.dispatchEvent(event);
+        }
+      }
+    });
+
+    // 点击页面其他区域隐藏建议
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-bar')) {
+        hideSearchSuggestions();
+      }
+    });
   </script>
 </body>
-
 </html>
-
