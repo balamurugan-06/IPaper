@@ -494,14 +494,16 @@
     
  .top-right-logo {
   position: fixed;
-  top: 12px;
-  right: 20px;
-  width: 65px;
-  height: 65px;
-  object-fit: cover;
-  z-index: 1100;
+  top: 10px;
+  right: 18px;
+  width: 55px;      /* Smaller but clean */
+  height: 55px;
+  object-fit: contain;  /* Prevents stretched or cropped logo */
+  padding: 4px;         /* Keeps it clean & centered */
+  background: white;    /* Optional: looks more professional */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 2000;
 }
 
 .topbar-actions {
@@ -849,6 +851,15 @@
     opacity: 0.8;          /* softer look */
 }
 
+
+    .user-info .profession {
+  background: #eef4ff;
+  color: #3b82f6;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
   </style>
 </head>
 <body>
@@ -909,7 +920,7 @@
       <div class="topbar">
         <div class="user-info">
           <div class="user-name">{{ name }}</div>
-          <div class="user-profession">{{ profession }}</div>
+          <div class="profession">{{ profession }}</div>
         </div>
         <div class="topbar-actions">
           <button id="downloadBtn" class="action-btn secondary">Download</button>
@@ -1602,5 +1613,6 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
