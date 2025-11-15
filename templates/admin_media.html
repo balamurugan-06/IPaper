@@ -246,12 +246,10 @@
               accept="video/*" 
               style="display:none;" 
               id="video-file"
-              onchange="previewVideoAndSubmit()">
+              onchange="document.getElementById('video-form').submit()">
             
-            <label for="video-file" class="upload-btn">Replace Video</label>
-        
-            <div class="file-name" id="video-filename"></div>
-        </form>
+            <label for="video-file" class="upload-btn">Upload Video</label>
+          </form>
         </div>
       </div>
     </div>
@@ -288,32 +286,6 @@
         }, 100);
       }
     }
-
-
-    function previewVideoAndSubmit() {
-    const fileInput = document.getElementById("video-file");
-    const file = fileInput.files[0];
-
-    if (!file) return;
-
-    // Show uploading text
-    document.getElementById("video-filename").textContent = "Uploading " + file.name + "...";
-
-    // Preview video instantly
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById("video-preview");
-        if (preview) {
-            preview.src = e.target.result;
-        }
-    };
-    reader.readAsDataURL(file);
-
-    // Submit after short delay
-    setTimeout(() => {
-        document.getElementById("video-form").submit();
-    }, 150);
-}
   </script>
 </body>
 </html>
