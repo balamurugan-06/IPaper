@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -85,16 +86,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 6px;
   margin-left: 0;
 }
-.user-info .muted {
-    font-size: 16px; 
-  }
-  .user-info .muted:first-child {
-    font-size: 18px; 
-    color: var(--text); 
-  }
     
   
     
@@ -1056,8 +1050,8 @@
     delBtn.textContent = '🗑';
     delBtn.onclick = async (e) => {
       e.stopPropagation();
-      if (confirm(Delete "${div.dataset.fileName}"?)) {
-        await fetch(/delete-document/${doc.id}, { method: 'GET' });
+      if (confirm(`Delete "${div.dataset.fileName}"?`)) {
+        await fetch(`/delete-document/${doc.id}`, { method: 'GET' });
         await loadDocuments();
       }
     };
@@ -1141,7 +1135,7 @@
   async function deleteCategory(categoryId) {
     if (!confirm('Are you sure you want to delete this category? Documents will be moved back to All Documents.')) return;
     try {
-      const res = await fetch(/delete_category/${categoryId}, { method: 'DELETE' });
+      const res = await fetch(`/delete_category/${categoryId}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         categories = categories.filter(cat => String(cat.id) !== String(categoryId));
@@ -1190,7 +1184,7 @@
           }
           saveCategories();
           loadDocuments();
-          console.log(Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent});
+          console.log(`Moved "${dragData.fileName}" to ${targetCategory === 'all' ? 'All Documents' : this.querySelector('.category-title').textContent}`);
         } else {
           alert('Failed to update document category');
         }
@@ -1239,7 +1233,7 @@
   }
 
   // ✅ Maintain active highlight
-  const activeEl = container.querySelector(.category[data-category="${currentCategory}"]);
+  const activeEl = container.querySelector(`.category[data-category="${currentCategory}"]`);
   container.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
   if (activeEl) activeEl.classList.add('active-category');
 }
@@ -1251,14 +1245,14 @@
 
   // Highlight active folder
   document.querySelectorAll('.category').forEach(c => c.classList.remove('active-category'));
-  const el = document.querySelector(.category[data-category="${categoryId}"]);
+  const el = document.querySelector(`.category[data-category="${categoryId}"]`);
   if (el) el.classList.add('active-category');
 
   // Update display text
   const categoryName = categoryId === 'all'
     ? 'All Documents'
     : (categories.find(cat => String(cat.id) === String(categoryId))?.name || categoryId);
-  $('#current-category').textContent = Showing: ${categoryName};
+  $('#current-category').textContent = `Showing: ${categoryName}`;
 
   // ✅ Update hidden folder_id input before upload
   const folderInput = document.getElementById('folder_id');
@@ -1285,7 +1279,7 @@
 
  async function filterDocuments() {
   try {
-    const res = await fetch(/get-documents?category=${currentCategory});
+    const res = await fetch(`/get-documents?category=${currentCategory}`);
     if (!res.ok) throw new Error('Failed to fetch documents');
 
     const docs = await res.json();
@@ -1324,12 +1318,12 @@ if (generateBtn) {
     // Check membership level first
     const membership = "{{ latest_membership }}";
     if (membership === "Free") {
-      alert('⚠ Please upgrade your plan to access the Generate feature.\n\nVisit "Purchase Plan" to unlock this feature.');
+      alert('⚠️ Please upgrade your plan to access the Generate feature.\n\nVisit "Purchase Plan" to unlock this feature.');
       return;
     }
 
     if (!window.selectedDocId) {
-      alert('⚠ Please select a document first before generating.');
+      alert('⚠️ Please select a document first before generating.');
       return;
     }
 
@@ -1397,7 +1391,7 @@ if (generateBtn) {
 
 generateNowBtn.addEventListener('click', async () => {
   if (!selectedTemplateId) {
-    alert("⚠ Please select a template first.");
+    alert("⚠️ Please select a template first.");
     return;
   }
 
@@ -1433,7 +1427,7 @@ generateNowBtn.addEventListener('click', async () => {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠ Server error. Check console.";
+    outputDiv.textContent = "⚠️ Server error. Check console.";
     console.error(err);
 
   } finally {
@@ -1514,13 +1508,13 @@ dropZone.addEventListener('drop', e => {
   dropZone.classList.remove('active');
   // ✅ Show dropped file name
   if (fileInput.files.length > 0) {
-    fileNameDisplay.textContent = Selected: ${fileInput.files[0].name};
+    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
   }
 });
 
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length > 0) {
-    fileNameDisplay.textContent = Selected: ${fileInput.files[0].name};
+    fileNameDisplay.textContent = `Selected: ${fileInput.files[0].name}`;
   } else {
     fileNameDisplay.textContent = '';
   }
@@ -1530,14 +1524,14 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     const summaryText = document.getElementById("generatedText").innerText.trim();
 
     if (filename.includes("undefined")) {
-        alert("⚠ Please select a document first.");
+        alert("⚠️ Please select a document first.");
         return;
     }
     if (!summaryText) {
-        alert("⚠ No summary available. Please generate summary first.");
+        alert("⚠️ No summary available. Please generate summary first.");
         return;
     }
-    window.location.href = /download_summary/${window.selectedDocId};
+    window.location.href = `/download_summary/${window.selectedDocId}`;
 });
 
 async function loadSummaryForSelectedDoc(docId) {
@@ -1545,7 +1539,7 @@ async function loadSummaryForSelectedDoc(docId) {
   outputDiv.textContent = "⏳ Checking summary...";
 
   try {
-    const res = await fetch(/getSummary/${docId});
+    const res = await fetch(`/getSummary/${docId}`);
     const data = await res.json();
 
     if (data.summary) {
@@ -1557,7 +1551,7 @@ async function loadSummaryForSelectedDoc(docId) {
 
 
   } catch (err) {
-    outputDiv.textContent = "⚠ Error fetching summary.";
+    outputDiv.textContent = "⚠️ Error fetching summary.";
     console.error(err);
   }
 }
@@ -1566,7 +1560,7 @@ async function loadSummaryForSelectedDoc(docId) {
 // Share to Forum functionality
 document.getElementById('foreignerBtn').addEventListener('click', async () => {
   if (!window.selectedDocId) {
-    alert('⚠ Please select a document first.');
+    alert('⚠️ Please select a document first.');
     return;
   }
 
@@ -1574,7 +1568,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
   const summaryText = outputDiv.textContent.trim();
   
   if (!summaryText || summaryText.includes('No summary generated yet')) {
-    alert('⚠ Please generate a summary first before sharing.');
+    alert('⚠️ Please generate a summary first before sharing.');
     return;
   }
 
