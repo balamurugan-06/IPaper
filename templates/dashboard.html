@@ -852,10 +852,28 @@
 }
 
 
-    .user-info .profession {
+   
+    .user-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* aligns properly */
+  flex-direction: row;           /* horizontal */
+  gap: 14px;                     /* spacing between name & profession */
+  margin-left: 0;
+}
+
+/* Bigger name */
+.user-info .name-text {
+  font-size: 18px;   /* make name bigger */
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Profession badge — clean & modern */
+.user-info .profession-badge {
   background: #eef4ff;
   color: #3b82f6;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
@@ -1613,6 +1631,7 @@ document.getElementById('foreignerBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
