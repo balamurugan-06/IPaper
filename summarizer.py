@@ -196,6 +196,7 @@ IMPORTANT (FOLLOW STRICTLY):
 - Only create headings, paragraphs, or lists IF the user's template requires them.
 - Use <strong> ONLY for headings that the template includes.
 - Use <ul> and <li> ONLY if the template format asks for bullet points.
+- Add visual spacing between section titles by inserting <br><br> BEFORE each <strong> heading.
 - No additional sections or formatting should be added beyond what the template specifies.
 - NO <script> tags or inline JS.
 - Output must be PURE HTML only.
