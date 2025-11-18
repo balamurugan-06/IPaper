@@ -188,47 +188,29 @@ def summarize_document(text, num_pages, promptFromFE):
 
     # Ask the model to return HTML. Headings in <strong>, sub-points in <ul><li> with '• ' prefix.
     final_prompt = f"""
-You will combine partial summaries into a single, well-structured final summary and return the output AS VALID HTML ONLY (no extra commentary, no markdown).
+You will combine partial summaries into a single final summary and return ONLY valid HTML (no markdown, no extra commentary).
 
-Requirements (IMPORTANT):
-- Use <strong> tags for headings (e.g. <strong>Introduction</strong>).
-- For sub-points, produce an unordered list using <ul> and <li>.
-  Each <li> text should begin with the bullet symbol "• " (U+2022) followed by the short point.
-  Example: <ul><li> First sub-point</li><li> Second sub-point</li></ul>
-- Keep paragraphs short. Prefer lists for Key Themes / Findings.
-- Do NOT include any <script> tags or inline event handlers.
-- Output only HTML markup (no surrounding backticks or text).
+IMPORTANT (FOLLOW STRICTLY):
+- FOLLOW THE USER'S TEMPLATE INSTRUCTIONS EXACTLY as provided below.
+- DO NOT force any predefined structure like Introduction, Key Themes, Method, Findings, Conclusion.
+- Only create headings, paragraphs, or lists IF the user's template requires them.
+- Use <strong> ONLY for headings that the template includes.
+- Use <ul> and <li> ONLY if the template format asks for bullet points.
+- No additional sections or formatting should be added beyond what the template specifies.
+- NO <script> tags or inline JS.
+- Output must be PURE HTML only.
 
-Structure to produce (as HTML, with headings wrapped in <strong>):
-<strong>Introduction</strong>
-<p>Short sentence(s) about purpose/context.</p>
+USER TEMPLATE INSTRUCTIONS:
+\"\"\"
+{promptFromFE}
+\"\"\"
 
-<strong>Key Themes / Core Arguments</strong>
-<ul>
-<li> Theme 1 summary (very short)</li>
-<li> Theme 2 summary</li>
-</ul>
+Document length guidance: {summary_instruction}
 
-<strong>Method / Approach</strong>
-<ul>
-<li> Method point 1</li>
-<li> Method point 2</li>
-</ul>
-
-<strong>Findings / Insights</strong>
-<ul>
-<li> Finding 1</li>
-<li> Finding 2</li>
-</ul>
-
-<strong>Conclusion</strong>
-<p>One short concluding paragraph.</p>
-
-Target length guidance (human-readable): {summary_instruction}
-
--- BELOW are the partial chunk summaries to merge. Combine them, remove duplicates, and produce concise bullets & short paragraphs as described. --
+Below are the merged chunk summaries. Combine, rewrite, remove duplicates, and shape the content EXACTLY according to the USER TEMPLATE ABOVE:
 {combined_summary_text}
 """
+
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
