@@ -708,7 +708,7 @@ def upload_media():
         unique_filename = f"{name}_{timestamp}{extension}"
         
         # 🔹 Use same persistent storage as uploads (parallel folder)
-        MEDIA_FOLDER = "/var/data/media"
+        MEDIA_FOLDER = "/tmp/uploads/media"
         os.makedirs(MEDIA_FOLDER, exist_ok=True)
         
         # Save to persistent disk
@@ -768,7 +768,7 @@ def upload_media():
 @app.route('/media/<filename>')
 def serve_media(filename):
     """Serve media files from persistent disk - PUBLIC ACCESS"""
-    MEDIA_FOLDER = "/var/data/media"
+    MEDIA_FOLDER = "/tmp/uploads/media"
     try:
         return send_from_directory(MEDIA_FOLDER, filename)
     except Exception as e:
@@ -778,7 +778,7 @@ def serve_media(filename):
 @app.route('/static/media/<path:filename>')
 def legacy_static_media(filename):
     """Compatibility shim: serve old /static/media/... links from the persistent folder."""
-    MEDIA_FOLDER = "/var/data/media"
+    MEDIA_FOLDER = "/tmp/uploads/media"
     try:
         return send_from_directory(MEDIA_FOLDER, filename)
     except Exception as e:
@@ -1513,6 +1513,7 @@ def increment_forum_view(forum_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
