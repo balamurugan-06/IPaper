@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IPaper — Research Workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<div id="fullscreenLoader">
+  <div class="loader-box">
+    <div class="spinner"></div>
+    <strong>Building your research summary</strong>
+    <p>IPaper AI is analysing your document. Please wait.</p>
+  </div>
+</div>
+
+<div id="app" class="app">
+
+  <aside id="ls" class="sidebar library-sidebar">
+    <div class="brand">
+      <div class="brand-mark">I</div>
+      <div><strong>IPaper</strong><small>Research workspace</small></div>
+    </div>
+
+    <div class="side-heading">
+      <span>Library</span>
+      <button id="addCategoryBtn" class="icon-btn" type="button">+</button>
+    </div>
+
+    <div class="categories-container">
+      <div class="category active-category" data-category="all">
+        <span class="category-icon">◫</span>
+        <div class="category-title">All Documents</div>
+      </div>
+    </div>
+
+    <div class="account-section">
+      <div class="side-heading">Account</div>
+      <div class="plan-card"><span></span><div><small>Current plan</small><strong>{{ latest_membership }}</strong></div></div>
+      <a class="side-link" href="/feedback">↗ &nbsp; Feedback</a>
+      <a class="side-link" href="/forum">◌ &nbsp; Community Forum</a>
+      <a class="side-link" href="/membership">◇ &nbsp; Upgrade plan</a>
+      <a class="logout" href="/logout">↪ &nbsp; Sign out</a>
+    </div>
+  </aside>
+
+  <div id="bar-ls" class="resizer"><button id="btnLS" class="collapse-btn" type="button">«</button></div>
+
+  <aside id="us" class="sidebar document-sidebar">
+    <div class="side-heading"><span>Documents</span><em>LIBRARY</em></div>
+
+    <div class="upload-card">
+      <div class="upload-icon">↑</div>
+      <div><strong>Import a paper</strong><small>PDF · DOC · DOCX</small></div>
+      <button id="uploadBtn" type="button">Upload</button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div id="current-category" class="current-category">
+    Showing: All Documents
+</div>
+
+<!-- Research Paper Search -->
+<div class="document-search">
+    <span class="document-search-icon">⌕</span>
+
+    <input
+        type="search"
+        id="documentSearch"
+        placeholder="Search research papers..."
+        autocomplete="off"
+        aria-label="Search research papers"
+    >
+
+    <button
+        type="button"
+        id="clearDocumentSearch"
+        aria-label="Clear search"
+    >×</button>
+</div>
+<!-- =====================================================
+     STEP 10A — DOCUMENT SORTING
+     ===================================================== -->
+
+<div class="document-sort-row">
+
+    <span class="document-sort-label">
+        SORT
+    </span>
+
+    <select
+        id="documentSort"
+        class="document-sort-select"
+        aria-label="Sort research papers"
+    >
+        <option value="newest">
+            Newest First
+        </option>
+
+        <option value="oldest">
+            Oldest First
+        </option>
+
+        <option value="az">
+            A → Z
+        </option>
+
+        <option value="za">
+            Z → A
+        </option>
+    </select>
+
+</div>
+
+<div id="documents-container" class="documents-list"></div>
+  </aside>
+
+  <div id="bar-us" class="resizer"><button id="btnUS" class="collapse-btn" type="button">«</button></div>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="user">
+        <div class="avatar">{{ name[:1]|upper }}</div>
+        <div><strong>{{ name }}</strong><small>{{ profession }}</small></div>
+      </div>
+
+      <div class="workspace-status"><i></i> RESEARCH WORKSPACE</div>
+
+      <div class="top-actions">
+
+  <button id="copySummaryBtn"
+          class="action secondary"
+          type="button">
+    ⧉ <span>Copy</span>
+  </button>
+
+  <button id="printSummaryBtn"
+          class="action secondary"
+          type="button">
+    ⎙ <span>Print</span>
+  </button>
+
+  <button id="downloadBtn"
+          class="action secondary"
+          type="button">
+    ↓ <span>Download</span>
+  </button>
+
+  {% if latest_membership == "Professional Plus" or latest_membership == "Professional" %}
+    <button id="generateBtn"
+            class="action primary"
+            type="button">
+      ✦ <span>Generate</span>
+    </button>
+  {% else %}
+    <button id="generateBtn"
+            class="action primary"
+            type="button"
+            title="Upgrade to use Generate">
+      ✦ <span>Generate</span>
+    </button>
+  {% endif %}
+
+  <button id="foreignerBtn"
+          class="action tertiary"
+          type="button">
+    ↗ <span>Share</span>
+  </button>
+
+  <img src="/static/images/logo.png"
+       alt="IPaper"
+       class="logo">
+
+</div>
+    </header>
+
+    <section class="workspace">
+      <div class="hero">
+        <div>
+          <div class="eyebrow"><i></i> YOUR RESEARCH DESK</div>
+          <h1>Good to see you, {{ name }}.</h1>
+          <p>Organise your papers, choose an AI template, and turn research documents into focused insights from one workspace.</p>
+        </div>
+        <div class="ai-badge"><b>✦</b><div><strong>AI-assisted research</strong><small>Structured · Searchable · Shareable</small></div></div>
+      </div>
+
+<!-- =====================================================
+     RESEARCH WORKSPACE OVERVIEW
+     ===================================================== -->
+
+<div class="workspace-overview">
+
+    <div class="overview-card">
+        <div class="overview-icon blue">▤</div>
+        <div class="overview-content">
+            <span>RESEARCH PAPERS</span>
+            <strong id="paperCount">0</strong>
+        </div>
+    </div>
+
+    <div class="overview-card">
+        <div class="overview-icon violet">◫</div>
+        <div class="overview-content">
+            <span>CATEGORIES</span>
+            <strong id="categoryCount">0</strong>
+        </div>
+    </div>
+
+    <div class="overview-card">
+        <div class="overview-icon green">✓</div>
+        <div class="overview-content">
+            <span>SELECTED PAPER</span>
+            <strong id="selectedPaperStatus">None</strong>
+        </div>
+    </div>
+
+    <div class="overview-card workspace-card">
+        <div class="overview-icon purple">✦</div>
+        <div class="overview-content">
+            <span>WORKSPACE</span>
+            <strong>Active</strong>
+        </div>
+    </div>
+
+</div>
+
+
+      <div class="workflow">
+        <div class="workflow-step active"><b>01</b><div><strong>Select a paper</strong><small>Choose from your library</small></div></div>
+        <span></span>
+        <div class="workflow-step"><b>02</b><div><strong>Choose a template</strong><small>Match your research goal</small></div></div>
+        <span></span>
+        <div class="workflow-step"><b>03</b><div><strong>Generate insights</strong><small>Review and download</small></div></div>
+      </div>
+
+      <div class="research-grid">
+        <section class="summary-panel">
+          <div class="panel-head">
+
+  <div>
+    <small>RESEARCH OUTPUT</small>
+    <h2>AI Summary</h2>
+  </div>
+
+  <div class="summary-panel-actions">
+
+    <div class="selected-doc">
+      <i></i>
+      <span id="selected-document-label">
+        No document selected
+      </span>
+    </div>
+
+    <button
+      id="clearCurrentSummaryBtn"
+      class="summary-clear-btn"
+      type="button">
+      Clear Summary
+    </button>
+
+  </div>
+
+</div>
+          <!-- =====================================================
+     STEP 9A — SELECTED DOCUMENT INFORMATION
+     ===================================================== -->
+
+<div class="selected-document-info">
+
+    <div class="selected-document-main">
+
+        <div class="selected-document-icon">
+            PDF
+        </div>
+
+        <div class="selected-document-details">
+
+            <span class="document-info-label">
+                SELECTED RESEARCH PAPER
+            </span>
+
+            <strong id="selected-document-title">
+                No document selected
+            </strong>
+
+            <span id="selected-document-filename">
+                Select a paper from your library
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="selected-document-meta">
+
+        <span id="selected-document-type">
+            PDF
+        </span>
+
+        <span>
+            Research Paper
+        </span>
+
+    </div>
+
+</div>
+          <div id="generatedText" class="generated-text">
+            <div class="empty-state">
+              <div class="empty-icon">✦</div>
+              <h3>Your research summary will appear here</h3>
+              <p>Select a document from your library, then choose <b>Generate</b> to create an AI-powered summary.</p>
+              <div><span>01 Select document</span><span>02 Generate</span><span>03 Review output</span></div>
+            </div>
+          </div>
+
+          <!-- =====================================================
+     STEP 9E — SUMMARY HISTORY
+     ===================================================== -->
+
+<section class="summary-history-panel">
+
+    <div class="summary-history-header">
+
+        <div>
+            <span class="section-kicker">RECENT ACTIVITY</span>
+
+            <h3>
+                <span class="summary-history-icon">◷</span>
+                Summary History
+            </h3>
+
+            <p>
+                Your recently generated research summaries
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="clearSummaryHistoryBtn"
+            class="summary-history-clear"
+        >
+            Clear
+        </button>
+
+    </div>
+
+    <div
+        id="summaryHistoryList"
+        class="summary-history-list"
+    >
+
+        <div
+            id="summaryHistoryEmpty"
+            class="summary-history-empty"
+        >
+            <div class="summary-history-empty-icon">
+                ◷
+            </div>
+
+            <strong>No summary history yet</strong>
+
+            <span>
+                Generate a summary to see your recent activity here.
+            </span>
+        </div>
+
+    </div>
+
+</section>
+        </section>
+        <!-- =====================================================
+     STEP 8A — DOCUMENT PREVIEW
+     ===================================================== -->
+
+<section class="document-preview-panel">
+
+    <div class="preview-header">
+
+        <div>
+            <span class="section-kicker">DOCUMENT VIEWER</span>
+
+            <h3>
+                <span class="preview-icon">▣</span>
+                Document Preview
+            </h3>
+
+            <p id="preview-document-name">
+                Select a research paper to preview
+            </p>
+        </div>
+
+        <div class="preview-actions">
+
+            <button
+                type="button"
+                id="openPreviewBtn"
+                class="preview-action"
+                disabled
+            >
+                ↗ Open
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="documentPreviewEmpty" class="document-preview-empty">
+
+        <div class="preview-empty-icon">
+            ▤
+        </div>
+
+        <strong>No document selected</strong>
+
+        <span>
+            Select a research paper from your library
+            to preview it here.
+        </span>
+
+    </div>
+
+    <div id="documentPreviewViewer" class="document-preview-viewer">
+
+        <div class="preview-placeholder">
+
+            <div class="preview-file-icon">
+                PDF
+            </div>
+
+            <strong id="preview-file-title">
+                Research Paper
+            </strong>
+
+            <span>
+                Document preview will appear here.
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+        
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="templateModal" class="template-selector-modal hidden">
+  <div class="template-popup">
+    <aside class="template-sidebar">
+      <small>AI WORKSPACE</small><h3>Summary templates</h3><p>Choose the style that best fits your research task.</p>
+      <ul id="categoryList"></ul>
+    </aside>
+    <section class="template-content">
+      <div class="template-head"><div><small>SELECT A TEMPLATE</small><h3 id="categoryTitle">Select a category</h3></div><label class="model-label">AI Model · GPT-4o-mini</label></div>
+      <div id="templateCards" class="template-grid"></div>
+    </section>
+    <button class="close-popup" type="button" onclick="closeTemplateModal()">×</button>
+    <button id="generateNowBtn" class="generate-now-btn" type="button">Generate summary →</button>
+  </div>
+</div>
+
+<div id="uploadModal">
+  <div class="modal-content">
+    <div class="modal-head"><div><small>ADD TO LIBRARY</small><h2>Attach document</h2></div><button id="cancelUpload" class="modal-x" type="button">×</button></div>
+    <p>Upload a research paper and keep it available in your IPaper workspace.</p>
+    <form id="modalUploadForm" enctype="multipart/form-data" method="post" action="/upload-document">
+      <input type="hidden" id="folder_id_modal" name="folder_id" value="">
+      <label for="docTitle">Document title</label>
+      <input type="text" name="title" id="docTitle" placeholder="e.g. Machine Learning in Healthcare" required>
+      <div id="dropZone">
+        <div class="drop-icon">↑</div><strong>Drop your document here</strong><span>or click to browse</span><small>PDF · DOC · DOCX</small>
+        <input type="file" id="fileInput" name="file" accept=".pdf,.doc,.docx" class="hidden" required>
+        <p id="fileNameDisplay"></p>
+      </div>
+      <div class="modal-actions"><button type="button" id="cancelUploadBottom" class="cancel-button">Cancel</button><button type="submit" id="addUpload" class="submit-button">Add to library</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const label = document.getElementById("selected-document-label");
+  const docs = document.getElementById("documents-container");
+  const update = () => {
+    const selected = document.querySelector(".document-item.selected");
+    label.textContent = selected ? (selected.dataset.fileName || selected.textContent.trim()) : "No document selected";
+  };
+  if (docs) new MutationObserver(update).observe(docs, {subtree:true, attributes:true, attributeFilter:["class"]});
+  const bottomCancel = document.getElementById("cancelUploadBottom");
+  const topCancel = document.getElementById("cancelUpload");
+  if (bottomCancel && topCancel) bottomCancel.addEventListener("click", () => topCancel.click());
+});
+</script>
+</body>
+</html>

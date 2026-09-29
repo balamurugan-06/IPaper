@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPaper Community</title>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root{--primary:#2563eb;--primary-dark:#1d4ed8;--primary-soft:#eff6ff;--page:#f5f7fb;--surface:#fff;--soft:#f8fafc;--text:#172033;--muted:#64748b;--border:#e2e8f0;--shadow:0 8px 28px rgba(15,23,42,.06)}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--page);color:var(--text);line-height:1.6}button,input,select,textarea{font:inherit}
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.header-content{width:min(1240px,calc(100% - 40px));min-height:72px;margin:auto;display:flex;align-items:center;gap:24px}.logo{display:flex;align-items:center;gap:11px;color:var(--text);text-decoration:none;font-size:17px;font-weight:700}.logo-icon{width:38px;height:38px;object-fit:contain;border-radius:10px}
+.search-bar{position:relative;flex:1;max-width:560px;margin:auto}.search-input{width:100%;height:42px;padding:0 14px;border:1px solid var(--border);border-radius:9px;background:var(--soft);color:var(--text);font-size:13px}.search-input:focus{outline:none;background:#fff;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.08)}.search-icon{display:none}.back-btn{padding:9px 15px;border:1px solid var(--border);border-radius:8px;background:#fff;color:#334155;text-decoration:none;font-size:12px;font-weight:600}.back-btn:hover{background:var(--soft);color:var(--primary)}
+.search-suggestions{position:absolute;top:calc(100% + 6px);left:0;right:0;display:none;max-height:240px;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);z-index:200}.search-suggestion{padding:11px 14px;border-bottom:1px solid #edf2f7;font-size:13px;cursor:pointer}.search-suggestion:hover{background:var(--primary-soft)}
+.container{width:min(1120px,calc(100% - 40px));margin:30px auto 60px}.page-title{margin-bottom:26px;padding:30px 32px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}.forum-page-header{display:flex;align-items:center;justify-content:space-between;gap:28px}.forum-eyebrow,.section-eyebrow{margin-bottom:7px;color:var(--primary);font-size:10px;font-weight:700;letter-spacing:.12em}.page-title h1{margin-bottom:7px;font-size:28px;line-height:1.25}.page-title p{max-width:720px;color:var(--muted);font-size:13px}.create-discussion-btn{padding:11px 18px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer}.create-discussion-btn:hover{background:var(--primary-dark)}
+.discussion-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:14px}.discussion-toolbar-left h2,.shared-section-header h2{margin-bottom:4px;font-size:20px;line-height:1.3}.discussion-toolbar-left p,.shared-section-header p{color:var(--muted);font-size:12px}.discussion-toolbar-right{display:flex;gap:9px}.discussion-category-filter,.discussion-search{height:40px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-size:12px}.discussion-category-filter{min-width:180px;padding:0 11px}.discussion-search{width:210px;padding:0 12px}.discussion-category-filter:focus,.discussion-search:focus,.discussion-form-group input:focus,.discussion-form-group select:focus,.discussion-form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.discussion-composer{margin-bottom:16px;padding:24px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}.discussion-composer.hidden{display:none}.discussion-composer-header{display:flex;justify-content:space-between;gap:20px;margin-bottom:22px}.discussion-form-label{display:inline-block;margin-bottom:6px;color:var(--primary);font-size:10px;font-weight:700;letter-spacing:.1em}.discussion-composer-header h3{margin-bottom:5px;font-size:19px}.discussion-composer-header p{color:var(--muted);font-size:12px}.discussion-composer-close{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;color:#64748b;cursor:pointer;font-size:19px}.discussion-form-group{position:relative;margin-bottom:17px}.discussion-form-group label{display:block;margin-bottom:7px;color:#334155;font-size:12px;font-weight:600}.discussion-form-group input,.discussion-form-group select,.discussion-form-group textarea{width:100%;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-size:13px}.discussion-form-group input,.discussion-form-group select{height:42px;padding:0 12px}.discussion-form-group textarea{min-height:160px;padding:12px;resize:vertical}.discussion-character-count{position:absolute;right:10px;bottom:9px;color:#94a3b8;font-size:10px}.discussion-form-footer{display:flex;justify-content:flex-end;gap:9px}.discussion-cancel-btn,.discussion-submit-btn{padding:10px 17px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}.discussion-cancel-btn{border:1px solid var(--border);background:#fff;color:#475569}.discussion-submit-btn{border:0;background:var(--primary);color:#fff}.discussion-submit-btn:disabled{opacity:.65;cursor:not-allowed}
+.discussion-list{display:flex;flex-direction:column;gap:10px}.discussion-card{padding:19px 20px;background:#fff;border:1px solid var(--border);border-radius:11px;transition:.2s}.discussion-card:hover{border-color:#cbd5e1;box-shadow:0 5px 18px rgba(15,23,42,.06);transform:translateY(-1px)}.discussion-category{display:inline-block;margin-bottom:7px;padding:4px 8px;border-radius:5px;background:var(--primary-soft);color:var(--primary);font-size:10px;font-weight:700}.discussion-card-title{font-size:16px;line-height:1.45}.discussion-card-content{margin-top:10px}.discussion-card-content p{color:var(--muted);font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word}.discussion-card-footer{display:flex;justify-content:space-between;gap:12px;margin-top:15px;padding-top:11px;border-top:1px solid #edf2f7}.discussion-author,.discussion-post-meta{color:#94a3b8;font-size:11px}.discussion-author{display:flex;gap:6px}
+.shared-section{margin-top:38px}.shared-section-header{padding-top:28px;margin-bottom:14px;border-top:1px solid var(--border)}.summary-card{margin-bottom:12px;overflow:hidden;background:#fff;border:1px solid var(--border);border-radius:11px}.card-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 18px;border-bottom:1px solid #edf2f7}.card-title{font-size:14px;font-weight:650}.card-meta{display:flex;gap:14px;color:#94a3b8;font-size:11px}.meta-item{display:flex;gap:5px}.card-content{position:relative;max-height:220px;overflow:hidden;padding:17px 18px;color:#334155;font-size:13px;line-height:1.8}.card-content.expanded{max-height:none}.card-content:not(.expanded):after{content:'';position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(to bottom,transparent,#fff);pointer-events:none}.card-content h2,.card-content h3,.card-content h4{margin:12px 0 8px}.card-content ul,.card-content ol{margin-left:20px}.card-content p{margin-bottom:12px}.read-more{padding:9px 16px;border-top:1px solid #edf2f7;color:var(--primary);text-align:center;font-size:11px;font-weight:600;cursor:pointer}.read-more:hover{background:var(--soft)}
+.loading,.discussion-loading,.empty-state{padding:38px 20px;background:#fff;border:1px solid var(--border);border-radius:11px;text-align:center}.loading,.discussion-loading{color:var(--muted);font-size:12px}.empty-state h2{margin-bottom:5px;font-size:17px}.empty-state p{color:var(--muted);font-size:12px}.spinner{width:30px;height:30px;margin:0 auto 13px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+/* =====================================================
+   DISCUSSION DETAIL
+   ===================================================== */
+
+.discussion-detail {
+  display: none;
+}
+
+.discussion-detail.active {
+  display: block;
+}
+
+.discussion-detail-header {
+  margin-bottom: 16px;
+}
+
+.discussion-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.discussion-back-btn:hover {
+  background: var(--soft);
+  color: var(--primary);
+}
+
+.discussion-detail-card {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.discussion-detail-category {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.discussion-detail-title {
+  margin-bottom: 10px;
+  color: var(--text);
+  font-size: 25px;
+  line-height: 1.35;
+}
+
+.discussion-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.discussion-detail-content {
+  padding-top: 22px;
+  border-top: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.discussion-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #edf2f7;
+}
+
+.discussion-edit-btn,
+.discussion-delete-btn {
+  padding: 8px 13px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.discussion-edit-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #475569;
+}
+
+.discussion-edit-btn:hover {
+  background: var(--soft);
+  color: var(--primary);
+}
+
+.discussion-delete-btn {
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+}
+
+.discussion-delete-btn:hover {
+  background: #fef2f2;
+}
+
+.discussion-comments-section {
+  margin-top: 18px;
+}
+
+.discussion-comments-header {
+  margin-bottom: 12px;
+}
+
+.discussion-comments-header h3 {
+  margin-bottom: 4px;
+  font-size: 18px;
+}
+
+.discussion-comments-header p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.comment-composer {
+  margin-bottom: 16px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.comment-composer textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.comment-composer textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+}
+
+.comment-composer-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.comment-submit-btn {
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comment-submit-btn:hover {
+  background: var(--primary-dark);
+}
+
+.comment-submit-btn:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-card {
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.comment-card.reply {
+  margin-left: 36px;
+  background: #fbfdff;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.comment-date {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.comment-content {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 9px;
+}
+
+.comment-reply-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comment-reply-btn:hover {
+  text-decoration: underline;
+}
+
+.reply-box {
+  margin-top: 10px;
+}
+
+.reply-box textarea {
+  width: 100%;
+  min-height: 75px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.reply-box button {
+  margin-top: 7px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.discussion-edit-form {
+  display: none;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #edf2f7;
+}
+
+.discussion-edit-form.active {
+  display: block;
+}
+
+.discussion-edit-form label {
+  display: block;
+  margin-bottom: 6px;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.discussion-edit-form input,
+.discussion-edit-form select,
+.discussion-edit-form textarea {
+  width: 100%;
+  margin-bottom: 13px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.discussion-edit-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.discussion-edit-form input:focus,
+.discussion-edit-form select:focus,
+.discussion-edit-form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+}
+
+.discussion-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.discussion-edit-cancel,
+.discussion-edit-save {
+  padding: 8px 13px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.discussion-edit-cancel {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #475569;
+}
+
+.discussion-edit-save {
+  border: 0;
+  background: var(--primary);
+  color: #fff;
+}
+
+@media(max-width:600px) {
+  .discussion-detail-card {
+    padding: 20px;
+  }
+
+  .discussion-detail-title {
+    font-size: 21px;
+  }
+
+  .discussion-detail-actions {
+    justify-content: flex-start;
+  }
+
+  .comment-card.reply {
+    margin-left: 18px;
+  }
+
+  .comment-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+@media(max-width:850px){.header-content{width:calc(100% - 24px);gap:12px}.container{width:calc(100% - 24px)}.forum-page-header,.discussion-toolbar{align-items:stretch;flex-direction:column}.create-discussion-btn{align-self:flex-start}.discussion-toolbar-right{flex-direction:column}.discussion-category-filter,.discussion-search{width:100%}}@media(max-width:600px){.logo span{display:none}.back-btn{padding:8px 11px;font-size:11px}.page-title{padding:22px}.page-title h1{font-size:24px}.discussion-composer{padding:18px}.card-header,.discussion-card-footer{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body data-current-user-id="{{ current_user_id }}">  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="/forum" class="logo">
+        <img src="/static/images/logo.png" alt="Logo" class="logo-icon">
+        <span>IPaper Community</span>
+      </a>
+      
+      <div class="search-bar">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Search summaries..."
+        >
+        
+        
+        <!-- 添加搜索建议容器 -->
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </div>
+      
+      <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <section class="page-title">
+      <div class="forum-page-header">
+        <div>
+          <div class="forum-eyebrow">IPAPER RESEARCH COMMUNITY</div>
+          <h1>Community Forum</h1>
+          <p>Discuss research, data science, artificial intelligence, academic writing, and related topics with the community.</p>
+        </div>
+        <button type="button" id="createDiscussionBtn" class="create-discussion-btn">Create Discussion</button>
+      </div>
+    </section>
+
+    <section class="community-discussion-section">
+      <div class="discussion-toolbar">
+        <div class="discussion-toolbar-left">
+          <div class="section-eyebrow">COMMUNITY DISCUSSIONS</div>
+          <h2>Research Discussions</h2>
+          <p>Ask questions, share knowledge, and discuss research topics.</p>
+        </div>
+        <div class="discussion-toolbar-right">
+          <select id="discussionCategoryFilter" class="discussion-category-filter">
+            <option value="all">All Categories</option><option value="Research Methods">Research Methods</option><option value="Data Science">Data Science</option><option value="Artificial Intelligence">Artificial Intelligence</option><option value="Machine Learning">Machine Learning</option><option value="Academic Writing">Academic Writing</option><option value="Statistics">Statistics</option><option value="Technology">Technology</option><option value="General Discussion">General Discussion</option>
+          </select>
+          <input type="search" id="discussionSearch" class="discussion-search" placeholder="Search discussions..." autocomplete="off">
+        </div>
+      </div>
+
+      <div id="discussionComposer" class="discussion-composer hidden">
+        <div class="discussion-composer-header">
+          <div><span class="discussion-form-label">NEW DISCUSSION</span><h3>Start a discussion</h3><p>Share a question, research topic, idea, or useful insight.</p></div>
+          <button type="button" id="closeDiscussionComposer" class="discussion-composer-close" aria-label="Close discussion form">×</button>
+        </div>
+        <form id="discussionForm">
+          <div class="discussion-form-group"><label for="discussionTitle">Discussion title</label><input type="text" id="discussionTitle" name="title" maxlength="200" placeholder="Enter a clear discussion title" required><div class="discussion-character-count"><span id="discussionTitleCount">0</span>/200</div></div>
+          <div class="discussion-form-group"><label for="discussionCategory">Category</label><select id="discussionCategory" name="category" required><option value="General Discussion">General Discussion</option><option value="Research Methods">Research Methods</option><option value="Data Science">Data Science</option><option value="Artificial Intelligence">Artificial Intelligence</option><option value="Machine Learning">Machine Learning</option><option value="Academic Writing">Academic Writing</option><option value="Statistics">Statistics</option><option value="Technology">Technology</option></select></div>
+          <div class="discussion-form-group"><label for="discussionContent">Discussion</label><textarea id="discussionContent" name="content" rows="8" placeholder="Write your discussion here..." required></textarea></div>
+          <div class="discussion-form-footer"><button type="button" id="cancelDiscussionBtn" class="discussion-cancel-btn">Cancel</button><button type="submit" id="submitDiscussionBtn" class="discussion-submit-btn">Publish Discussion</button></div>
+        </form>
+      </div>
+
+      <div id="discussionList" class="discussion-list"><div class="discussion-loading">Loading community discussions...</div></div>
+    </section>
+
+    <!-- =====================================================
+     DISCUSSION DETAIL
+     ===================================================== -->
+<section id="discussionDetail" class="discussion-detail">
+
+  <div class="discussion-detail-header">
+    <button
+      type="button"
+      id="backToDiscussionsBtn"
+      class="discussion-back-btn">
+      ← Back to Discussions
+    </button>
+  </div>
+
+  <div id="discussionDetailContainer">
+    <div class="discussion-loading">
+      Loading discussion...
+    </div>
+  </div>
+
+</section>
+
+    <section class="shared-section">
+      <div class="shared-section-header"><div class="section-eyebrow">SHARED KNOWLEDGE</div><h2>Shared Research Summaries</h2><p>Explore AI-generated research summaries shared by the community.</p></div>
+    <div id="summariesContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading summaries...</p>
+      </div>
+    </div>
+    </section>
+  </div>
+
+  <script>
+    
+    let allSummaries = [];
+
+    // Load all summaries
+    async function loadSummaries() {
+      try {
+        const response = await fetch('/forum/summaries');
+        const data = await response.json();
+        
+        if (data.success) {
+          allSummaries = data.summaries || [];
+          renderSummaries(allSummaries);
+        } else {
+          throw new Error(data.error || 'Failed to load summaries');
+        }
+      } catch (error) {
+        console.error('Error loading summaries:', error);
+        document.getElementById('summariesContainer').innerHTML = `
+          <div class="empty-state">
+            
+            <h2>Failed to load summaries</h2>
+            <p>Please try again later</p>
+          </div>
+        `;
+      }
+    }
+
+    // Render summaries
+    function renderSummaries(summaries) {
+      const container = document.getElementById('summariesContainer');
+      
+      if (!summaries || summaries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            
+            <h2>No summaries yet</h2>
+            <p>Be the first to share a summary!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = summaries.map((summary, index) => {
+        const date = new Date(summary.sharedat).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        return `
+          <div class="summary-card">
+            <div class="card-header">
+              <div class="card-title">${escapeHtml(summary.documenttitle || 'Untitled Document')}</div>
+              
+            </div>
+            <div class="card-content" id="content-${index}">
+              ${DOMPurify.sanitize(summary.summarycontent)}
+            </div>
+            <div class="read-more" onclick="toggleContent(${index})">
+              <span id="toggle-${index}">Read More</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle read more/less
+    function toggleContent(index) {
+      const content = document.getElementById('content-' + index);
+      const toggle = document.getElementById('toggle-' + index);
+      
+      if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        toggle.textContent = 'Read More';
+      } else {
+        content.classList.add('expanded');
+        toggle.textContent = 'Read Less';
+      }
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      
+      if (!query) {
+        renderSummaries(allSummaries);
+        return;
+      }
+
+      const filtered = allSummaries.filter(summary => {
+        const title = (summary.documenttitle || '').toLowerCase();
+        const content = (summary.summarycontent || '').toLowerCase();
+        return title.includes(query) || content.includes(query);
+      });
+
+      renderSummaries(filtered);
+    });
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load summaries on page load
+    document.addEventListener('DOMContentLoaded', loadSummaries);
+
+    // 搜索建议功能
+    let currentSuggestions = [];
+    let selectedSuggestionIndex = -1;
+
+    // 搜索框事件监听增强
+    const searchInput = document.getElementById('searchInput');
+    const originalInputHandler = searchInput.oninput;
+
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      
+      // 调用原有搜索逻辑
+      if (originalInputHandler) {
+        originalInputHandler(e);
+      }
+      
+      // 显示搜索建议
+      if (query.length > 0) {
+        showSearchSuggestions(query);
+      } else {
+        hideSearchSuggestions();
+      }
+    });
+
+    // 显示搜索建议
+    function showSearchSuggestions(query) {
+      currentSuggestions = allSummaries.filter(summary => {
+        const title = (summary.documenttitle || '').toLowerCase();
+        return title.includes(query);
+      }).slice(0, 5);
+
+      const suggestionsContainer = document.getElementById('searchSuggestions');
+      
+      if (currentSuggestions.length > 0) {
+        suggestionsContainer.innerHTML = currentSuggestions.map((summary, index) => {
+          const title = summary.documenttitle || 'Untitled Document';
+          return `<div class="search-suggestion" data-index="${index}">${escapeHtml(title)}</div>`;
+        }).join('');
+        suggestionsContainer.style.display = 'block';
+        selectedSuggestionIndex = -1;
+      } else {
+        suggestionsContainer.style.display = 'none';
+      }
+    }
+
+    // 隐藏搜索建议
+    function hideSearchSuggestions() {
+      document.getElementById('searchSuggestions').style.display = 'none';
+      selectedSuggestionIndex = -1;
+    }
+
+    // 点击建议项
+    document.getElementById('searchSuggestions').addEventListener('click', function(e) {
+      if (e.target.classList.contains('search-suggestion')) {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        if (!isNaN(index) && currentSuggestions[index]) {
+          const selectedTitle = currentSuggestions[index].documenttitle;
+          searchInput.value = selectedTitle;
+          hideSearchSuggestions();
+          
+          // 触发搜索
+          const event = new Event('input');
+          searchInput.dispatchEvent(event);
+        }
+      }
+    });
+
+    // 点击页面其他区域隐藏建议
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-bar')) {
+        hideSearchSuggestions();
+      }
+    });
+
+
+    /* =====================================================
+       COMMUNITY DISCUSSIONS
+       ===================================================== */
+    let allDiscussionPosts = [];
+    const createDiscussionBtn = document.getElementById('createDiscussionBtn');
+    const discussionComposer = document.getElementById('discussionComposer');
+    const closeDiscussionComposer = document.getElementById('closeDiscussionComposer');
+    const cancelDiscussionBtn = document.getElementById('cancelDiscussionBtn');
+    const discussionForm = document.getElementById('discussionForm');
+    const discussionTitle = document.getElementById('discussionTitle');
+    const discussionTitleCount = document.getElementById('discussionTitleCount');
+    const discussionCategoryFilter = document.getElementById('discussionCategoryFilter');
+    const discussionSearch = document.getElementById('discussionSearch');
+    const discussionList = document.getElementById('discussionList');
+
+    createDiscussionBtn.addEventListener('click', () => {
+      discussionComposer.classList.remove('hidden');
+      discussionTitle.focus();
+      discussionComposer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    function closeDiscussionForm() {
+      discussionComposer.classList.add('hidden');
+      discussionForm.reset();
+      discussionTitleCount.textContent = '0';
+    }
+
+    closeDiscussionComposer.addEventListener('click', closeDiscussionForm);
+    cancelDiscussionBtn.addEventListener('click', closeDiscussionForm);
+    discussionTitle.addEventListener('input', () => { discussionTitleCount.textContent = discussionTitle.value.length; });
+
+    async function loadDiscussionPosts() {
+      try {
+        discussionList.innerHTML = '<div class="discussion-loading">Loading community discussions...</div>';
+        const response = await fetch('/forum/posts');
+        if (!response.ok) throw new Error(`Failed to load discussions: ${response.status}`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'Failed to load discussions');
+        allDiscussionPosts = data.posts || [];
+        renderDiscussionPosts(allDiscussionPosts);
+      } catch (error) {
+        console.error('Error loading discussion posts:', error);
+        discussionList.innerHTML = '<div class="empty-state"><h2>Unable to load discussions</h2><p>Please refresh the page and try again.</p></div>';
+      }
+    }
+
+    function renderDiscussionPosts(posts) {
+  if (!posts || posts.length === 0) {
+    discussionList.innerHTML = `
+      <div class="empty-state">
+        <h2>No discussions yet</h2>
+        <p>Start the first community discussion.</p>
+      </div>
+    `;
+    return;
+  }
+
+  discussionList.innerHTML = posts.map(post => `
+    <article
+      class="discussion-card"
+      data-post-id="${post.postid}"
+      role="button"
+      tabindex="0"
+      onclick="openDiscussion(${post.postid})"
+      onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDiscussion(${post.postid}); }"
+    >
+      <span class="discussion-category">
+        ${escapeHtml(post.category || 'General Discussion')}
+      </span>
+
+      <h3 class="discussion-card-title">
+        ${escapeHtml(post.title || 'Untitled Discussion')}
+      </h3>
+
+      <div class="discussion-card-content">
+        <p>${escapeHtml(post.content || '')}</p>
+      </div>
+
+      <div class="discussion-card-footer">
+        <div class="discussion-author">
+          <span>${escapeHtml(post.username || 'Community Member')}</span>
+          <span class="discussion-dot">·</span>
+          <span>${formatDiscussionDate(post.createdat)}</span>
+        </div>
+
+        <div class="discussion-post-meta">
+          ${post.views || 0} views
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+    discussionForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const title = discussionTitle.value.trim();
+      const content = document.getElementById('discussionContent').value.trim();
+      const category = document.getElementById('discussionCategory').value;
+      if (!title) { alert('Please enter a discussion title.'); discussionTitle.focus(); return; }
+      if (!content) { alert('Please enter your discussion.'); document.getElementById('discussionContent').focus(); return; }
+      const submitButton = document.getElementById('submitDiscussionBtn');
+      submitButton.disabled = true;
+      submitButton.dataset.originalText = submitButton.textContent;
+      submitButton.textContent = 'Publishing...';
+      try {
+        const response = await fetch('/forum/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title, content, category}) });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Failed to create discussion');
+        closeDiscussionForm();
+        await loadDiscussionPosts();
+      } catch (error) {
+        console.error('Error creating discussion:', error);
+        alert(error.message || 'Unable to create discussion.');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.originalText || 'Publish Discussion';
+      }
+    });
+
+    discussionSearch.addEventListener('input', filterDiscussionPosts);
+    discussionCategoryFilter.addEventListener('change', filterDiscussionPosts);
+
+    function filterDiscussionPosts() {
+      const query = discussionSearch.value.toLowerCase().trim();
+      const category = discussionCategoryFilter.value;
+      const filtered = allDiscussionPosts.filter(post => {
+        const title = (post.title || '').toLowerCase();
+        const content = (post.content || '').toLowerCase();
+        const postCategory = post.category || 'General Discussion';
+        return (!query || title.includes(query) || content.includes(query)) && (category === 'all' || postCategory === category);
+      });
+      renderDiscussionPosts(filtered);
+    }
+
+    function formatDiscussionDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    }
+
+    /* =====================================================
+   DISCUSSION DETAIL VIEW
+   ===================================================== */
+
+const discussionDetail = document.getElementById('discussionDetail');
+const discussionDetailContainer = document.getElementById('discussionDetailContainer');
+const backToDiscussionsBtn = document.getElementById('backToDiscussionsBtn');
+
+let currentDiscussionId = null;
+
+
+/* -----------------------------------------------------
+   Open discussion
+   ----------------------------------------------------- */
+
+async function openDiscussion(postId) {
+
+  currentDiscussionId = postId;
+
+  discussionDetail.classList.add('active');
+
+  document.querySelector('.community-discussion-section').style.display = 'none';
+
+  discussionDetailContainer.innerHTML = `
+    <div class="discussion-loading">
+      Loading discussion...
+    </div>
+  `;
+
+  discussionDetail.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+
+  try {
+
+    /* Load the discussion */
+
+    const response = await fetch(`/forum/posts/${postId}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load discussion: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !data.post) {
+      throw new Error(data.error || 'Discussion not found');
+    }
+
+    const post = data.post;
+
+
+    /* Increase view count */
+
+    let viewCount = post.views || 0;
+
+    try {
+
+      const viewResponse = await fetch(
+        `/forum/posts/${postId}/view`,
+        {
+          method: 'POST'
+        }
+      );
+
+      if (viewResponse.ok) {
+
+        const viewData = await viewResponse.json();
+
+        if (viewData.success) {
+          viewCount = viewData.views;
+        }
+
+      }
+
+    } catch (viewError) {
+
+      console.warn(
+        'Unable to update discussion view count:',
+        viewError
+      );
+
+    }
+
+
+    /* Display discussion */
+
+    const currentUserId = Number(
+    document.body.dataset.currentUserId
+);
+
+const isOwner =
+    Number(post.userid) === currentUserId;
+
+    discussionDetailContainer.innerHTML = `
+
+      <div class="discussion-detail-card">
+
+        <span class="discussion-detail-category">
+          ${escapeHtml(post.category || 'General Discussion')}
+        </span>
+
+        <h1 class="discussion-detail-title">
+          ${escapeHtml(post.title || 'Untitled Discussion')}
+        </h1>
+
+        <div class="discussion-detail-meta">
+
+          <span>
+            ${escapeHtml(post.username || 'Community Member')}
+          </span>
+
+          <span>·</span>
+
+          <span>
+            ${formatDiscussionDate(post.createdat)}
+          </span>
+
+          <span>·</span>
+
+          <span>
+            ${viewCount} views
+          </span>
+
+        </div>
+
+        <div class="discussion-detail-content">
+          ${escapeHtml(post.content || '')}
+        </div>
+
+        ${
+          isOwner
+            ? `
+              <div class="discussion-detail-actions">
+
+                <button
+                  type="button"
+                  class="discussion-edit-btn"
+                  onclick="showEditDiscussionForm()"
+                >
+                  Edit Discussion
+                </button>
+
+                <button
+                  type="button"
+                  class="discussion-delete-btn"
+                  onclick="deleteDiscussion()"
+                >
+                  Delete Discussion
+                </button>
+
+              </div>
+
+              <div
+                id="discussionEditForm"
+                class="discussion-edit-form"
+              >
+
+                <label for="editDiscussionTitle">
+                  Discussion Title
+                </label>
+
+                <input
+                  type="text"
+                  id="editDiscussionTitle"
+                  maxlength="200"
+                  value="${escapeHtml(post.title || '')}"
+                >
+
+                <label for="editDiscussionCategory">
+                  Category
+                </label>
+
+                <select id="editDiscussionCategory">
+
+                  ${getDiscussionCategoryOptions(post.category)}
+
+                </select>
+
+                <label for="editDiscussionContent">
+                  Discussion
+                </label>
+
+                <textarea
+                  id="editDiscussionContent"
+                >${escapeHtml(post.content || '')}</textarea>
+
+                <div class="discussion-edit-actions">
+
+                  <button
+                    type="button"
+                    class="discussion-edit-cancel"
+                    onclick="hideEditDiscussionForm()"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    class="discussion-edit-save"
+                    onclick="saveDiscussionEdit()"
+                  >
+                    Save Changes
+                  </button>
+
+                </div>
+
+              </div>
+            `
+            : ''
+        }
+
+      </div>
+
+      <div class="discussion-comments-section">
+
+        <div class="discussion-comments-header">
+
+          <h3>
+            Comments
+          </h3>
+
+          <p>
+            Share your thoughts or respond to the discussion.
+          </p>
+
+        </div>
+
+        <div class="comment-composer">
+
+          <textarea
+            id="newCommentContent"
+            placeholder="Write a comment..."
+            maxlength="5000"
+          ></textarea>
+
+          <div class="comment-composer-footer">
+
+            <button
+              type="button"
+              id="addCommentBtn"
+              class="comment-submit-btn"
+              onclick="addDiscussionComment()"
+            >
+              Add Comment
+            </button>
+
+          </div>
+
+        </div>
+
+        <div
+          id="commentsList"
+          class="comments-list"
+        >
+          <div class="discussion-loading">
+            Loading comments...
+          </div>
+        </div>
+
+      </div>
+    `;
+
+
+    /* Load comments */
+
+    await loadDiscussionComments(postId);
+
+
+  } catch (error) {
+
+    console.error(
+      'Error opening discussion:',
+      error
+    );
+
+    discussionDetailContainer.innerHTML = `
+      <div class="empty-state">
+
+        <h2>Unable to open discussion</h2>
+
+        <p>
+          ${escapeHtml(error.message || 'Please try again.')}
+        </p>
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Back to discussion list
+   ----------------------------------------------------- */
+
+backToDiscussionsBtn.addEventListener(
+  'click',
+  () => {
+
+    discussionDetail.classList.remove('active');
+
+    document.querySelector(
+      '.community-discussion-section'
+    ).style.display = '';
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+    currentDiscussionId = null;
+
+  }
+);
+
+
+/* -----------------------------------------------------
+   Category options
+   ----------------------------------------------------- */
+
+function getDiscussionCategoryOptions(selectedCategory) {
+
+  const categories = [
+    'Research Methods',
+    'Data Science',
+    'Artificial Intelligence',
+    'Machine Learning',
+    'Academic Writing',
+    'Statistics',
+    'Technology',
+    'General Discussion'
+  ];
+
+  return categories.map(category => `
+    <option
+      value="${escapeHtml(category)}"
+      ${category === selectedCategory ? 'selected' : ''}
+    >
+      ${escapeHtml(category)}
+    </option>
+  `).join('');
+
+}
+
+
+/* -----------------------------------------------------
+   Load comments
+   ----------------------------------------------------- */
+
+async function loadDiscussionComments(postId) {
+
+  const commentsList =
+    document.getElementById('commentsList');
+
+  if (!commentsList) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `/forum/posts/${postId}/comments`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to load comments: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.error || 'Failed to load comments'
+      );
+    }
+
+    renderDiscussionComments(
+      data.comments || []
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Error loading comments:',
+      error
+    );
+
+    commentsList.innerHTML = `
+      <div class="empty-state">
+
+        <h2>Unable to load comments</h2>
+
+        <p>
+          Please refresh the discussion and try again.
+        </p>
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Render comments
+   ----------------------------------------------------- */
+
+function renderDiscussionComments(comments) {
+
+  const commentsList =
+    document.getElementById('commentsList');
+
+  if (!commentsList) {
+    return;
+  }
+
+  if (!comments || comments.length === 0) {
+
+    commentsList.innerHTML = `
+      <div class="empty-state">
+
+        <h2>No comments yet</h2>
+
+        <p>
+          Be the first to comment on this discussion.
+        </p>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const topLevelComments =
+    comments.filter(
+      comment => !comment.parent_comment_id
+    );
+
+
+  const repliesByParent = {};
+
+  comments
+    .filter(comment => comment.parent_comment_id)
+    .forEach(comment => {
+
+      if (!repliesByParent[comment.parent_comment_id]) {
+        repliesByParent[comment.parent_comment_id] = [];
+      }
+
+      repliesByParent[
+        comment.parent_comment_id
+      ].push(comment);
+
+    });
+
+
+  commentsList.innerHTML =
+    topLevelComments.map(comment => {
+
+      const replies =
+        repliesByParent[comment.commentid] || [];
+
+      return `
+
+        <div class="comment-card">
+
+          <div class="comment-header">
+
+            <span class="comment-author">
+              ${escapeHtml(
+                comment.username || 'Community Member'
+              )}
+            </span>
+
+            <span class="comment-date">
+              ${formatDiscussionDate(
+                comment.createdat
+              )}
+            </span>
+
+          </div>
+
+          <div class="comment-content">
+            ${escapeHtml(comment.content || '')}
+          </div>
+
+          <div class="comment-actions">
+
+            <button
+              type="button"
+              class="comment-reply-btn"
+              onclick="showReplyBox(${comment.commentid})"
+            >
+              Reply
+            </button>
+
+          </div>
+
+          <div
+            id="reply-box-${comment.commentid}"
+            class="reply-box"
+          ></div>
+
+          ${
+            replies.length
+              ? replies.map(reply => `
+                <div class="comment-card reply">
+
+                  <div class="comment-header">
+
+                    <span class="comment-author">
+                      ${escapeHtml(
+                        reply.username ||
+                        'Community Member'
+                      )}
+                    </span>
+
+                    <span class="comment-date">
+                      ${formatDiscussionDate(
+                        reply.createdat
+                      )}
+                    </span>
+
+                  </div>
+
+                  <div class="comment-content">
+                    ${escapeHtml(reply.content || '')}
+                  </div>
+
+                </div>
+              `).join('')
+              : ''
+          }
+
+        </div>
+
+      `;
+
+    }).join('');
+
+}
+
+
+/* -----------------------------------------------------
+   Show reply box
+   ----------------------------------------------------- */
+
+function showReplyBox(commentId) {
+
+  const box =
+    document.getElementById(
+      `reply-box-${commentId}`
+    );
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML = `
+
+    <textarea
+      id="reply-content-${commentId}"
+      placeholder="Write a reply..."
+      maxlength="5000"
+    ></textarea>
+
+    <button
+      type="button"
+      onclick="submitCommentReply(${commentId})"
+    >
+      Post Reply
+    </button>
+
+  `;
+
+  document
+    .getElementById(
+      `reply-content-${commentId}`
+    )
+    .focus();
+
+}
+
+
+/* -----------------------------------------------------
+   Add new comment
+   ----------------------------------------------------- */
+
+async function addDiscussionComment() {
+
+  if (!currentDiscussionId) {
+    return;
+  }
+
+  const textarea =
+    document.getElementById(
+      'newCommentContent'
+    );
+
+  const button =
+    document.getElementById(
+      'addCommentBtn'
+    );
+
+  const content =
+    textarea.value.trim();
+
+  if (!content) {
+
+    alert(
+      'Please enter a comment.'
+    );
+
+    textarea.focus();
+
+    return;
+
+  }
+
+
+  button.disabled = true;
+  button.textContent = 'Adding...';
+
+
+  try {
+
+    const response = await fetch(
+      `/forum/posts/${currentDiscussionId}/comments`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: content,
+          parent_comment_id: null
+        })
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error || 'Failed to add comment'
+      );
+
+    }
+
+
+    textarea.value = '';
+
+    await loadDiscussionComments(
+      currentDiscussionId
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      'Error adding comment:',
+      error
+    );
+
+    alert(
+      error.message ||
+      'Unable to add comment.'
+    );
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = 'Add Comment';
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Submit reply
+   ----------------------------------------------------- */
+
+async function submitCommentReply(
+  parentCommentId
+) {
+
+  if (!currentDiscussionId) {
+    return;
+  }
+
+  const textarea =
+    document.getElementById(
+      `reply-content-${parentCommentId}`
+    );
+
+  if (!textarea) {
+    return;
+  }
+
+  const content =
+    textarea.value.trim();
+
+  if (!content) {
+
+    alert(
+      'Please enter a reply.'
+    );
+
+    textarea.focus();
+
+    return;
+
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `/forum/posts/${currentDiscussionId}/comments`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: content,
+          parent_comment_id: parentCommentId
+        })
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error || 'Failed to add reply'
+      );
+
+    }
+
+
+    await loadDiscussionComments(
+      currentDiscussionId
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      'Error adding reply:',
+      error
+    );
+
+    alert(
+      error.message ||
+      'Unable to add reply.'
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Show edit form
+   ----------------------------------------------------- */
+
+function showEditDiscussionForm() {
+
+  const form =
+    document.getElementById(
+      'discussionEditForm'
+    );
+
+  if (form) {
+    form.classList.add('active');
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Hide edit form
+   ----------------------------------------------------- */
+
+function hideEditDiscussionForm() {
+
+  const form =
+    document.getElementById(
+      'discussionEditForm'
+    );
+
+  if (form) {
+    form.classList.remove('active');
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Save edited discussion
+   ----------------------------------------------------- */
+
+async function saveDiscussionEdit() {
+
+  if (!currentDiscussionId) {
+    return;
+  }
+
+  const title =
+    document
+      .getElementById(
+        'editDiscussionTitle'
+      )
+      .value
+      .trim();
+
+  const category =
+    document
+      .getElementById(
+        'editDiscussionCategory'
+      )
+      .value;
+
+  const content =
+    document
+      .getElementById(
+        'editDiscussionContent'
+      )
+      .value
+      .trim();
+
+
+  if (!title) {
+
+    alert(
+      'Please enter a discussion title.'
+    );
+
+    return;
+
+  }
+
+
+  if (!content) {
+
+    alert(
+      'Please enter your discussion.'
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `/forum/posts/${currentDiscussionId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          content
+        })
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error ||
+        'Failed to update discussion'
+      );
+
+    }
+
+
+    await openDiscussion(
+      currentDiscussionId
+    );
+
+    await loadDiscussionPosts();
+
+
+  } catch (error) {
+
+    console.error(
+      'Error updating discussion:',
+      error
+    );
+
+    alert(
+      error.message ||
+      'Unable to update discussion.'
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   Delete discussion
+   ----------------------------------------------------- */
+
+async function deleteDiscussion() {
+
+  if (!currentDiscussionId) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      'Are you sure you want to delete this discussion?'
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `/forum/posts/${currentDiscussionId}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error ||
+        'Failed to delete discussion'
+      );
+
+    }
+
+
+    discussionDetail.classList.remove(
+      'active'
+    );
+
+    document.querySelector(
+      '.community-discussion-section'
+    ).style.display = '';
+
+    currentDiscussionId = null;
+
+    await loadDiscussionPosts();
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      'Error deleting discussion:',
+      error
+    );
+
+    alert(
+      error.message ||
+      'Unable to delete discussion.'
+    );
+
+  }
+
+}
+    document.addEventListener('DOMContentLoaded', loadDiscussionPosts);
+  </script>
+</body>
+</html>

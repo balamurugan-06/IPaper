@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="IPaper - AI-powered research workspace for understanding and organizing research papers.">
+
+    <title>IPaper | AI Research Workspace</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <header class="site-header">
+
+        <div class="nav-container">
+
+            <a href="/" class="brand">
+
+                <span class="brand-mark">iP</span>
+
+                <span class="brand-name">
+                    IPaper
+                </span>
+
+            </a>
+
+
+            <nav class="main-nav">
+
+                <a href="#features">
+                    Features
+                </a>
+
+                <a href="#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="#reviews">
+                    Reviews
+                </a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+                <a href="/login"
+                   class="nav-login">
+                    Login
+                </a>
+
+                <a href="/register"
+                   class="btn btn-primary btn-small">
+                    Get Started
+                </a>
+
+            </div>
+
+
+            <!-- Mobile Menu -->
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                type="button"
+                aria-label="Open navigation"
+                aria-expanded="false">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+        </div>
+
+
+        <div class="mobile-nav"
+             id="mobileNav">
+
+            <a href="#features">
+                Features
+            </a>
+
+            <a href="#how-it-works">
+                How It Works
+            </a>
+
+            <a href="#reviews">
+                Reviews
+            </a>
+
+            <a href="/login">
+                Login
+            </a>
+
+            <a href="/register">
+                Get Started
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <main>
+
+        <!-- =========================
+             HERO SECTION
+        ========================== -->
+
+        <section class="hero-section">
+
+            <div class="hero-glow hero-glow-one"></div>
+            <div class="hero-glow hero-glow-two"></div>
+
+
+            <div class="hero-container">
+
+
+                <!-- HERO TEXT -->
+
+                <div class="hero-copy">
+
+                    <div class="eyebrow">
+
+                        <span class="eyebrow-dot"></span>
+
+                        AI-powered research workspace
+
+                    </div>
+
+
+                    <h1>
+
+                        Understand research papers
+
+                        <span>
+                            faster with AI.
+                        </span>
+
+                    </h1>
+
+
+                    <p class="hero-description">
+
+                        Upload your research papers, choose how you want
+                        to analyze them, and turn lengthy documents into
+                        clear, structured insights.
+
+                    </p>
+
+
+                    <div class="hero-actions">
+
+                        <a href="/register"
+                           class="btn btn-primary">
+
+                            Start Researching
+
+                            <span>
+                                →
+                            </span>
+
+                        </a>
+
+
+                        <a href="#how-it-works"
+                           class="btn btn-secondary">
+
+                            See How It Works
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="hero-trust">
+
+                        <span>
+                            Built for researchers
+                        </span>
+
+                        <span>
+                            •
+                        </span>
+
+                        <span>
+                            PDF &amp; DOCX support
+                        </span>
+
+                        <span>
+                            •
+                        </span>
+
+                        <span>
+                            AI-assisted analysis
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- PRODUCT PREVIEW -->
+
+                <div class="product-preview-wrap">
+
+                    <div class="preview-glow"></div>
+
+
+                    <div class="product-window">
+
+
+                        <!-- Window Header -->
+
+                        <div class="window-topbar">
+
+                            <div class="window-dots">
+
+                                <span></span>
+                                <span></span>
+                                <span></span>
+
+                            </div>
+
+
+                            <div class="window-title">
+
+                                IPaper Research Workspace
+
+                            </div>
+
+
+                            <div class="window-status">
+
+                                <span class="status-dot"></span>
+
+                                AI Ready
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Window Body -->
+
+                        <div class="window-body">
+
+
+                            <!-- Preview Sidebar -->
+
+                            <aside class="preview-sidebar">
+
+                                <div class="preview-brand">
+
+                                    <span class="mini-mark">
+                                        iP
+                                    </span>
+
+                                    IPaper
+
+                                </div>
+
+
+                                <div class="preview-nav active">
+
+                                    ▣ &nbsp; Research Library
+
+                                </div>
+
+
+                                <div class="preview-nav">
+
+                                    ◇ &nbsp; Categories
+
+                                </div>
+
+
+                                <div class="preview-nav">
+
+                                    ☆ &nbsp; Saved
+
+                                </div>
+
+
+                                <div class="preview-sidebar-label">
+
+                                    Workspace
+
+                                </div>
+
+
+                                <div class="preview-nav">
+
+                                    + &nbsp; New Document
+
+                                </div>
+
+                            </aside>
+
+
+
+                            <!-- Preview Main -->
+
+                            <div class="preview-main">
+
+
+                                <div class="preview-heading">
+
+                                    <div>
+
+                                        <small>
+                                            RESEARCH WORKSPACE
+                                        </small>
+
+                                        <h3>
+                                            Document Analysis
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span class="preview-badge">
+
+                                        AI Assisted
+
+                                    </span>
+
+                                </div>
+
+
+
+                                <!-- Document -->
+
+                                <div class="document-card">
+
+                                    <div class="document-icon">
+                                        PDF
+                                    </div>
+
+
+                                    <div class="document-info">
+
+                                        <strong>
+                                            Research Paper.pdf
+                                        </strong>
+
+                                        <span>
+                                            Ready for analysis
+                                        </span>
+
+                                    </div>
+
+
+                                    <span class="document-check">
+                                        ✓
+                                    </span>
+
+                                </div>
+
+
+
+                                <!-- AI Summary -->
+
+                                <div class="summary-card">
+
+                                    <div class="summary-heading">
+
+                                        <strong>
+                                            ✦ &nbsp; AI Summary
+                                        </strong>
+
+                                        <span>
+                                            Generated
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="summary-line long"></div>
+
+                                    <div class="summary-line medium"></div>
+
+
+
+                                    <div class="insight-row">
+
+                                        <div class="insight-icon">
+                                            01
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                Key ideas
+                                            </strong>
+
+                                            <span>
+                                                Identify the main concepts
+                                                and arguments.
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <div class="insight-row">
+
+                                        <div class="insight-icon">
+                                            02
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                Research findings
+                                            </strong>
+
+                                            <span>
+                                                Highlight important results
+                                                and conclusions.
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <div class="preview-button-row">
+
+                                        <span class="preview-action">
+                                            Read Summary
+                                        </span>
+
+                                        <span class="preview-action secondary-action">
+                                            Download
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Floating AI Card -->
+
+                    <div class="floating-card floating-card-top">
+
+                        <span class="floating-icon">
+                            ✦
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                AI Analysis
+                            </strong>
+
+                            <small>
+                                Ready to generate
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Floating Organization Card -->
+
+                    <div class="floating-card floating-card-bottom">
+
+                        <span class="floating-icon">
+                            ✓
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Organized
+                            </strong>
+
+                            <small>
+                                Your research, structured
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             HOW IT WORKS
+        ========================== -->
+
+        <section
+            class="workflow-section"
+            id="how-it-works">
+
+            <div class="section-container">
+
+
+                <div class="section-heading centered">
+
+                    <span class="section-kicker">
+                        HOW IPAPER WORKS
+                    </span>
+
+
+                    <h2>
+                        From paper to insight
+                        in a few simple steps.
+                    </h2>
+
+
+                    <p>
+
+                        Bring your document, choose what you need,
+                        and let AI help you understand it.
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="workflow-grid">
+
+
+                    <article class="workflow-card">
+
+                        <div class="step-number">
+                            01
+                        </div>
+
+                        <div class="workflow-icon">
+                            ↑
+                        </div>
+
+                        <h3>
+                            Upload
+                        </h3>
+
+                        <p>
+                            Add your research paper from the
+                            Research Workspace.
+                        </p>
+
+                    </article>
+
+
+                    <div class="workflow-connector"></div>
+
+
+                    <article class="workflow-card">
+
+                        <div class="step-number">
+                            02
+                        </div>
+
+                        <div class="workflow-icon">
+                            ◎
+                        </div>
+
+                        <h3>
+                            Choose
+                        </h3>
+
+                        <p>
+                            Select the type of AI analysis that
+                            fits your research goal.
+                        </p>
+
+                    </article>
+
+
+                    <div class="workflow-connector"></div>
+
+
+                    <article class="workflow-card">
+
+                        <div class="step-number">
+                            03
+                        </div>
+
+                        <div class="workflow-icon">
+                            ✦
+                        </div>
+
+                        <h3>
+                            Generate
+                        </h3>
+
+                        <p>
+                            Let AI transform the document into
+                            structured insights.
+                        </p>
+
+                    </article>
+
+
+                    <div class="workflow-connector"></div>
+
+
+                    <article class="workflow-card">
+
+                        <div class="step-number">
+                            04
+                        </div>
+
+                        <div class="workflow-icon">
+                            □
+                        </div>
+
+                        <h3>
+                            Organize
+                        </h3>
+
+                        <p>
+                            Keep your research organized and
+                            return to it whenever you need.
+                        </p>
+
+                    </article>
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             FEATURES
+        ========================== -->
+
+        <section
+            class="features-section"
+            id="features">
+
+            <div class="section-container">
+
+
+                <div class="section-heading">
+
+                    <span class="section-kicker">
+                        BUILT FOR RESEARCH
+                    </span>
+
+
+                    <h2>
+                        Everything you need to work
+                        through complex papers.
+                    </h2>
+
+
+                    <p>
+                        A focused workspace designed around
+                        reading, analyzing, and managing documents.
+                    </p>
+
+                </div>
+
+
+
+                <div class="features-grid">
+
+
+                    <!-- Feature 1 -->
+
+                    <article class="feature-card feature-card-large">
+
+                        <div class="feature-number">
+                            01
+                        </div>
+
+                        <div class="feature-icon-box">
+                            ✦
+                        </div>
+
+                        <h3>
+                            AI PDF Summarization
+                        </h3>
+
+                        <p>
+
+                            Turn lengthy research papers into
+                            clear, structured summaries so you
+                            can focus on what matters.
+
+                        </p>
+
+
+                        <div class="feature-preview">
+
+                            <span>
+                                Key Ideas
+                            </span>
+
+                            <span>
+                                Findings
+                            </span>
+
+                            <span>
+                                Conclusion
+                            </span>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Feature 2 -->
+
+                    <article class="feature-card">
+
+                        <div class="feature-number">
+                            02
+                        </div>
+
+                        <div class="feature-icon-box">
+                            ▦
+                        </div>
+
+                        <h3>
+                            Research Organization
+                        </h3>
+
+                        <p>
+
+                            Organize your documents into
+                            categories and keep your research
+                            library easier to navigate.
+
+                        </p>
+
+
+                        <div class="feature-mini-list">
+
+                            <span>
+                                Research Library
+                            </span>
+
+                            <span>
+                                Categories
+                            </span>
+
+                            <span>
+                                Saved Papers
+                            </span>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Feature 3 -->
+
+                    <article class="feature-card">
+
+                        <div class="feature-number">
+                            03
+                        </div>
+
+                        <div class="feature-icon-box">
+                            ◎
+                        </div>
+
+                        <h3>
+                            Flexible AI Templates
+                        </h3>
+
+                        <p>
+
+                            Choose a suitable analysis format
+                            instead of forcing every paper
+                            into the same structure.
+
+                        </p>
+
+
+                        <div class="template-pills">
+
+                            <span>
+                                Summary
+                            </span>
+
+                            <span>
+                                Insights
+                            </span>
+
+                            <span>
+                                Analysis
+                            </span>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             WORKSPACE
+        ========================== -->
+
+        <section class="workspace-section">
+
+            <div class="section-container workspace-layout">
+
+
+                <div class="workspace-copy">
+
+                    <span class="section-kicker">
+                        YOUR RESEARCH WORKSPACE
+                    </span>
+
+
+                    <h2>
+                        One place for the papers
+                        you are actually working on.
+                    </h2>
+
+
+                    <p>
+
+                        The homepage explains IPaper.
+                        The Research Workspace is where the
+                        real work happens — upload documents,
+                        organize them, generate summaries,
+                        and manage your results.
+
+                    </p>
+
+
+                    <ul class="check-list">
+
+                        <li>
+                            <span>✓</span>
+                            Central document library
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            Category-based organization
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            AI-assisted document analysis
+                        </li>
+
+                        <li>
+                            <span>✓</span>
+                            Download and sharing workflows
+                        </li>
+
+                    </ul>
+
+
+                    <a
+                        href="/register"
+                        class="text-link">
+
+                        Enter the Research Workspace →
+
+                    </a>
+
+                </div>
+
+
+
+                <!-- Workspace Preview -->
+
+                <div class="workspace-visual">
+
+                    <div class="visual-window">
+
+
+                        <div class="visual-header">
+
+                            <span>
+                                Research Library
+                            </span>
+
+                            <span>
+                                Your documents
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="visual-document">
+
+                            <span class="visual-file pdf">
+                                PDF
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Machine Learning Research.pdf
+                                </strong>
+
+                                <small>
+                                    AI analysis available
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="visual-document">
+
+                            <span class="visual-file doc">
+                                DOC
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Literature Review.docx
+                                </strong>
+
+                                <small>
+                                    Organized in Research
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="visual-document">
+
+                            <span class="visual-file pdf">
+                                PDF
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    AI Ethics Paper.pdf
+                                </strong>
+
+                                <small>
+                                    Summary available
+                                </small>
+
+                            </div>
+
+                            <span>
+                                →
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             REVIEWS
+        ========================== -->
+
+        <section
+            class="reviews-section"
+            id="reviews">
+
+            <div class="section-container">
+
+
+                <div class="section-heading centered">
+
+                    <span class="section-kicker">
+                        USER REVIEWS
+                    </span>
+
+
+                    <h2>
+                        What researchers are saying.
+                    </h2>
+
+
+                    <p>
+                        Real feedback from the IPaper community.
+                    </p>
+
+                </div>
+
+
+
+                <div class="reviews-grid">
+
+
+                    {% if feedbacks %}
+
+                        {% for feedback in feedbacks %}
+
+                        <article class="review-card">
+
+
+                            <div class="review-top">
+
+                                <div class="review-avatar">
+
+                                    {{ feedback[0][0]|upper
+                                       if feedback[0]
+                                       else 'U' }}
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ feedback[0] }}
+                                    </strong>
+
+                                    <span>
+                                        {{ feedback[1] }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="review-stars">
+
+                                {% for i in range(feedback[2]) %}
+                                    ★
+                                {% endfor %}
+
+                                {% for i in range(5 - feedback[2]) %}
+                                    <span>★</span>
+                                {% endfor %}
+
+                            </div>
+
+
+
+                            <p class="review-comment">
+
+                                “{{ feedback[3] }}”
+
+                            </p>
+
+
+
+                            {% if feedback[4] %}
+
+                                <span class="review-type">
+                                    {{ feedback[4] }}
+                                </span>
+
+                            {% endif %}
+
+
+                        </article>
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+
+                        <div class="empty-reviews">
+
+                            <div>
+                                ✦
+                            </div>
+
+                            <h3>
+                                Be one of the first reviewers.
+                            </h3>
+
+                            <p>
+                                User feedback will appear here
+                                as the IPaper community grows.
+                            </p>
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             FINAL CTA
+        ========================== -->
+
+        <section class="cta-section">
+
+            <div class="cta-content">
+
+                <span class="section-kicker">
+                    START YOUR RESEARCH WORKFLOW
+                </span>
+
+
+                <h2>
+
+                    Spend less time searching
+                    through papers.
+                    Spend more time
+                    understanding them.
+
+                </h2>
+
+
+                <p>
+
+                    Create your IPaper account and explore
+                    the Research Workspace.
+
+                </p>
+
+
+                <div class="cta-actions">
+
+                    <a
+                        href="/register"
+                        class="btn btn-primary">
+
+                        Get Started →
+
+                    </a>
+
+
+                    <a
+                        href="/login"
+                        class="btn btn-secondary">
+
+                        I already have an account
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-container">
+
+
+            <div class="footer-brand">
+
+                <a href="/" class="brand">
+
+                    <span class="brand-mark">
+                        iP
+                    </span>
+
+                    <span class="brand-name">
+                        IPaper
+                    </span>
+
+                </a>
+
+
+                <p>
+
+                    An AI-powered research workspace designed
+                    to help you understand and organize academic
+                    documents more efficiently.
+
+                </p>
+
+            </div>
+
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Product
+                </h3>
+
+                <a href="#features">
+                    Features
+                </a>
+
+                <a href="#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="/register">
+                    Get Started
+                </a>
+
+                <a href="/login">
+                    Login
+                </a>
+
+            </div>
+
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Community
+                </h3>
+
+                <a href="/forum">
+                    Forum
+                </a>
+
+                <a href="/feedback">
+                    Feedback
+                </a>
+
+            </div>
+
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Contact
+                </h3>
+
+                <a href="mailto:support@ipaper.com">
+                    support@ipaper.com
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="footer-bottom">
+
+            <span>
+                © 2026 IPaper. All rights reserved.
+            </span>
+
+            <span>
+                AI-assisted research, organized.
+            </span>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- HOME PAGE JAVASCRIPT -->
+
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+</body>
+
+</html>
