@@ -12,7 +12,7 @@ from flask import Response
 from flask_session import Session
 import bcrypt
 import os
-import razorpay
+
 
 import re
 
