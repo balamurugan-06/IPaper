@@ -493,7 +493,7 @@ def generateSummary():
                 summarytemplateid,
                 templatename,
                 category,
-                prompt,
+                promptinstructions,
                 minimum_plan
             FROM uploadsummarytemplates
             WHERE summarytemplateid = %s
