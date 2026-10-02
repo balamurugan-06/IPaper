@@ -351,14 +351,17 @@ def generateSummary():
     # 1. Authentication
     # ---------------------------------------------------------
 
-    if 'user_id' not in session:
+    if "user_id" not in session:
 
         return jsonify({
             "error": "Authentication required."
         }), 401
 
+
     conn = None
     cur = None
+    temp_doc_path = None
+
 
     try:
 
@@ -366,7 +369,10 @@ def generateSummary():
         # 2. Read request data
         # -----------------------------------------------------
 
-        data = request.get_json(silent=True) or {}
+        data = request.get_json(
+            silent=True
+        ) or {}
+
 
         doc_name = data.get(
             "document_name"
@@ -385,6 +391,7 @@ def generateSummary():
             "summaryTemplate"
         )
 
+
         # -----------------------------------------------------
         # 3. Validate required values
         # -----------------------------------------------------
@@ -395,54 +402,49 @@ def generateSummary():
                 "error": "Document name is required."
             }), 400
 
+
         if doc_id_raw is None:
 
             return jsonify({
                 "error": "Document ID is required."
             }), 400
 
+
         try:
 
-            doc_id = int(doc_id_raw)
+            doc_id = int(
+                doc_id_raw
+            )
 
-        except (TypeError, ValueError):
+        except (
+            TypeError,
+            ValueError
+        ):
 
             return jsonify({
                 "error": "Invalid document ID."
             }), 400
 
-        
 
-        # -----------------------------------------------------
-        # 4. Verify document ownership
-        # -----------------------------------------------------
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-                # -----------------------------------------------------
-        # 4. Verify membership and template access
-        # -----------------------------------------------------
-
-        if summary_template_id is None:
+        if not template_prompt:
 
             return jsonify({
                 "error": "Summary template is required."
             }), 400
 
-        try:
 
-            summary_template_id = int(
-                summary_template_id
-            )
+        # -----------------------------------------------------
+        # 4. Verify template and membership
+        # -----------------------------------------------------
 
-        except (TypeError, ValueError):
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-            return jsonify({
-                "error": "Invalid summary template."
-            }), 400
 
-        # Get the user's current membership
+        # -----------------------------------------------------
+        # Get user's membership
+        # -----------------------------------------------------
+
         cur.execute(
             """
             SELECT membership
@@ -450,94 +452,82 @@ def generateSummary():
             WHERE userid = %s
             """,
             (
-                session['user_id'],
+                session["user_id"],
             )
         )
 
-        user_row = cur.fetchone()
+        membership_row = cur.fetchone()
 
-        membership = 'Free'
 
-        if user_row and user_row[0]:
+        membership = (
+            membership_row[0]
+            if membership_row
+            and membership_row[0]
+            else "Free"
+        )
 
-            membership = user_row[0]
 
-        if membership not in [
-            'Free',
-            'Professional',
-            'Professional Plus'
-        ]:
+        # -----------------------------------------------------
+        # Get selected template
+        # -----------------------------------------------------
 
-            membership = 'Free'
+        try:
 
-        # Verify that this template is available
-        # for the user's membership level.
+            template_id = int(
+                summary_template_id
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            return jsonify({
+                "error": "Invalid summary template."
+            }), 400
+
+
         cur.execute(
             """
             SELECT
-                t.summarytemplateid,
-                t.templatename,
-                t.category,
-                t.promptinstructions,
-                a.minimum_plan
-            FROM uploadsummarytemplates t
-            INNER JOIN template_plan_access a
-                ON a.summarytemplateid =
-                   t.summarytemplateid
-            WHERE
-                t.summarytemplateid = %s
-                AND
-                CASE %s
-                    WHEN 'Free' THEN 1
-                    WHEN 'Professional' THEN 2
-                    WHEN 'Professional Plus' THEN 3
-                END
-                >=
-                CASE a.minimum_plan
-                    WHEN 'Free' THEN 1
-                    WHEN 'Professional' THEN 2
-                    WHEN 'Professional Plus' THEN 3
-                END
-            LIMIT 1
+                summarytemplateid,
+                templatename,
+                category,
+                prompt,
+                minimum_plan
+            FROM summarytemplates
+            WHERE summarytemplateid = %s
             """,
             (
-                summary_template_id,
-                membership
+                template_id,
             )
         )
 
         template_row = cur.fetchone()
 
+
         if not template_row:
 
             return jsonify({
-                "error":
-                    "This summary template is not "
-                    "available for your membership plan."
-            }), 403
+                "error": "Selected summary template was not found."
+            }), 404
 
-        # -----------------------------------------------------
-        # Use the prompt stored in the database.
-        # Do NOT trust the prompt sent by the browser.
-        # -----------------------------------------------------
 
         summary_template_id = template_row[0]
-
         template_name = template_row[1]
-
         template_category = template_row[2]
-
-        template_prompt = template_row[3]
-
+        database_template_prompt = template_row[3]
         minimum_plan = template_row[4]
 
-        if not template_prompt:
+
+        if not database_template_prompt:
 
             return jsonify({
                 "error":
                     "The selected summary template "
                     "does not contain prompt instructions."
             }), 500
+
 
         print(
             f"Membership: {membership}"
@@ -552,7 +542,19 @@ def generateSummary():
             f"Required plan: {minimum_plan}"
         )
 
-                cur.execute(
+
+        # -----------------------------------------------------
+        # Use database prompt
+        # -----------------------------------------------------
+
+        template_prompt = database_template_prompt
+
+
+        # -----------------------------------------------------
+        # 5. Verify document ownership
+        # -----------------------------------------------------
+
+        cur.execute(
             """
             SELECT
                 fileid,
@@ -564,11 +566,13 @@ def generateSummary():
             """,
             (
                 doc_id,
-                session['user_id']
+                session["user_id"]
             )
         )
 
+
         document = cur.fetchone()
+
 
         if not document:
 
@@ -583,151 +587,92 @@ def generateSummary():
 
 
         # -----------------------------------------------------
-        # 5. Verify document data exists
+        # 6. Verify stored PDF data
         # -----------------------------------------------------
 
         if not attachment_data:
 
             return jsonify({
-                "error": (
+                "error":
                     "Document file data is not available. "
                     "Please upload the document again."
-                )
             }), 404
 
 
         # -----------------------------------------------------
-        # 6. Create temporary local file
+        # 7. Create temporary local PDF
         # -----------------------------------------------------
 
-        temp_doc_path = None
-
-        try:
-
-            file_extension = os.path.splitext(
-                stored_filename
-            )[1]
-
-            if not file_extension:
-                file_extension = ".pdf"
+        file_extension = os.path.splitext(
+            stored_filename
+        )[1]
 
 
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=file_extension
-            ) as temp_file:
+        if not file_extension:
 
-                temp_file.write(
-                    bytes(attachment_data)
-                )
-
-                temp_doc_path = temp_file.name
+            file_extension = ".pdf"
 
 
-            print(
-                f"📄 Temporary document created: "
-                f"{temp_doc_path}"
+        with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=file_extension
+        ) as temp_file:
+
+            temp_file.write(
+                bytes(attachment_data)
             )
 
-
-            # -------------------------------------------------
-            # 7. Generate AI summary
-            # -------------------------------------------------
-
-            tem_prompt = (
-                template_prompt.strip()
-                + " also"
-            )
+            temp_doc_path = temp_file.name
 
 
-            print(
-                f"🤖 Generating summary "
-                f"for document {stored_file_id}"
-            )
+        print(
+            f"📄 Temporary document created: "
+            f"{temp_doc_path}"
+        )
 
-
-            summary = summarizer(
-                temp_doc_path,
-                tem_prompt,
-                stored_file_id
-            )
-
-
-            if not summary:
-
-                return jsonify({
-                    "error": (
-                        "Summary generation "
-                        "returned no result."
-                    )
-                }), 500
-
-
-        finally:
-
-            # -------------------------------------------------
-            # Remove temporary input file
-            # -------------------------------------------------
-
-            if (
-                temp_doc_path
-                and os.path.exists(temp_doc_path)
-            ):
-
-                try:
-
-                    os.remove(
-                        temp_doc_path
-                    )
-
-                    print(
-                        "🗑️ Temporary document removed."
-                    )
-
-                except Exception as cleanup_error:
-
-                    print(
-                        "⚠️ Temporary file cleanup "
-                        "failed:",
-                        cleanup_error
-                    )
 
         # -----------------------------------------------------
-        # 7. Generate AI summary
-        # -----------------------------------------------------
-
-                # -----------------------------------------------------
         # 8. Generate AI summary
         # -----------------------------------------------------
 
-        tem_prompt = template_prompt.strip()
+        tem_prompt = (
+            template_prompt.strip()
+            + " also"
+        )
+
 
         print(
-            f"Generating summary "
+            f"🤖 Generating summary "
             f"for document {stored_file_id}"
         )
 
+
         summary = summarizer(
-            doc_path,
+            temp_doc_path,
             tem_prompt,
             stored_file_id
         )
 
+
         if not summary:
 
             return jsonify({
-                "error": "Summary generation returned no result."
+                "error":
+                    "Summary generation returned no result."
             }), 500
 
+
         # -----------------------------------------------------
-        # 8. Model information
+        # 9. Model information
         # -----------------------------------------------------
 
         model_name = "gpt-4o-mini"
+
         now = datetime.now()
 
+
         # -----------------------------------------------------
-        # 9. Check existing summary
+        # 10. Check existing summary
         # -----------------------------------------------------
 
         cur.execute(
@@ -737,13 +682,17 @@ def generateSummary():
             WHERE docid = %s
             LIMIT 1
             """,
-            (stored_file_id,)
+            (
+                stored_file_id,
+            )
         )
+
 
         existing = cur.fetchone()
 
+
         # -----------------------------------------------------
-        # 10. Update existing summary
+        # 11. Update existing summary
         # -----------------------------------------------------
 
         if existing:
@@ -767,8 +716,9 @@ def generateSummary():
                 )
             )
 
+
         # -----------------------------------------------------
-        # 11. Insert new summary
+        # 12. Insert new summary
         # -----------------------------------------------------
 
         else:
@@ -783,7 +733,14 @@ def generateSummary():
                     createdat,
                     docid
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
                 """,
                 (
                     summary_template_id,
@@ -794,33 +751,41 @@ def generateSummary():
                 )
             )
 
+
         # -----------------------------------------------------
-        # 12. Commit database transaction
+        # 13. Commit
         # -----------------------------------------------------
 
         conn.commit()
+
 
         print(
             f"✅ Summary generated "
             f"for document {stored_file_id}"
         )
 
+
         return jsonify({
             "summary": summary
         })
 
+
     except Exception as e:
 
         # -----------------------------------------------------
-        # 13. Roll back database
+        # 14. Roll back
         # -----------------------------------------------------
 
         if conn:
 
             try:
+
                 conn.rollback()
+
             except Exception:
+
                 pass
+
 
         print(
             f"❌ Summary generation failed: {e}"
@@ -828,22 +793,59 @@ def generateSummary():
 
         traceback.print_exc()
 
+
         return jsonify({
-            "error": "Summary generation failed. "
-                     "Please try again."
+            "error":
+                "Summary generation failed. "
+                "Please try again."
         }), 500
+
 
     finally:
 
         # -----------------------------------------------------
-        # 14. Close database resources
+        # 15. Delete temporary PDF
+        # -----------------------------------------------------
+
+        if (
+            temp_doc_path
+            and os.path.exists(
+                temp_doc_path
+            )
+        ):
+
+            try:
+
+                os.remove(
+                    temp_doc_path
+                )
+
+                print(
+                    "🗑️ Temporary document removed."
+                )
+
+            except Exception as cleanup_error:
+
+                print(
+                    "⚠️ Temporary file cleanup failed:",
+                    cleanup_error
+                )
+
+
+        # -----------------------------------------------------
+        # 16. Close database
         # -----------------------------------------------------
 
         if cur:
+
             cur.close()
 
+
         if conn:
-            release_db_connection(conn)
+
+            release_db_connection(
+                conn
+            )
 
 # =========================================================
 # STEP 9E — PART 5A
