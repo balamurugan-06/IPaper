@@ -495,7 +495,7 @@ def generateSummary():
                 category,
                 prompt,
                 minimum_plan
-            FROM summarytemplates
+            FROM uploadsummarytemplates
             WHERE summarytemplateid = %s
             """,
             (
