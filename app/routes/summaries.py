@@ -490,19 +490,21 @@ def generateSummary():
         cur.execute(
             """
             SELECT
-                summarytemplateid,
-                templatename,
-                category,
-                promptinstructions,
-                minimum_plan
-            FROM uploadsummarytemplates
-            WHERE summarytemplateid = %s
+                t.summarytemplateid,
+                t.templatename,
+                t.category,
+                t.promptinstructions,
+                a.minimum_plan
+            FROM uploadsummarytemplates t
+            INNER JOIN template_plan_access a
+                ON a.summarytemplateid = t.summarytemplateid
+            WHERE t.summarytemplateid = %s
+            LIMIT 1
             """,
             (
                 template_id,
             )
         )
-
         template_row = cur.fetchone()
 
 
