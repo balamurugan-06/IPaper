@@ -308,8 +308,6 @@ def upload_document():
     conn = None
     cur = None
 
-    saved_files = []
-
 
     try:
 
@@ -321,12 +319,10 @@ def upload_document():
             "file"
         )
 
-
         folder_id_raw = request.form.get(
             "folder_id",
             ""
         ).strip()
-
 
         title = request.form.get(
             "title",
@@ -428,85 +424,22 @@ def upload_document():
 
 
             # -------------------------------------------------
-            # Prevent filename collisions
+            # Read actual file into memory
             # -------------------------------------------------
 
-            base, ext = os.path.splitext(
-                filename
-            )
+            file_data = file.read()
 
 
-            counter = 1
+            if not file_data:
 
-
-            save_path = os.path.join(
-                os.getenv(
-                    "UPLOAD_FOLDER",
-                    os.path.join(
-                        os.path.dirname(
-                            os.path.dirname(
-                                os.path.abspath(
-                                    __file__
-                                )
-                            )
-                        ),
-                        "..",
-                        "uploads"
-                    )
-                ),
-                filename
-            )
-
-
-            save_path = os.path.abspath(
-                save_path
-            )
-
-
-            while os.path.exists(
-                save_path
-            ):
-
-                filename = (
-                    f"{base}_{counter}{ext}"
+                raise ValueError(
+                    f"Uploaded file is empty: "
+                    f"{filename}"
                 )
 
 
-                save_path = os.path.join(
-                    os.path.dirname(
-                        save_path
-                    ),
-                    filename
-                )
-
-
-                counter += 1
-
-
             # -------------------------------------------------
-            # Save physical file
-            # -------------------------------------------------
-
-            os.makedirs(
-                os.path.dirname(
-                    save_path
-                ),
-                exist_ok=True
-            )
-
-
-            file.save(
-                save_path
-            )
-
-
-            saved_files.append(
-                save_path
-            )
-
-
-            # -------------------------------------------------
-            # Insert database record
+            # Insert document + PDF bytes into PostgreSQL
             # -------------------------------------------------
 
             cur.execute(
@@ -517,10 +450,12 @@ def upload_document():
                     folderid,
                     filename,
                     title,
-                    attachment
+                    attachment,
+                    attachment_data
                 )
                 VALUES
                 (
+                    %s,
                     %s,
                     %s,
                     %s,
@@ -533,7 +468,8 @@ def upload_document():
                     folder_id,
                     filename,
                     title,
-                    save_path
+                    None,
+                    file_data
                 )
             )
 
@@ -543,6 +479,12 @@ def upload_document():
         # -----------------------------------------------------
 
         conn.commit()
+
+
+        print(
+            "✅ Document uploaded and stored "
+            "in PostgreSQL."
+        )
 
 
         flash(
@@ -559,30 +501,6 @@ def upload_document():
                 conn.rollback()
             except Exception:
                 pass
-
-
-        # -----------------------------------------------------
-        # Remove files if DB operation failed
-        # -----------------------------------------------------
-
-        for file_path in saved_files:
-
-            try:
-
-                if os.path.exists(
-                    file_path
-                ):
-
-                    os.remove(
-                        file_path
-                    )
-
-            except Exception as cleanup_error:
-
-                print(
-                    "⚠️ File cleanup failed:",
-                    cleanup_error
-                )
 
 
         print(
