@@ -6,6 +6,7 @@ Handles AI summary generation and summary retrieval/download.
 
 import os
 import traceback
+import tempfile
 from datetime import datetime
 
 
@@ -551,12 +552,12 @@ def generateSummary():
             f"Required plan: {minimum_plan}"
         )
 
-        cur.execute(
+                cur.execute(
             """
             SELECT
                 fileid,
                 filename,
-                attachment
+                attachment_data
             FROM files
             WHERE fileid = %s
               AND userid = %s
@@ -575,46 +576,121 @@ def generateSummary():
                 "error": "Document not found."
             }), 404
 
+
         stored_file_id = document[0]
         stored_filename = document[1]
-        attachment_path = document[2]
+        attachment_data = document[2]
+
 
         # -----------------------------------------------------
-        # 5. Determine actual document path
+        # 5. Verify document data exists
         # -----------------------------------------------------
 
-        if attachment_path:
-
-            doc_path = attachment_path
-
-        else:
-
-            doc_path = os.path.join(
-                os.getenv(
-                    "UPLOAD_FOLDER",
-                    os.path.join(
-                        os.path.dirname(
-                            os.path.dirname(
-                                os.path.dirname(
-                                    os.path.abspath(__file__)
-                                )
-                            )
-                        ),
-                        "uploads"
-                    )
-                ),
-                stored_filename
-            )
-
-        # -----------------------------------------------------
-        # 6. Verify physical document exists
-        # -----------------------------------------------------
-
-        if not os.path.exists(doc_path):
+        if not attachment_data:
 
             return jsonify({
-                "error": "Document file not found."
+                "error": (
+                    "Document file data is not available. "
+                    "Please upload the document again."
+                )
             }), 404
+
+
+        # -----------------------------------------------------
+        # 6. Create temporary local file
+        # -----------------------------------------------------
+
+        temp_doc_path = None
+
+        try:
+
+            file_extension = os.path.splitext(
+                stored_filename
+            )[1]
+
+            if not file_extension:
+                file_extension = ".pdf"
+
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=file_extension
+            ) as temp_file:
+
+                temp_file.write(
+                    bytes(attachment_data)
+                )
+
+                temp_doc_path = temp_file.name
+
+
+            print(
+                f"📄 Temporary document created: "
+                f"{temp_doc_path}"
+            )
+
+
+            # -------------------------------------------------
+            # 7. Generate AI summary
+            # -------------------------------------------------
+
+            tem_prompt = (
+                template_prompt.strip()
+                + " also"
+            )
+
+
+            print(
+                f"🤖 Generating summary "
+                f"for document {stored_file_id}"
+            )
+
+
+            summary = summarizer(
+                temp_doc_path,
+                tem_prompt,
+                stored_file_id
+            )
+
+
+            if not summary:
+
+                return jsonify({
+                    "error": (
+                        "Summary generation "
+                        "returned no result."
+                    )
+                }), 500
+
+
+        finally:
+
+            # -------------------------------------------------
+            # Remove temporary input file
+            # -------------------------------------------------
+
+            if (
+                temp_doc_path
+                and os.path.exists(temp_doc_path)
+            ):
+
+                try:
+
+                    os.remove(
+                        temp_doc_path
+                    )
+
+                    print(
+                        "🗑️ Temporary document removed."
+                    )
+
+                except Exception as cleanup_error:
+
+                    print(
+                        "⚠️ Temporary file cleanup "
+                        "failed:",
+                        cleanup_error
+                    )
 
         # -----------------------------------------------------
         # 7. Generate AI summary
